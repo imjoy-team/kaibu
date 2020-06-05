@@ -7,7 +7,7 @@
           v-model="config.opacity"
           :min="0"
           :max="1.0"
-          :step="0.05"
+          :step="0.1"
         ></b-slider>
       </b-field>
       <b-field v-if="config.climit" label="contrast limit">
@@ -45,6 +45,28 @@ export default {
   mounted() {
     this.config.climit = [4, 50];
     this.config.opacity = 1.0;
+    this.config.sliders = [
+      {
+        name: "Z",
+        min: 0,
+        max: 1000,
+        step: 1,
+        value: 3,
+        changed() {
+          console.log("z slider changed.");
+        }
+      },
+      {
+        name: "T",
+        min: 0,
+        max: 100,
+        step: 1,
+        value: 3,
+        changed() {
+          console.log("t slider changed.");
+        }
+      }
+    ];
     this.layer = this.getLayer();
     this.map.addLayer(this.layer);
     this.$forceUpdate();

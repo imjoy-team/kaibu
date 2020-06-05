@@ -76,7 +76,6 @@ export default {
     this.config.color = "#F48A39";
     this.layer = this.getLayer();
     this.map.addLayer(this.layer);
-    this.updateDrawInteraction();
     this.$forceUpdate();
   },
   beforeDestroy() {
@@ -106,9 +105,11 @@ export default {
           })
         })
       });
+      this.updateDrawInteraction();
       return vector_layer;
     },
     updateDrawInteraction() {
+      if (!this.vector_source) return;
       this.$nextTick(() => {
         if (this.draw) {
           this.map.removeInteraction(this.draw);

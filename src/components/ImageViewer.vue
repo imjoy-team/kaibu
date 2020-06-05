@@ -17,9 +17,9 @@
               alt="Lightweight UI components for Vue.js based on Bulma"
             />
           </div>
-          <div class="block">
+          <div class="block" v-if="currentLayer" style="min-height: 150px;">
             <component
-              v-show="current_layer === layer"
+              v-show="currentLayer === layer"
               v-for="layer in layers"
               :ref="'layer_' + layer.id"
               :key="layer.name"
@@ -28,6 +28,7 @@
               :config="layer"
             />
           </div>
+          <div class="is-divider" data-content="OR"></div>
           <b-menu class="is-custom-mobile">
             <b-menu-list label="Layers">
               <b-menu-item
@@ -35,7 +36,7 @@
                 :key="layer.name"
                 :label="layer.name"
                 :icon="layer.icon || 'layers'"
-                @click="current_layer = layer"
+                @click="$store.commit('setCurrentLayer', layer)"
               ></b-menu-item>
             </b-menu-list>
           </b-menu>
@@ -44,6 +45,23 @@
 
       <div class="p-1">
         <div id="map"></div>
+        <section v-if="activeSliders" class="slider-container">
+          <b-field
+            style="margin-bottom:0px!important;"
+            v-for="slider in activeSliders"
+            :key="slider.name"
+          >
+            <label class="label slider-label">{{ slider.name }}</label>
+            <b-slider
+              class="slider-body"
+              @input="slider.changed"
+              v-model="slider.value"
+              :min="slider.min || 0"
+              :max="slider.max || 1"
+              :step="slider.step || 1"
+            ></b-slider>
+          </b-field>
+        </section>
       </div>
     </section>
   </div>
@@ -56,6 +74,7 @@ import { randId } from "../utils";
 import * as layerComponents from "@/components/layers";
 import Projection from "ol/proj/Projection";
 import { getCenter } from "ol/extent";
+import { mapState } from "vuex";
 
 const components = {};
 for (let c in layerComponents) {
@@ -67,8 +86,6 @@ export default {
   components,
   data() {
     return {
-      layers: [],
-      current_layer: null,
       expandOnHover: false,
       mobile: "reduce",
       reduce: false
@@ -87,11 +104,19 @@ export default {
       name: "my vector layer"
     });
   },
+  computed: {
+    ...mapState({
+      layers: state => state.layers,
+      currentLayer: state => state.currentLayer,
+      map: state => state.map,
+      activeSliders: state => state.activeSliders
+    })
+  },
   methods: {
     addLayer(config) {
       const id = randId();
       config.id = id;
-      this.layers.push(config);
+      this.$store.commit("addLayer", config);
     },
     init() {
       const extent = [0, 0, 1024, 968];
@@ -100,7 +125,7 @@ export default {
         units: "pixels",
         extent: extent
       });
-      this.map = new Map({
+      const map = new Map({
         target: "map",
         layers: [],
         view: new View({
@@ -110,6 +135,7 @@ export default {
           maxZoom: 8
         })
       });
+      this.$store.commit("setMap", map);
     }
   }
 };
@@ -117,9 +143,27 @@ export default {
 
 <style lang="css">
 #map {
-  width: 100%;
+  width: calc(100% - 260px);
   height: 100%;
   position: fixed;
+}
+.slider-container {
+  padding-left: 10px;
+  padding-right: 10px;
+  bottom: 0px;
+  width: calc(100% - 260px);
+  position: absolute;
+}
+.slider-label {
+  display: inline-block !important;
+  margin-bottom: 0px !important;
+  margin-top: 7px;
+  width: 30px;
+}
+.slider-body {
+  display: inline-block;
+  margin-bottom: 6px !important;
+  margin-left: 5px !important;
 }
 .sidebar-page {
   display: flex;
