@@ -67,9 +67,11 @@ export default {
         }
       }
     ];
-    this.layer = this.getLayer();
-    this.map.addLayer(this.layer);
-    this.$forceUpdate();
+    Promise.resolve(this.getLayer()).then(layer => {
+      this.layer = layer;
+      this.map.addLayer(this.layer);
+      this.$forceUpdate();
+    });
   },
   beforeDestroy() {
     if (this.layer) {
@@ -87,7 +89,7 @@ export default {
         extent: extent
       });
       const image_source = new Static({
-        attributions: '© <a href="http://xkcd.com/license.html">xkcd</a>',
+        attributions: '<a href="http://imjoy.io">imjoy</a>',
         url: "https://imgs.xkcd.com/comics/online_communities.png",
         projection: projection,
         imageExtent: extent

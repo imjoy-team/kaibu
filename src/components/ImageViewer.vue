@@ -2,33 +2,25 @@
   <div class="sidebar-page">
     <section class="sidebar-layout">
       <b-sidebar
-        position="static"
+        :position="position"
+        :fullheight="true"
+        :fullwidth="false"
+        :overlay="false"
+        :open.sync="open"
         :mobile="mobile"
         :expand-on-hover="expandOnHover"
         :reduce="reduce"
         type="is-light"
-        open
       >
         <div class="p-1">
           <div class="block">
-            <h1>ImJoy ImageViewer</h1>
-            <img
-              src="https://raw.githubusercontent.com/buefy/buefy/dev/static/img/buefy-logo.png"
-              alt="Lightweight UI components for Vue.js based on Bulma"
-            />
+            <div class="title" style="color: #7957d5;">ImJoy Viewer</div>
           </div>
-          <div class="block" v-if="currentLayer" style="min-height: 150px;">
-            <component
-              v-show="currentLayer === layer"
-              v-for="layer in layers"
-              :ref="'layer_' + layer.id"
-              :key="layer.name"
-              :is="layer.type"
-              :map="map"
-              :config="layer"
-            />
+          <div class="block">
+            <div class="field">
+              <b-switch v-model="showGallery">Gallery</b-switch>
+            </div>
           </div>
-          <div class="is-divider" data-content="OR"></div>
           <b-menu class="is-custom-mobile">
             <b-menu-list label="Layers">
               <b-menu-item
@@ -40,10 +32,28 @@
               ></b-menu-item>
             </b-menu-list>
           </b-menu>
+
+          <hr class="solid" />
+
+          <div class="block" v-show="currentLayer" style="min-height: 150px;">
+            <b-menu-list label="Properties">
+              <component
+                v-show="currentLayer === layer"
+                v-for="layer in layers"
+                :ref="'layer_' + layer.id"
+                :key="layer.name"
+                :is="layer.type"
+                :map="map"
+                :config="layer"
+              />
+            </b-menu-list>
+          </div>
         </div>
       </b-sidebar>
-
-      <div class="p-1">
+      <div v-show="showGallery" class="p-1">
+        <gallery :collections="collections"></gallery>
+      </div>
+      <div v-show="!showGallery" class="p-1">
         <div id="map"></div>
         <section v-if="activeSliders" class="slider-container">
           <b-field
@@ -71,6 +81,7 @@
 import "ol/ol.css";
 import { Map, View } from "ol";
 import { randId } from "../utils";
+import Gallery from "@/components/Gallery";
 import * as layerComponents from "@/components/layers";
 import Projection from "ol/proj/Projection";
 import { getCenter } from "ol/extent";
@@ -80,29 +91,52 @@ const components = {};
 for (let c in layerComponents) {
   components[layerComponents[c].name] = layerComponents[c];
 }
+components["gallery"] = Gallery;
 
 export default {
   name: "ImageViewer",
   components,
   data() {
     return {
+      position: null,
+      open: true,
       expandOnHover: false,
-      mobile: "reduce",
-      reduce: false
+      mobile: "fullwidth",
+      reduce: false,
+      showGallery: false,
+      collections: null
     };
   },
   mounted() {
     this.init();
 
     this.addLayer({
-      type: "image-layer",
-      name: "my image layer1"
+      type: "itk-vtk-layer",
+      name: "my itk vtk layer"
     });
+
+    // this.addLayer({
+    //   type: "image-layer",
+    //   name: "my image layer1"
+    // });
 
     this.addLayer({
       type: "vector-layer",
       name: "my vector layer"
     });
+
+    this.collections = [
+      {
+        name: "My collection",
+        items: [
+          { name: "my image 1" },
+          { name: "my image 2" },
+          { name: "my image 3" },
+          { name: "my image 4" },
+          { name: "my image 5" }
+        ]
+      }
+    ];
   },
   computed: {
     ...mapState({
@@ -182,6 +216,29 @@ export default {
 }
 .sidebar-layout {
   height: 100vh;
+}
+/* Solid border */
+hr.solid {
+  margin-top: 10px;
+  border-top: 2px solid #ccc5c5;
+  margin-bottom: 15px;
+}
+section#toolbar > div > div > div > canvas {
+  max-width: 100%;
+  height: 150px;
+}
+section#toolbar > div {
+  background: transparent;
+}
+section#toolbar > div:first-child {
+  display: none;
+}
+.corner-annotation {
+  z-index: 99999;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  color: violet;
 }
 @media screen and (max-width: 1023px) {
   .sidebar-content {

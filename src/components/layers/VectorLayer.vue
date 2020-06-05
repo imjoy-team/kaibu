@@ -74,9 +74,11 @@ export default {
     this.config.freehand = true;
     this.config.label = "cell";
     this.config.color = "#F48A39";
-    this.layer = this.getLayer();
-    this.map.addLayer(this.layer);
-    this.$forceUpdate();
+    Promise.resolve(this.getLayer()).then(layer => {
+      this.layer = layer;
+      this.map.addLayer(this.layer);
+      this.$forceUpdate();
+    });
   },
   beforeDestroy() {
     if (this.layer) {
