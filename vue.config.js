@@ -1,5 +1,9 @@
 module.exports = {
-    configureWebpack: () => {
+  baseUrl: process.env.NODE_ENV === 'production' ?
+    './' // prod
+    :
+    '/', // dev
+  configureWebpack: () => {
 
-    }
   }
+}
