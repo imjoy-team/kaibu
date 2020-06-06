@@ -20,15 +20,32 @@
             <div class="field">
               <b-switch v-model="showGallery">Gallery</b-switch>
             </div>
+            <div class="field">
+              <b-dropdown aria-role="list">
+                <button class="button" slot="trigger" slot-scope="{ active }">
+                  <span>+ Add layer</span>
+                  <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+                </button>
+
+                <b-dropdown-item
+                  @click="newLayer(type)"
+                  v-for="(name, type) in layerTypes"
+                  :key="type"
+                  :value="type"
+                  aria-role="listitem"
+                  >{{ type }}</b-dropdown-item
+                >
+              </b-dropdown>
+            </div>
           </div>
           <b-menu class="is-custom-mobile">
             <b-menu-list label="Layers">
               <b-menu-item
-                v-for="layer in layers"
-                :key="layer.name"
+                v-for="layer in layers.slice().reverse()"
+                :key="layer.id"
                 :label="layer.name"
                 :icon="layer.icon || 'layers'"
-                @click="$store.commit('setCurrentLayer', layer)"
+                @click="selectLayer(layer)"
               ></b-menu-item>
             </b-menu-list>
           </b-menu>
@@ -38,11 +55,12 @@
           <div class="block" v-show="currentLayer" style="min-height: 150px;">
             <b-menu-list label="Properties">
               <component
-                v-show="currentLayer === layer"
                 v-for="layer in layers"
+                v-show="currentLayer === layer"
                 :ref="'layer_' + layer.id"
-                :key="layer.name"
-                :is="layer.type"
+                :key="layer.id"
+                :is="layerTypes[layer.type]"
+                :selected="layer.selected"
                 :map="map"
                 :config="layer"
               />
@@ -88,9 +106,12 @@ import { getCenter } from "ol/extent";
 import { mapState } from "vuex";
 
 const components = {};
+const layerTypes = {};
 for (let c in layerComponents) {
   components[layerComponents[c].name] = layerComponents[c];
+  layerTypes[layerComponents[c].type] = layerComponents[c].name;
 }
+
 components["gallery"] = Gallery;
 
 export default {
@@ -104,26 +125,28 @@ export default {
       mobile: "fullwidth",
       reduce: false,
       showGallery: false,
-      collections: null
+      newLayerType: null,
+      collections: null,
+      layerTypes: layerTypes
     };
   },
   mounted() {
     this.init();
 
-    this.addLayer({
-      type: "itk-vtk-layer",
-      name: "my itk vtk layer"
-    });
+    // this.addLayer({
+    //   type: "vtk",
+    //   name: "my itk vtk layer"
+    // });
 
     // this.addLayer({
-    //   type: "image-layer",
+    //   type: "image",
     //   name: "my image layer1"
     // });
 
-    this.addLayer({
-      type: "vector-layer",
-      name: "my vector layer"
-    });
+    // this.addLayer({
+    //   type: "vector",
+    //   name: "my vector layer"
+    // });
 
     this.collections = [
       {
@@ -147,6 +170,15 @@ export default {
     })
   },
   methods: {
+    selectLayer(layer) {
+      this.$store.commit("setCurrentLayer", layer);
+    },
+    newLayer(type) {
+      this.addLayer({
+        type: type,
+        name: type + "-" + randId()
+      });
+    },
     addLayer(config) {
       const id = randId();
       config.id = id;

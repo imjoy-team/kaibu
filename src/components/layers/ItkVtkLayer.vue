@@ -99,6 +99,7 @@ function generateData3D() {
 
 export default {
   name: "itk-vtk-layer",
+  type: "vtk",
   props: {
     map: {
       type: Map,
@@ -147,6 +148,7 @@ export default {
         })
       );
       this.enableItkInteraction();
+      this.synchronizeVtkCoordinate();
       this.$forceUpdate();
     });
   },

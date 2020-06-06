@@ -30,10 +30,15 @@ const store = new Vuex.Store({
       }
     },
     setCurrentLayer(state, layer) {
+      if (state.currentLayer === layer) return;
+      if (state.currentLayer) {
+        state.currentLayer.selected = false;
+      }
       state.currentLayer = layer;
       if (layer.sliders) {
         state.activeSliders = layer.sliders;
       }
+      layer.selected = true;
     },
     setMap(state, map) {
       state.map = map;

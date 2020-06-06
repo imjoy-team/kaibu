@@ -25,6 +25,7 @@ import ImageLayer from "ol/layer/Image";
 import Projection from "ol/proj/Projection";
 export default {
   name: "image-layer",
+  type: "image",
   props: {
     map: {
       type: Map,

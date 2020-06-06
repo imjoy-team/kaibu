@@ -51,10 +51,15 @@ import { Draw } from "ol/interaction";
 import { Vector } from "ol/source";
 export default {
   name: "vector-layer",
+  type: "vector",
   props: {
     map: {
       type: Map,
       default: null
+    },
+    selected: {
+      type: Boolean,
+      default: false
     },
     config: {
       type: Object,
@@ -67,6 +72,15 @@ export default {
     return {
       layer: null
     };
+  },
+  watch: {
+    selected: function(newVal) {
+      if (!newVal) {
+        this.removeDrawInteraction();
+      } else {
+        this.updateDrawInteraction();
+      }
+    }
   },
   mounted() {
     this.config.draw_type = "Polygon";
@@ -107,8 +121,15 @@ export default {
           })
         })
       });
-      this.updateDrawInteraction();
+      if (this.selected) {
+        this.updateDrawInteraction();
+      }
       return vector_layer;
+    },
+    removeDrawInteraction() {
+      if (this.draw) {
+        this.map.removeInteraction(this.draw);
+      }
     },
     updateDrawInteraction() {
       if (!this.vector_source) return;

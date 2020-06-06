@@ -8,8 +8,12 @@
       v-for="collection in collections"
       :key="collection.name"
     >
-      <div v-for="item in collection.items" class="columns" :key="item.name">
-        <div class="card column">
+      <div class="columns">
+        <div
+          class="card column"
+          v-for="item in collection.items"
+          :key="item.name"
+        >
           <div class="card-image">
             <figure class="image is-4by3">
               <img
