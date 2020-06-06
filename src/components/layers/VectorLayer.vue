@@ -3,6 +3,11 @@
   <div class="vector-layer">
     <section>
       <div class="field">
+        <b-switch v-model="config.enableDraw" @input="updateDrawInteraction()"
+          >Enable Draw</b-switch
+        >
+      </div>
+      <div class="field">
         <b-switch v-model="config.freehand" @input="updateDrawInteraction()"
           >Freehand</b-switch
         >
@@ -87,26 +92,19 @@ export default {
     };
   },
   watch: {
-    selected: function(newVal) {
-      if (!newVal) {
-        this.removeDrawInteraction();
-      } else {
-        this.updateDrawInteraction();
-      }
+    selected: function() {
+      this.updateDrawInteraction();
     },
     visible: function(newVal) {
       this.layer.setVisible(newVal);
-      if (newVal && this.selected) {
-        this.updateDrawInteraction();
-      } else {
-        this.removeDrawInteraction();
-      }
+      this.updateDrawInteraction();
     }
   },
   mounted() {
     this.config.draw_type = "Polygon";
     this.config.line_width = 4;
     this.config.freehand = true;
+    this.config.enableDraw = false;
     this.config.label = "cell";
     this.config.color = getRandomColor();
     Promise.resolve(this.getLayer()).then(layer => {
@@ -143,17 +141,21 @@ export default {
           })
         })
       });
-      if (this.selected) {
-        this.updateDrawInteraction();
-      }
       return vector_layer;
+    },
+    updateDrawInteraction() {
+      if (this.selected && this.visible && this.config.enableDraw) {
+        this.setupDrawInteraction();
+      } else {
+        this.removeDrawInteraction();
+      }
     },
     removeDrawInteraction() {
       if (this.draw) {
         this.map.removeInteraction(this.draw);
       }
     },
-    updateDrawInteraction() {
+    setupDrawInteraction() {
       if (!this.vector_source) return;
       this.$nextTick(() => {
         if (this.draw) {
