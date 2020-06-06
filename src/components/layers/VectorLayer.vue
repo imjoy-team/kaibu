@@ -50,8 +50,8 @@ import { Stroke } from "ol/style";
 import { Draw } from "ol/interaction";
 import { Vector } from "ol/source";
 function getRandomColor() {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
+  var letters = "0123456789ABCDEF";
+  var color = "#";
   for (var i = 0; i < 6; i++) {
     color += letters[Math.floor(Math.random() * 16)];
   }
