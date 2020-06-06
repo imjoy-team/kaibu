@@ -49,6 +49,15 @@ import { Fill } from "ol/style";
 import { Stroke } from "ol/style";
 import { Draw } from "ol/interaction";
 import { Vector } from "ol/source";
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
 export default {
   name: "vector-layer",
   type: "vector",
@@ -87,7 +96,7 @@ export default {
     this.config.line_width = 4;
     this.config.freehand = true;
     this.config.label = "cell";
-    this.config.color = "#F48A39";
+    this.config.color = getRandomColor();
     Promise.resolve(this.getLayer()).then(layer => {
       this.layer = layer;
       this.map.addLayer(this.layer);
@@ -110,7 +119,7 @@ export default {
             color: "rgba(255, 255, 255, 0.2)"
           }),
           stroke: new Stroke({
-            color: "#ffcc33",
+            color: this.config.color,
             width: 2
           }),
           image: new Circle({
