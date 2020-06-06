@@ -1,8 +1,7 @@
 module.exports = {
-  baseUrl: process.env.NODE_ENV === 'production' ?
-    './' // prod
-    :
-    '/', // dev
+  publicPath: process.env.NODE_ENV === 'production'
+  ? '/image-viewer/'
+  : '/',
   configureWebpack: () => {
 
   }
