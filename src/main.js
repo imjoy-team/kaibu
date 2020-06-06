@@ -21,13 +21,18 @@ const store = new Vuex.Store({
   },
   mutations: {
     addLayer(state, layer) {
+      if (layer.visible === undefined) layer.visible = true;
       state.layers.push(layer);
     },
     removeLayer(state, layer) {
+      layer.selected = false;
       const idx = state.layers.indexOf(layer);
       if (idx >= 0) {
         state.layers.splice(idx, 1);
       }
+    },
+    toggleVisible(state, layer) {
+      layer.visible = !layer.visible;
     },
     setCurrentLayer(state, layer) {
       if (state.currentLayer === layer) return;

@@ -105,6 +105,14 @@ export default {
       type: Map,
       default: null
     },
+    selected: {
+      type: Boolean,
+      default: false
+    },
+    visible: {
+      type: Boolean,
+      default: false
+    },
     config: {
       type: Object,
       default: function() {
@@ -116,6 +124,13 @@ export default {
     return {
       layer: null
     };
+  },
+  watch: {
+    visible: function(newVal) {
+      this.layer.setVisible(newVal);
+      this.synchronizeVtkCoordinate();
+      this.renderWindow.render();
+    }
   },
   mounted() {
     this.config.sliders = [
@@ -149,6 +164,7 @@ export default {
       );
       this.enableItkInteraction();
       this.synchronizeVtkCoordinate();
+      this.renderWindow.render();
       this.$forceUpdate();
     });
   },
@@ -209,6 +225,7 @@ export default {
       setTimeout(() => {
         viewer.setUserInterfaceCollapsed(false);
       }, 10);
+      this.viewer = viewer;
       return itk_layer;
     },
     convertCoordinates(x, y) {

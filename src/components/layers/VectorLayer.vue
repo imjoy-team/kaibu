@@ -70,6 +70,10 @@ export default {
       type: Boolean,
       default: false
     },
+    visible: {
+      type: Boolean,
+      default: false
+    },
     config: {
       type: Object,
       default: function() {
@@ -89,6 +93,14 @@ export default {
       } else {
         this.updateDrawInteraction();
       }
+    },
+    visible: function(newVal) {
+      this.layer.setVisible(newVal);
+      if (newVal && this.selected) {
+        this.updateDrawInteraction();
+      } else {
+        this.removeDrawInteraction();
+      }
     }
   },
   mounted() {
@@ -105,6 +117,7 @@ export default {
   },
   beforeDestroy() {
     if (this.layer) {
+      this.removeDrawInteraction();
       this.map.removeLayer(this.layer);
     }
   },

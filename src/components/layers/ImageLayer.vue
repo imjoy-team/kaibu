@@ -31,6 +31,14 @@ export default {
       type: Map,
       default: null
     },
+    selected: {
+      type: Boolean,
+      default: false
+    },
+    visible: {
+      type: Boolean,
+      default: false
+    },
     config: {
       type: Object,
       default: function() {
@@ -42,6 +50,11 @@ export default {
     return {
       layer: null
     };
+  },
+  watch: {
+    visible: function(newVal) {
+      this.layer.setVisible(newVal);
+    }
   },
   mounted() {
     this.config.climit = [4, 50];

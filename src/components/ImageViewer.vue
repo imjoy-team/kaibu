@@ -43,10 +43,29 @@
               <b-menu-item
                 v-for="layer in layers.slice().reverse()"
                 :key="layer.id"
-                :label="layer.name"
-                :icon="layer.icon || 'layers'"
                 @click="selectLayer(layer)"
-              ></b-menu-item>
+              >
+                <template slot="label">
+                  <button class="button is-small" @click="toggleVisible(layer)">
+                    <b-icon v-if="layer.visible" icon="eye-outline"></b-icon>
+                    <b-icon v-else icon="eye-off-outline"></b-icon>
+                  </button>
+                  {{ layer.name }}
+                  <b-dropdown
+                    aria-role="list"
+                    class="is-pulled-right"
+                    position="is-bottom-left"
+                  >
+                    <b-icon icon="dots-vertical" slot="trigger"></b-icon>
+                    <b-dropdown-item
+                      aria-role="listitem"
+                      icon="close-circle"
+                      @click="removeLayer(layer)"
+                      >Remove</b-dropdown-item
+                    >
+                  </b-dropdown>
+                </template>
+              </b-menu-item>
             </b-menu-list>
           </b-menu>
 
@@ -61,6 +80,7 @@
                 :key="layer.id"
                 :is="layerTypes[layer.type]"
                 :selected="layer.selected"
+                :visible="layer.visible"
                 :map="map"
                 :config="layer"
               />
@@ -170,6 +190,14 @@ export default {
     })
   },
   methods: {
+    removeLayer(layer) {
+      this.$store.commit("removeLayer", layer);
+      this.$forceUpdate();
+    },
+    toggleVisible(layer) {
+      this.$store.commit("toggleVisible", layer);
+      this.$forceUpdate();
+    },
     selectLayer(layer) {
       this.$store.commit("setCurrentLayer", layer);
     },
@@ -184,6 +212,9 @@ export default {
       config.id = id;
       this.$store.commit("addLayer", config);
       this.selectLayer(config);
+      this.$nextTick(() => {
+        config.el = this.$refs["layer_" + config.id];
+      });
     },
     init() {
       const extent = [0, 0, 1024, 968];
@@ -244,6 +275,7 @@ export default {
   min-height: 100%;
 }
 .sidebar-content {
+  width: 300px !important;
   height: 100%;
   padding: 10px;
 }
@@ -272,5 +304,9 @@ section#toolbar > div:first-child {
   bottom: 10px;
   left: 10px;
   color: violet;
+}
+.menu-list a.is-active {
+  background-color: #e9e1ff !important;
+  color: #4a4a4a !important;
 }
 </style>
