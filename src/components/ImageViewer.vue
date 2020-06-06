@@ -183,6 +183,7 @@ export default {
       const id = randId();
       config.id = id;
       this.$store.commit("addLayer", config);
+      this.selectLayer(config);
     },
     init() {
       const extent = [0, 0, 1024, 968];
