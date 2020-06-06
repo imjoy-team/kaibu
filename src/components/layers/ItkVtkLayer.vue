@@ -196,8 +196,6 @@ export default {
         rotate: false,
         uiContainer: document.getElementById("toolbar")
       });
-      viewer.on("imagePicked", console.log);
-
       const viewProxy = viewer.getViewProxy();
       const renderWindow = viewProxy.getRenderWindow();
       renderWindow.getViews()[0].initialize();

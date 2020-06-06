@@ -275,7 +275,7 @@ section#toolbar > div:first-child {
 }
 @media screen and (max-width: 1023px) {
   .sidebar-content {
-    padding: 1px;
+    padding: 7px;
   }
   .b-sidebar
     .sidebar-content.is-mini-mobile:not(.is-mini-expand)
