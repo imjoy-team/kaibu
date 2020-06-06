@@ -43,7 +43,7 @@ jobs:
         with:
           name: built-output
           path: ./dist
-      - name: Deploy the plugin file to GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3.5.0
         with:
           deploy_key: ${{ secrets.ACTION_DEPLOY_KEY }}
