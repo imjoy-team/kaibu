@@ -293,7 +293,7 @@ export default {
   mounted() {
     this.init();
 
-    this.newLayer("vtk");
+    this.newLayer("image");
     this.newLayer("vector");
 
     this.collections = [
@@ -310,8 +310,8 @@ export default {
     ];
 
     this.sortableOptions.layer_configs = this.layer_configs;
-    this.updateSize();
     window.addEventListener("resize", this.updateSize);
+    window.dispatchEvent(new Event("resize"));
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.updateSize);
@@ -508,15 +508,16 @@ section#toolbar > div:first-child {
   border-color: #dbdbdb00 !important;
   z-index: 9999;
   position: absolute !important;
-  width: 30px;
+  width: 32px;
+  height: 32px;
   top: 5px;
   left: 5px;
 }
 .floating-menu-btn > img {
   height: 30px;
   width: 30px;
-  max-width: 30px;
-  max-height: 30px;
+  max-width: 28px;
+  max-height: 28px;
 }
 .ol-control {
   top: 50px;
