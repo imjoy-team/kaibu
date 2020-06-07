@@ -14,21 +14,21 @@ Vue.config.productionTip = false;
 
 const store = new Vuex.Store({
   state: {
-    layers: [],
+    layer_configs: [],
     activeSliders: null,
     currentLayer: null,
     map: null
   },
   mutations: {
-    addLayer(state, layer) {
-      if (layer.visible === undefined) layer.visible = true;
-      state.layers.push(layer);
+    addLayer(state, config) {
+      if (config.visible === undefined) config.visible = true;
+      state.layer_configs.push(config);
     },
     removeLayer(state, layer) {
       layer.selected = false;
-      const idx = state.layers.indexOf(layer);
+      const idx = state.layer_configs.indexOf(layer);
       if (idx >= 0) {
-        state.layers.splice(idx, 1);
+        state.layer_configs.splice(idx, 1);
       }
     },
     toggleVisible(state, layer) {

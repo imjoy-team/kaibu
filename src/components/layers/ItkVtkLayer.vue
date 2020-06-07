@@ -157,7 +157,6 @@ export default {
     ];
     Promise.resolve(this.getLayer()).then(layer => {
       this.layer = layer;
-      this.layer.setOpacity(0.5);
       this.config.layer = layer;
       this.map.addLayer(this.layer);
       const projection = new Projection({
@@ -206,7 +205,7 @@ export default {
         display: "block-inline"
       };
       const viewerStyle = {
-        backgroundColor: [1.0, 1.0, 1.0],
+        backgroundColor: [0, 0, 0, 0],
         containerStyle: containerStyle
       };
 

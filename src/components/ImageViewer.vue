@@ -14,7 +14,7 @@
       >
         <div class="p-1">
           <div class="block">
-            <div class="title" style="color: #7957d5;">ImJoy Viewer</div>
+            <div class="title" style="color: #7957d5;">Image Viewer</div>
           </div>
           <div class="block">
             <div class="field">
@@ -46,7 +46,7 @@
             <b-menu-list label="Layers">
               <b-menu-item
                 class="layer-item"
-                v-for="layer in layers.slice().reverse()"
+                v-for="layer in layer_configs.slice().reverse()"
                 :key="layer.id"
                 @click="selectLayer(layer)"
               >
@@ -79,7 +79,7 @@
           <div class="block" v-show="currentLayer" style="min-height: 150px;">
             <b-menu-list label="Properties">
               <component
-                v-for="layer in layers"
+                v-for="layer in layer_configs"
                 v-show="currentLayer === layer"
                 :ref="'layer_' + layer.id"
                 :key="layer.id"
@@ -148,10 +148,10 @@ const createSortable = (el, options, vnode) => {
     ...options,
     onEnd: function(evt) {
       // since we used layers.slice().reserve(), we need to reverse the index here
-      const oldIndex = options.layers.length - evt.oldIndex - 1;
-      const newIndex = options.layers.length - evt.newIndex - 1;
+      const oldIndex = options.layer_configs.length - evt.oldIndex - 1;
+      const newIndex = options.layer_configs.length - evt.newIndex - 1;
 
-      const data = options.layers;
+      const data = options.layer_configs;
       const item = data[oldIndex];
       if (newIndex > oldIndex) {
         for (let i = oldIndex; i < newIndex; i++) {
@@ -242,11 +242,11 @@ export default {
       }
     ];
 
-    this.sortableOptions.layers = this.layers;
+    this.sortableOptions.layer_configs = this.layer_configs;
   },
   computed: {
     ...mapState({
-      layers: state => state.layers,
+      layer_configs: state => state.layer_configs,
       currentLayer: state => state.currentLayer,
       map: state => state.map,
       activeSliders: state => state.activeSliders
@@ -254,8 +254,8 @@ export default {
   },
   methods: {
     layerSorted() {
-      for (let i = 0; i < this.layers.length; i++) {
-        this.layers[i].layer.setZIndex(i);
+      for (let i = 0; i < this.layer_configs.length; i++) {
+        this.layer_configs[i].layer.setZIndex(i);
       }
     },
     removeLayer(layer) {
@@ -279,9 +279,14 @@ export default {
       const id = randId();
       config.id = id;
       this.$store.commit("addLayer", config);
-      this.selectLayer(config);
       this.$nextTick(() => {
-        if (config.layer) config.layer.setZIndex(this.layers.length);
+        const layer = config.layer;
+        if (layer) {
+          this.selectLayer(layer);
+          config.layer.setZIndex(this.layer_configs.length);
+        } else {
+          debugger;
+        }
       });
     },
     init() {
@@ -378,5 +383,8 @@ section#toolbar > div:first-child {
 .menu-list a.is-active {
   background-color: #e9e1ff !important;
   color: #4a4a4a !important;
+}
+.ol-layers:first-child {
+  background-color: black;
 }
 </style>
