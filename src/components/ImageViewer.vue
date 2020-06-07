@@ -280,7 +280,7 @@ export default {
         draggable: ".layer-item"
       },
       position: "static",
-      open: true,
+      open: false,
       expandOnHover: false,
       mobile: "fullwidth",
       reduce: false,
@@ -316,6 +316,7 @@ export default {
     this.sortableOptions.layer_configs = this.layer_configs;
     window.addEventListener("resize", this.updateSize);
     window.dispatchEvent(new Event("resize"));
+    this.openSidebar();
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.updateSize);
