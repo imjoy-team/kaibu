@@ -104,13 +104,14 @@ export default {
     this.config.draw_type = "Polygon";
     this.config.line_width = 4;
     this.config.freehand = true;
-    this.config.enableDraw = false;
+    this.config.enableDraw = true;
     this.config.label = "cell";
     this.config.color = getRandomColor();
     Promise.resolve(this.getLayer()).then(layer => {
       this.layer = layer;
       this.config.layer = layer;
       this.map.addLayer(this.layer);
+      this.updateDrawInteraction();
       this.$forceUpdate();
     });
   },
