@@ -20,7 +20,6 @@ var CanvasLayer = /*@__PURE__*/ (function(Layer) {
     this.viewerElement = document.createElement("div");
     this.viewerElement.classList.add("ol-layer");
     this.viewerElement.style.position = "absolute";
-    this.viewerElement.style["z-index"] = -1;
     this.sync_callback = options.sync_callback;
   }
 
@@ -147,6 +146,7 @@ export default {
     ];
     Promise.resolve(this.getLayer()).then(layer => {
       this.layer = layer;
+      this.config.layer = layer;
       this.map.addLayer(this.layer);
       const projection = new Projection({
         code: "image",
@@ -220,6 +220,17 @@ export default {
       this.viewProxy.updateOrientation(2, 1, [0, 1, 0]);
       this.renderWindow = this.viewProxy.getRenderWindow();
       this.interactor = this.renderWindow.getInteractor();
+      const view = this.interactor.getView();
+
+      // we will disable the wheel and mousedown event,
+      // but keep mouse move for the corner annotation
+      view
+        .getContainer()
+        .removeEventListener("wheel", this.interactor.handleWheel);
+      view
+        .getContainer()
+        .removeEventListener("mousedown", this.interactor.handleMouseDown);
+
       this.renderer = this.viewProxy.getRenderer();
       viewer.setUserInterfaceCollapsed(true);
       setTimeout(() => {
@@ -229,7 +240,7 @@ export default {
       return itk_layer;
     },
     convertCoordinates(x, y) {
-      const view = this.viewProxy.getInteractor().getView();
+      const view = this.interactor.getView();
       const renderPosition = { x: x, y: y };
       const bounds = view.getContainer().getBoundingClientRect();
       const canvas = view.getCanvas();

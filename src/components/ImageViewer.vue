@@ -38,9 +38,14 @@
               </b-dropdown>
             </div>
           </div>
-          <b-menu class="is-custom-mobile">
+          <b-menu
+            class="is-custom-mobile"
+            @sorted="layerSorted()"
+            v-sortable="sortableOptions"
+          >
             <b-menu-list label="Layers">
               <b-menu-item
+                class="layer-item"
                 v-for="layer in layers.slice().reverse()"
                 :key="layer.id"
                 @click="selectLayer(layer)"
@@ -134,11 +139,67 @@ for (let c in layerComponents) {
 
 components["gallery"] = Gallery;
 
+// You have to install sortable.js to use it:
+// 'npm install sortablejs'
+import Sortable from "sortablejs";
+
+const createSortable = (el, options, vnode) => {
+  return Sortable.create(el, {
+    ...options,
+    onEnd: function(evt) {
+      // since we used layers.slice().reserve(), we need to reverse the index here
+      const oldIndex = options.layers.length - evt.oldIndex - 1;
+      const newIndex = options.layers.length - evt.newIndex - 1;
+
+      const data = options.layers;
+      const item = data[oldIndex];
+      if (newIndex > oldIndex) {
+        for (let i = oldIndex; i < newIndex; i++) {
+          data[i] = data[i + 1];
+        }
+      } else {
+        for (let i = oldIndex; i > newIndex; i--) {
+          data[i] = data[i - 1];
+        }
+      }
+      data[newIndex] = item;
+      vnode.componentInstance.$emit("sorted", data);
+      // vnode.context.$buefy.toast.open(`Moved ${item} from row ${oldIndex + 1} to ${newIndex + 1}`)
+    }
+  });
+};
+
+/**
+ * We add a new instance of Sortable when the element
+ * is bound or updated, and destroy it when it's unbound.
+ */
+const sortable = {
+  name: "sortable",
+  bind(el, binding, vnode) {
+    const container = el.querySelector(".menu-list");
+    container._sortable = createSortable(container, binding.value, vnode);
+  },
+  update(el, binding, vnode) {
+    const container = el.querySelector(".menu-list");
+    container._sortable.destroy();
+    container._sortable = createSortable(container, binding.value, vnode);
+  },
+  unbind(el) {
+    const container = el.querySelector(".menu-list");
+    container._sortable.destroy();
+  }
+};
+
 export default {
   name: "ImageViewer",
   components,
+  directives: { sortable },
   data() {
     return {
+      sortableOptions: {
+        chosenClass: "is-primary",
+        draggable: ".layer-item"
+      },
       position: null,
       open: true,
       expandOnHover: false,
@@ -180,6 +241,8 @@ export default {
         ]
       }
     ];
+
+    this.sortableOptions.layers = this.layers;
   },
   computed: {
     ...mapState({
@@ -190,6 +253,11 @@ export default {
     })
   },
   methods: {
+    layerSorted() {
+      for (let i = 0; i < this.layers.length; i++) {
+        this.layers[i].layer.setZIndex(i);
+      }
+    },
     removeLayer(layer) {
       this.$store.commit("removeLayer", layer);
       this.$forceUpdate();
@@ -213,7 +281,7 @@ export default {
       this.$store.commit("addLayer", config);
       this.selectLayer(config);
       this.$nextTick(() => {
-        config.el = this.$refs["layer_" + config.id];
+        config.layer.setZIndex(this.layers.length);
       });
     },
     init() {
@@ -240,6 +308,9 @@ export default {
 </script>
 
 <style lang="css">
+.layer-item {
+  cursor: grab !important;
+}
 #map {
   width: calc(100% - 260px);
   height: 100%;
@@ -299,7 +370,6 @@ section#toolbar > div:first-child {
   display: none;
 }
 .corner-annotation {
-  z-index: 99999;
   position: absolute;
   bottom: 10px;
   left: 10px;

@@ -83,6 +83,7 @@ export default {
     ];
     Promise.resolve(this.getLayer()).then(layer => {
       this.layer = layer;
+      this.config.layer = layer;
       this.map.addLayer(this.layer);
       this.$forceUpdate();
     });
