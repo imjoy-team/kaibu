@@ -14,10 +14,10 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/image-viewer/precache-manifest.1340c65149ee16527314d9e3babb8dd1.js"
+  "/precache-manifest.8e6e141af5b7306ecf20eeaeea5c2730.js"
 );
 
-workbox.core.setCacheNameDetails({prefix: "image-viewer"});
+workbox.core.setCacheNameDetails({prefix: "kaibu"});
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
