@@ -6,8 +6,7 @@
         :fullheight="true"
         :fullwidth="false"
         :overlay="false"
-        :open="true"
-        v-show="open"
+        :open.sync="open"
         :mobile="mobile"
         :can-cancel="true"
         :expand-on-hover="expandOnHover"
@@ -20,7 +19,7 @@
           </div>
           <button
             class="button floating-close-btn is-small"
-            @click="open = false"
+            @click="closeSidebar"
           >
             <b-icon icon="chevron-left"></b-icon>
           </button>
@@ -104,7 +103,7 @@
       <button
         class="button floating-menu-btn"
         v-show="!open"
-        @click="open = true"
+        @click="openSidebar()"
       >
         <img style="width: 30px;" src="static/img/kaibu-icon.svg" />
       </button>
@@ -325,7 +324,7 @@ export default {
     viewerWidth() {
       return this.open && this.position === "static"
         ? "calc(100% - 260px)"
-        : "100%";
+        : "calc(100%)";
     },
     ...mapState({
       layers: state => state.layers,
@@ -336,6 +335,18 @@ export default {
     })
   },
   methods: {
+    closeSidebar() {
+      this.open = false;
+      setTimeout(() => {
+        window.dispatchEvent(new Event("resize"));
+      }, 300);
+    },
+    openSidebar() {
+      setTimeout(() => {
+        this.open = true;
+        window.dispatchEvent(new Event("resize"));
+      }, 300);
+    },
     updateSize() {
       debounce(() => {
         this.screenWidth = window.innerWidth;
@@ -524,6 +535,7 @@ section#toolbar > div:first-child {
   max-height: 28px;
   background: rgb(242, 237, 237);
 }
+
 .ol-zoom {
   top: 50px;
 }
