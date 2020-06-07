@@ -3,6 +3,9 @@
 
 Kaibu is a web application for visualizing and annotating multi-dimensional images, built with [OpenLayers](https://openlayers.org/) and [itk-vtk-viewer](https://kitware.github.io/itk-vtk-viewer/).
 
+----
+***WARNING: This is a work-in-progress repo, you are welcome to try it out but it's not ready for use in production yet.***
+
 ## How to use it
 
 ### As standalone appliction: https://kaibu.org
