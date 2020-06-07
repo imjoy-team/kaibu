@@ -6,8 +6,10 @@
         :fullheight="true"
         :fullwidth="false"
         :overlay="false"
-        :open.sync="open"
+        :open="true"
+        v-show="open"
         :mobile="mobile"
+        :can-cancel="true"
         :expand-on-hover="expandOnHover"
         :reduce="reduce"
         type="is-light"
@@ -16,6 +18,12 @@
           <div class="block">
             <img style="width: 220px;" src="static/img/kaibu-banner.svg" />
           </div>
+          <button
+            class="button floating-close-btn is-small"
+            @click="open = false"
+          >
+            <b-icon icon="chevron-left"></b-icon>
+          </button>
           <div class="block">
             <div class="field">
               <b-switch v-model="showGallery">Gallery</b-switch>
@@ -93,12 +101,23 @@
           </div>
         </div>
       </b-sidebar>
+      <button
+        class="button floating-menu-btn"
+        v-show="!open"
+        @click="open = true"
+      >
+        <img style="width: 30px;" src="static/img/kaibu-icon.svg" />
+      </button>
       <div v-show="showGallery" class="p-1">
         <gallery :collections="collections"></gallery>
       </div>
       <div v-show="!showGallery" class="p-1">
-        <div id="map"></div>
-        <section v-if="activeSliders" class="slider-container">
+        <div id="map" :style="{ width: viewerWidth }"></div>
+        <section
+          v-if="activeSliders"
+          class="slider-container"
+          :style="{ width: sliderWidth }"
+        >
           <b-field
             style="margin-bottom:0px!important;"
             v-for="slider in activeSliders"
@@ -189,7 +208,21 @@ const sortable = {
     container._sortable.destroy();
   }
 };
-
+function debounce(func, wait, immediate) {
+  var timeout;
+  return function() {
+    var context = this,
+      args = arguments;
+    var later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+}
 const itkVtkViewer = window.itkVtkViewer;
 async function setupImJoy(config) {
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
@@ -245,11 +278,12 @@ export default {
         chosenClass: "is-primary",
         draggable: ".layer-item"
       },
-      position: null,
+      position: "static",
       open: true,
       expandOnHover: false,
       mobile: "fullwidth",
       reduce: false,
+      screenWidth: 1000,
       showGallery: false,
       newLayerType: null,
       collections: null,
@@ -276,8 +310,23 @@ export default {
     ];
 
     this.sortableOptions.layer_configs = this.layer_configs;
+    this.updateSize();
+    window.addEventListener("resize", this.updateSize);
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.updateSize);
   },
   computed: {
+    sliderWidth() {
+      return this.open && this.position === "static"
+        ? "calc(100% - 310px)"
+        : "calc(100% - 20px )";
+    },
+    viewerWidth() {
+      return this.open && this.position === "static"
+        ? "calc(100% - 260px)"
+        : "100%";
+    },
     ...mapState({
       layers: state => state.layers,
       layer_configs: state => state.layer_configs,
@@ -287,9 +336,30 @@ export default {
     })
   },
   methods: {
+    updateSize() {
+      debounce(() => {
+        this.screenWidth = window.innerWidth;
+        if (this.screenWidth > 1024) {
+          if (this.position != "static") {
+            this.open = true;
+          }
+          this.position = "static";
+        } else {
+          if (this.position != "absolute") {
+            this.open = false;
+          }
+          this.position = "absolute";
+        }
+        this.$forceUpdate();
+      }, 250)();
+    },
     layerSorted() {
       for (let i = 0; i < this.layer_configs.length; i++) {
-        this.layers[this.layer_configs[i].id].setZIndex(i);
+        if (this.layers[this.layer_configs[i].id])
+          this.layers[this.layer_configs[i].id].setZIndex(i);
+        else {
+          console.warn("Layer not ready", this.layer_configs[i]);
+        }
       }
     },
     removeLayer(layer) {
@@ -348,7 +418,6 @@ export default {
   cursor: grab !important;
 }
 #map {
-  width: calc(100% - 260px);
   height: 100%;
   position: fixed;
 }
@@ -356,14 +425,20 @@ export default {
   padding-left: 10px;
   padding-right: 10px;
   bottom: 0px;
-  width: calc(100% - 260px);
   position: absolute;
 }
 .slider-label {
+  color: #b6acd3 !important;
   display: inline-block !important;
   margin-bottom: 0px !important;
   margin-top: 7px;
   width: 30px;
+}
+.slider-container .b-slider-track {
+  background: #dbdbdb3b !important;
+}
+.slider-container .b-slider-fill {
+  background: #7957d580 !important;
 }
 .slider-body {
   display: inline-block;
@@ -411,9 +486,9 @@ section#toolbar > div:first-child {
 
 .corner-annotation {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
-  color: violet;
+  top: 10px;
+  right: 80px;
+  color: #7957d5;
 }
 .menu-list a.is-active {
   background-color: #e9e1ff !important;
@@ -421,5 +496,29 @@ section#toolbar > div:first-child {
 }
 .ol-layers:first-child {
   background-color: black;
+}
+.floating-close-btn {
+  position: absolute !important;
+  left: 260px;
+  top: 10px;
+}
+.floating-menu-btn {
+  margin-left: 3px;
+  background-color: #ffffff00 !important;
+  border-color: #dbdbdb00 !important;
+  z-index: 9999;
+  position: absolute !important;
+  width: 30px;
+  top: 5px;
+  left: 5px;
+}
+.floating-menu-btn > img {
+  height: 30px;
+  width: 30px;
+  max-width: 30px;
+  max-height: 30px;
+}
+.ol-control {
+  top: 50px;
 }
 </style>

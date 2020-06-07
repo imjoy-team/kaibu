@@ -26,6 +26,7 @@ const store = new Vuex.Store({
       Vue.nextTick(() => {
         if (config.init) {
           config.init().then(layer => {
+            if (!layer) debugger;
             layer.config = config;
             context.commit("initialized", layer);
             context.commit("setCurrentLayer", layer.config);
