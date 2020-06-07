@@ -141,6 +141,7 @@
 <script>
 import "ol/ol.css";
 import { Map, View } from "ol";
+import { defaults } from "ol/interaction";
 import { randId } from "../utils";
 import Gallery from "@/components/Gallery";
 import * as layerComponents from "@/components/layers";
@@ -409,6 +410,10 @@ export default {
         extent: extent
       });
       const map = new Map({
+        interactions: defaults({
+          altShiftDragRotate: false,
+          pinchRotate: false
+        }),
         target: "map",
         layers: [],
         view: new View({
