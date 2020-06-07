@@ -24,9 +24,9 @@
             <b-icon icon="chevron-left"></b-icon>
           </button>
           <div class="block">
-            <div class="field">
+            <!-- <div class="field">
               <b-switch v-model="showGallery">Gallery</b-switch>
-            </div>
+            </div> -->
             <div class="field">
               <b-dropdown aria-role="list">
                 <button class="button" slot="trigger" slot-scope="{ active }">
@@ -107,7 +107,7 @@
       >
         <img style="width: 30px;" src="static/img/kaibu-icon.svg" />
       </button>
-      <div v-show="showGallery" class="p-1">
+      <div v-show="showGallery">
         <gallery :collections="collections"></gallery>
       </div>
       <div v-show="!showGallery" class="p-1">
@@ -223,15 +223,15 @@ function debounce(func, wait, immediate) {
   };
 }
 const itkVtkViewer = window.itkVtkViewer;
-async function setupImJoy(config) {
+async function setupImJoy({ addLayer }) {
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
     api_version: "0.2.3"
   });
   const api = await imjoyRPC.setupRPC({
-    name: "itk-vtk-viewer",
-    version: "9.23.x",
+    name: "Kaibu",
+    version: "0.1.0",
     description:
-      "2D / 3D web image, mesh, and point set viewer using itk.js and vtk.js ",
+      "Kaibu--a web application for visualizing and annotating multi-dimensional images",
     type: "rpc-window"
   });
   api.registerCodec({
@@ -243,27 +243,28 @@ async function setupImJoy(config) {
     decoder: itkVtkViewer.utils.ndarrayToItkImage
   });
 
-  const service_api = Object.assign(
-    {},
-    {
-      setup() {
-        api.log("itk-vtk-viewer loaded successfully.");
-      },
-      async run(ctx) {
-        if (ctx.data && ctx.data.image_array) {
-          await this.imshow(ctx.data.image_array);
+  const service_api = {
+    setup() {
+      api.log("Kaibu loaded successfully.");
+    },
+    async run(ctx) {
+      if (ctx.data && ctx.data.image_array) {
+        await this.imshow(ctx.data.image_array);
+      } else if (ctx.data && ctx.data.layers) {
+        for (let layer of ctx.data.layers) {
+          addLayer(layer);
         }
-      },
-      async imshow(image_array) {
-        const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
-          image_array
-        );
-        const dims = vtkImage.getDimensions();
-        const is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
-        config.addLayer({ type: "vtk", image: vtkImage, is2D: is2D });
       }
+    },
+    addLayer: addLayer,
+    async imshow(image_array) {
+      const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
+        image_array
+      );
+      addLayer({ type: "itk-vtk", image: vtkImage });
     }
-  );
+  };
+
   api.export(service_api);
 }
 
@@ -292,8 +293,11 @@ export default {
   mounted() {
     this.init();
 
-    this.newLayer("image");
-    this.newLayer("vector");
+    this.addLayer({
+      type: "itk-vtk",
+      name: "example image",
+      imageUrl: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+    });
 
     this.collections = [
       {
@@ -417,7 +421,7 @@ export default {
       this.$store.commit("setMap", map);
       // inside an iframe
       if (window.self !== window.top) {
-        setupImJoy({});
+        setupImJoy({ addLayer: this.addLayer });
       }
     }
   }

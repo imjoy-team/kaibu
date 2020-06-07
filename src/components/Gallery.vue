@@ -4,13 +4,13 @@
       Nothing to show in the gallery
     </p>
     <div
-      class="container"
+      class="tile is-ancestor  is-fluid"
       v-for="collection in collections"
       :key="collection.name"
     >
-      <div class="columns">
+      <div class="tile is-parent">
         <div
-          class="card column"
+          class="card tile is-child"
           v-for="item in collection.items"
           :key="item.name"
         >

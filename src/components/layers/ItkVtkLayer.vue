@@ -62,7 +62,7 @@ function convertImageUrl2Itk(url) {
       canvas.height = image.height;
       ctx.drawImage(image, 0, 0, image.width, image.height);
       const imageData = ctx.getImageData(0, 0, image.width, image.height);
-      const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage({
+      resolve({
         imageType: {
           dimension: 2,
           pixelType: 1,
@@ -76,7 +76,6 @@ function convertImageUrl2Itk(url) {
         size: [image.width, image.height],
         data: new Uint8Array(imageData.data.buffer)
       });
-      resolve(vtkImage);
     };
     image.crossOrigin = "Anonymous";
     image.src = url;
@@ -109,7 +108,7 @@ function generateData3D() {
 
 export default {
   name: "itk-vtk-layer",
-  type: "vtk",
+  type: "itk-vtk",
   props: {
     map: {
       type: Map,
@@ -214,17 +213,25 @@ export default {
       var itk_layer = new CanvasLayer({
         sync_callback: this.synchronizeVtkCoordinate
       });
-      const imageData = await convertImageUrl2Itk(
-        "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
-      ); //generateData2D();
-      const extent_3d = imageData.getExtent();
+
+      let imageData;
+      if (this.config.image) imageData = this.config.image;
+      else if (this.config.imageUrl)
+        imageData = await convertImageUrl2Itk(this.config.imageUrl);
+
+      const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
+        imageData
+      );
+      const extent_3d = vtkImage.getExtent();
       this.extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+      const dims = vtkImage.getDimensions();
+      const is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
       const viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, {
         viewerStyle: viewerStyle,
-        image: imageData,
+        image: vtkImage,
         pointSets: null,
         geometries: null,
-        use2D: true,
+        use2D: is2D,
         rotate: false,
         uiContainer: document.getElementById("toolbar")
       });
