@@ -14,12 +14,33 @@ Vue.config.productionTip = false;
 
 const store = new Vuex.Store({
   state: {
+    layers: {},
     layer_configs: [],
     activeSliders: null,
     currentLayer: null,
     map: null
   },
+  actions: {
+    addLayer(context, config) {
+      context.commit("addLayer", config);
+      Vue.nextTick(() => {
+        if (config.init) {
+          config.init().then(layer => {
+            layer.config = config;
+            context.commit("initialized", layer);
+            context.commit("setCurrentLayer", layer.config);
+          });
+        } else {
+          debugger;
+        }
+      });
+    }
+  },
   mutations: {
+    initialized(state, layer) {
+      state.layers[layer.config.id] = layer;
+      layer.setZIndex(state.layer_configs.length - 1);
+    },
     addLayer(state, config) {
       if (config.visible === undefined) config.visible = true;
       state.layer_configs.push(config);

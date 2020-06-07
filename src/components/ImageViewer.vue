@@ -259,20 +259,8 @@ export default {
   mounted() {
     this.init();
 
-    this.addLayer({
-      type: "vtk",
-      name: "my itk vtk layer"
-    });
-
-    this.addLayer({
-      type: "image",
-      name: "my image layer1"
-    });
-
-    this.addLayer({
-      type: "vector",
-      name: "my vector layer"
-    });
+    this.newLayer("vtk");
+    this.newLayer("vector");
 
     this.collections = [
       {
@@ -291,6 +279,7 @@ export default {
   },
   computed: {
     ...mapState({
+      layers: state => state.layers,
       layer_configs: state => state.layer_configs,
       currentLayer: state => state.currentLayer,
       map: state => state.map,
@@ -300,7 +289,7 @@ export default {
   methods: {
     layerSorted() {
       for (let i = 0; i < this.layer_configs.length; i++) {
-        this.layer_configs[i].layer.setZIndex(i);
+        this.layers[this.layer_configs[i].id].setZIndex(i);
       }
     },
     removeLayer(layer) {
@@ -321,17 +310,10 @@ export default {
       });
     },
     addLayer(config) {
-      const id = randId();
-      config.id = id;
-      this.$store.commit("addLayer", config);
+      config.id = randId();
+      this.$store.dispatch("addLayer", config);
       this.$nextTick(() => {
-        const layer = config.layer;
-        if (layer) {
-          this.selectLayer(layer);
-          config.layer.setZIndex(this.layer_configs.length);
-        } else {
-          debugger;
-        }
+        this.layerSorted();
       });
     },
     init() {
@@ -352,7 +334,10 @@ export default {
         })
       });
       this.$store.commit("setMap", map);
-      setupImJoy({});
+      // inside an iframe
+      if (window.self !== window.top) {
+        setupImJoy({});
+      }
     }
   }
 };
@@ -412,14 +397,18 @@ hr.solid {
 }
 section#toolbar > div > div > div > canvas {
   max-width: 100%;
-  height: 150px;
+  height: 140px;
+}
+svg {
+  fill: white;
 }
 section#toolbar > div {
-  background: transparent;
+  background: #dedddf;
 }
 section#toolbar > div:first-child {
   display: none;
 }
+
 .corner-annotation {
   position: absolute;
   bottom: 10px;

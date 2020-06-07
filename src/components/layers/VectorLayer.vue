@@ -107,13 +107,7 @@ export default {
     this.config.enableDraw = true;
     this.config.label = "cell";
     this.config.color = getRandomColor();
-    Promise.resolve(this.getLayer()).then(layer => {
-      this.layer = layer;
-      this.config.layer = layer;
-      this.map.addLayer(this.layer);
-      this.updateDrawInteraction();
-      this.$forceUpdate();
-    });
+    this.config.init = this.init;
   },
   beforeDestroy() {
     if (this.layer) {
@@ -123,6 +117,13 @@ export default {
   },
   created() {},
   methods: {
+    async init() {
+      this.layer = await this.getLayer();
+      this.map.addLayer(this.layer);
+      this.updateDrawInteraction();
+      this.$forceUpdate();
+      return this.layer;
+    },
     getLayer() {
       this.vector_source = new Vector();
       const vector_layer = new VectorLayer({

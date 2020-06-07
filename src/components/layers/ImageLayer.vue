@@ -82,12 +82,7 @@ export default {
         }
       }
     ];
-    Promise.resolve(this.getLayer()).then(layer => {
-      this.layer = layer;
-      this.config.layer = layer;
-      this.map.addLayer(this.layer);
-      this.$forceUpdate();
-    });
+    this.config.init = this.init;
   },
   beforeDestroy() {
     if (this.layer) {
@@ -96,6 +91,12 @@ export default {
   },
   created() {},
   methods: {
+    async init() {
+      this.layer = await this.getLayer();
+      this.map.addLayer(this.layer);
+      this.$forceUpdate();
+      return this.layer;
+    },
     updateOpacity() {
       if (this.layer) this.layer.setOpacity(this.config.opacity);
     },

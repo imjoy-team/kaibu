@@ -155,9 +155,17 @@ export default {
         }
       }
     ];
-    Promise.resolve(this.getLayer()).then(layer => {
-      this.layer = layer;
-      this.config.layer = layer;
+    this.config.init = this.init;
+  },
+  beforeDestroy() {
+    if (this.layer) {
+      this.map.removeLayer(this.layer);
+    }
+  },
+  created() {},
+  methods: {
+    async init() {
+      this.layer = await this.getLayer();
       this.map.addLayer(this.layer);
       const projection = new Projection({
         code: "image",
@@ -177,15 +185,8 @@ export default {
       this.synchronizeVtkCoordinate();
       this.renderWindow.render();
       this.$forceUpdate();
-    });
-  },
-  beforeDestroy() {
-    if (this.layer) {
-      this.map.removeLayer(this.layer);
-    }
-  },
-  created() {},
-  methods: {
+      return this.layer;
+    },
     updateOpacity() {
       if (this.layer) this.layer.setOpacity(this.config.opacity);
     },
