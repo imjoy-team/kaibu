@@ -65,7 +65,7 @@ function getRandomColor() {
 
 export default {
   name: "vector-layer",
-  type: "vector",
+  type: "annotation",
   props: {
     map: {
       type: Map,
