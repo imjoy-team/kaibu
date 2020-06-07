@@ -45,6 +45,7 @@ var CanvasLayer = /*@__PURE__*/ (function(Layer) {
       this.sync_callback();
     }
     this.viewerElement.style.opacity = this.getOpacity();
+    this.viewerElement.style.width = "100%";
     return this.viewerElement; //return the viewer element
   };
 
@@ -193,8 +194,8 @@ export default {
     selectLayer() {},
     async getLayer() {
       const containerStyle = {
-        position: "relative",
-        width: "100%",
+        position: "absolute",
+        width: "100vw",
         height: "100vh",
         minHeight: "400px",
         minWidth: "400px",

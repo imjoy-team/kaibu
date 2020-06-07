@@ -497,6 +497,10 @@ section#toolbar > div:first-child {
 .ol-layers:first-child {
   background-color: black;
 }
+.ol-layer {
+  width: 100% !important;
+  height: 100% !important;
+}
 .floating-close-btn {
   position: absolute !important;
   left: 260px;
@@ -508,8 +512,8 @@ section#toolbar > div:first-child {
   border-color: #dbdbdb00 !important;
   z-index: 9999;
   position: absolute !important;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   top: 5px;
   left: 5px;
 }
