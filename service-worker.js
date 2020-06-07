@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.d682f47eccc194cfdaf8494c6f8cb381.js"
+  "/precache-manifest.347215554230952e71f00af70184d636.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "kaibu"});
