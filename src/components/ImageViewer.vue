@@ -522,8 +522,9 @@ section#toolbar > div:first-child {
   width: 30px;
   max-width: 28px;
   max-height: 28px;
+  background: rgb(242, 237, 237);
 }
-.ol-control {
+.ol-zoom {
   top: 50px;
 }
 </style>
