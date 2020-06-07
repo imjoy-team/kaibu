@@ -14,7 +14,7 @@
       >
         <div class="p-1">
           <div class="block">
-            <div class="title" style="color: #7957d5;">Image Viewer</div>
+            <img style="width: 220px;" src="static/img/kaibu-banner.svg" />
           </div>
           <div class="block">
             <div class="field">

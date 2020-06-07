@@ -108,7 +108,7 @@ export default {
         extent: extent
       });
       const image_source = new Static({
-        attributions: '<a href="http://imjoy.io">imjoy</a>',
+        attributions: '<a href="https://imgs.xkcd.com">xkcd</a>',
         url: "https://imgs.xkcd.com/comics/online_communities.png",
         projection: projection,
         imageExtent: extent
