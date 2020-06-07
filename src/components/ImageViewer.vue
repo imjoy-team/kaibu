@@ -190,6 +190,51 @@ const sortable = {
   }
 };
 
+const itkVtkViewer = window.itkVtkViewer;
+async function setupImJoy(config) {
+  const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
+    api_version: "0.2.3"
+  });
+  const api = await imjoyRPC.setupRPC({
+    name: "itk-vtk-viewer",
+    version: "9.23.x",
+    description:
+      "2D / 3D web image, mesh, and point set viewer using itk.js and vtk.js ",
+    type: "rpc-window"
+  });
+  api.registerCodec({
+    name: "itkimage",
+    decoder: itkVtkViewer.utils.convertToItkImage
+  });
+  api.registerCodec({
+    name: "ndarray",
+    decoder: itkVtkViewer.utils.ndarrayToItkImage
+  });
+
+  const service_api = Object.assign(
+    {},
+    {
+      setup() {
+        api.log("itk-vtk-viewer loaded successfully.");
+      },
+      async run(ctx) {
+        if (ctx.data && ctx.data.image_array) {
+          await this.imshow(ctx.data.image_array);
+        }
+      },
+      async imshow(image_array) {
+        const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
+          image_array
+        );
+        const dims = vtkImage.getDimensions();
+        const is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
+        config.addLayer({ type: "vtk", image: vtkImage, is2D: is2D });
+      }
+    }
+  );
+  api.export(service_api);
+}
+
 export default {
   name: "ImageViewer",
   components,
@@ -214,20 +259,20 @@ export default {
   mounted() {
     this.init();
 
-    // this.addLayer({
-    //   type: "vtk",
-    //   name: "my itk vtk layer"
-    // });
+    this.addLayer({
+      type: "vtk",
+      name: "my itk vtk layer"
+    });
 
-    // this.addLayer({
-    //   type: "image",
-    //   name: "my image layer1"
-    // });
+    this.addLayer({
+      type: "image",
+      name: "my image layer1"
+    });
 
-    // this.addLayer({
-    //   type: "vector",
-    //   name: "my vector layer"
-    // });
+    this.addLayer({
+      type: "vector",
+      name: "my vector layer"
+    });
 
     this.collections = [
       {
@@ -307,6 +352,7 @@ export default {
         })
       });
       this.$store.commit("setMap", map);
+      setupImJoy({});
     }
   }
 };
