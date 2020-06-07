@@ -2,6 +2,15 @@
 <template>
   <div class="itk-vtk-layer">
     <section id="toolbar"></section>
+    <b-field label="opacity">
+      <b-slider
+        v-model="config.opacity"
+        @input="updateOpacity"
+        :min="0"
+        :max="1.0"
+        :step="0.1"
+      ></b-slider>
+    </b-field>
   </div>
 </template>
 
@@ -35,6 +44,7 @@ var CanvasLayer = /*@__PURE__*/ (function(Layer) {
     if (this.sync_callback) {
       this.sync_callback();
     }
+    this.viewerElement.style.opacity = this.getOpacity();
     return this.viewerElement; //return the viewer element
   };
 
@@ -132,6 +142,7 @@ export default {
     }
   },
   mounted() {
+    this.config.opacity = 1.0;
     this.config.sliders = [
       {
         name: "T",
@@ -146,6 +157,7 @@ export default {
     ];
     Promise.resolve(this.getLayer()).then(layer => {
       this.layer = layer;
+      this.layer.setOpacity(0.5);
       this.config.layer = layer;
       this.map.addLayer(this.layer);
       const projection = new Projection({
@@ -175,6 +187,9 @@ export default {
   },
   created() {},
   methods: {
+    updateOpacity() {
+      if (this.layer) this.layer.setOpacity(this.config.opacity);
+    },
     selectLayer() {},
     async getLayer() {
       const containerStyle = {

@@ -281,7 +281,7 @@ export default {
       this.$store.commit("addLayer", config);
       this.selectLayer(config);
       this.$nextTick(() => {
-        config.layer.setZIndex(this.layers.length);
+        if (config.layer) config.layer.setZIndex(this.layers.length);
       });
     },
     init() {

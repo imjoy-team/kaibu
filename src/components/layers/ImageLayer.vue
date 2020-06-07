@@ -5,6 +5,7 @@
       <b-field label="opacity">
         <b-slider
           v-model="config.opacity"
+          @input="updateOpacity"
           :min="0"
           :max="1.0"
           :step="0.1"
@@ -95,6 +96,9 @@ export default {
   },
   created() {},
   methods: {
+    updateOpacity() {
+      if (this.layer) this.layer.setOpacity(this.config.opacity);
+    },
     selectLayer() {},
     getLayer() {
       const extent = [0, 0, 1024, 968];
