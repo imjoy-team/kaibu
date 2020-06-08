@@ -16,20 +16,25 @@
         <div class="p-1">
           <div class="block">
             <img style="width: 220px;" src="static/img/kaibu-banner.svg" />
+            <button
+              class="button floating-close-btn is-small"
+              @click="closeSidebar"
+            >
+              <b-icon icon="chevron-left"></b-icon>
+            </button>
           </div>
-          <button
-            class="button floating-close-btn is-small"
-            @click="closeSidebar"
-          >
-            <b-icon icon="chevron-left"></b-icon>
-          </button>
+
           <div class="block">
             <!-- <div class="field">
               <b-switch v-model="showGallery">Gallery</b-switch>
             </div> -->
             <div class="field">
               <b-dropdown aria-role="list">
-                <button class="button" slot="trigger" slot-scope="{ active }">
+                <button
+                  class="button is-primary"
+                  slot="trigger"
+                  slot-scope="{ active }"
+                >
                   <span>+ Add layer</span>
                   <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
                 </button>
@@ -43,6 +48,16 @@
                   >{{ type }}</b-dropdown-item
                 >
               </b-dropdown>
+              &nbsp;
+              <b-button
+                @click="goto('https://github.com/imjoy-team/kaibu/')"
+                target="_blank"
+                icon-left="github-circle"
+              >
+                Github
+              </b-button>
+              <b-button @click="goto('/about')" icon-left="information-variant">
+              </b-button>
             </div>
           </div>
           <b-menu
@@ -322,6 +337,9 @@ export default {
     })
   },
   methods: {
+    goto(url) {
+      window.open(url, "_blank");
+    },
     closeSidebar() {
       this.open = false;
       setTimeout(() => {
