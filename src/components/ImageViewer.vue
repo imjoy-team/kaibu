@@ -407,14 +407,14 @@ export default {
       this.$store.commit("setMap", map);
       // inside an iframe
       if (window.self !== window.top) {
-          setupImJoy({ addLayer: this.addLayer });
-      }
-      else{
-           this.addLayer({
-            type: "itk-vtk",
-            name: "example image",
-            imageUrl: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
-          });
+        setupImJoy({ addLayer: this.addLayer });
+      } else {
+        this.addLayer({
+          type: "itk-vtk",
+          name: "example image",
+          imageUrl:
+            "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+        });
       }
     }
   }
@@ -482,7 +482,6 @@ hr.solid {
 svg {
   fill: white;
 }
-
 
 .corner-annotation {
   position: absolute;

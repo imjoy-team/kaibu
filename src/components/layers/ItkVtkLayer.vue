@@ -1,7 +1,10 @@
 <!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="itk-vtk-layer">
-    <section :id="'itk-vtk-control_'+config.id" style="position: relative;"></section>
+    <section
+      :id="'itk-vtk-control_' + config.id"
+      style="position: relative;"
+    ></section>
     <b-field label="opacity">
       <b-slider
         v-model="config.opacity"
@@ -233,7 +236,9 @@ export default {
         geometries: null,
         use2D: is2D,
         rotate: false,
-        uiContainer: document.getElementById('itk-vtk-control_'+this.config.id)
+        uiContainer: document.getElementById(
+          "itk-vtk-control_" + this.config.id
+        )
       });
       const viewProxy = viewer.getViewProxy();
       const renderWindow = viewProxy.getRenderWindow();
@@ -367,14 +372,14 @@ export default {
 .itk-vtk-layer > section > div:first-child {
   display: none;
 }
-.selected-box{
-  width: 100%!important;
+.selected-box {
+  width: 100% !important;
 }
-.selected-icon{
-  width: 100%!important;
+.selected-icon {
+  width: 100% !important;
 }
-.icon-select .box{
-  left: unset!important;
-  top: 24px!important;
+.icon-select .box {
+  left: unset !important;
+  top: 24px !important;
 }
 </style>
