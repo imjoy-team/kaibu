@@ -276,6 +276,7 @@ export default {
   data() {
     return {
       sortableOptions: {
+        delay: 400,
         chosenClass: "is-primary",
         draggable: ".layer-item"
       },
