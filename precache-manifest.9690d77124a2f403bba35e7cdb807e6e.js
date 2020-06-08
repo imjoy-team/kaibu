@@ -170,5 +170,9 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
     "revision": "abd3ca42b535a0aca482f14051699438",
     "url": "/static/img/kaibu-logo.gif"
+  },
+  {
+    "revision": "9c70934a3e14acf831670f9222890b38",
+    "url": "/static/img/kaibu-screenshot-1.png"
   }
 ]);
