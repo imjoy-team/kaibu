@@ -1,7 +1,7 @@
 <!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="itk-vtk-layer">
-    <section id="toolbar"></section>
+    <section :id="'itk-vtk-control_'+config.id" style="position: relative;"></section>
     <b-field label="opacity">
       <b-slider
         v-model="config.opacity"
@@ -233,7 +233,7 @@ export default {
         geometries: null,
         use2D: is2D,
         rotate: false,
-        uiContainer: document.getElementById("toolbar")
+        uiContainer: document.getElementById('itk-vtk-control_'+this.config.id)
       });
       const viewProxy = viewer.getViewProxy();
       const renderWindow = viewProxy.getRenderWindow();
@@ -357,7 +357,24 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
-#toolbar {
-  position: relative;
+.itk-vtk-layer > section > div > div > div > canvas {
+  max-width: 100%;
+  height: 140px;
+}
+.itk-vtk-layer > section > div {
+  background: #dedddf;
+}
+.itk-vtk-layer > section > div:first-child {
+  display: none;
+}
+.selected-box{
+  width: 100%!important;
+}
+.selected-icon{
+  width: 100%!important;
+}
+.icon-select .box{
+  left: unset!important;
+  top: 24px!important;
 }
 </style>
