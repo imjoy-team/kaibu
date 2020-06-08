@@ -221,7 +221,12 @@ export default {
       if (this.config.image) imageData = this.config.image;
       else if (this.config.imageUrl)
         imageData = await convertImageUrl2Itk(this.config.imageUrl);
-
+      else {
+        this.config.name = "example image";
+        this.config.imageUrl =
+          "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
+        imageData = await convertImageUrl2Itk(this.config.imageUrl);
+      }
       const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
         imageData
       );
