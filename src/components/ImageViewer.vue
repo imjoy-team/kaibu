@@ -56,7 +56,10 @@
               >
                 Github
               </b-button>
-              <b-button @click="goto('/about')" icon-left="information-variant">
+              <b-button
+                @click="goto('/#/about')"
+                icon-left="information-variant"
+              >
               </b-button>
             </div>
           </div>

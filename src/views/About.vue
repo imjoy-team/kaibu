@@ -45,8 +45,8 @@
               >Napari</a
             >
             which is also named after an island. <code>Kaibu</code> in
-            Chinese(开步), it means "to step forward", and yes, it is time to step
-            forward with Kaibu!
+            Chinese(开步), it means "to step forward", and yes, it is time to
+            step forward with Kaibu!
           </p>
           <p>
             <a
