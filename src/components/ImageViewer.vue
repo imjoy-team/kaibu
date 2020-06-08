@@ -262,7 +262,7 @@ async function setupImJoy({ addLayer }) {
       const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
         image_array
       );
-      addLayer({ type: "itk-vtk", image: vtkImage });
+      addLayer({ type: "itk-vtk", name: "image_array", image: vtkImage });
     }
   };
 
@@ -294,26 +294,6 @@ export default {
   },
   mounted() {
     this.init();
-
-    this.addLayer({
-      type: "itk-vtk",
-      name: "example image",
-      imageUrl: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
-    });
-
-    this.collections = [
-      {
-        name: "My collection",
-        items: [
-          { name: "my image 1" },
-          { name: "my image 2" },
-          { name: "my image 3" },
-          { name: "my image 4" },
-          { name: "my image 5" }
-        ]
-      }
-    ];
-
     this.sortableOptions.layer_configs = this.layer_configs;
     window.addEventListener("resize", this.updateSize);
     window.dispatchEvent(new Event("resize"));
@@ -429,6 +409,13 @@ export default {
       // inside an iframe
       if (window.self !== window.top) {
         setupImJoy({ addLayer: this.addLayer });
+      } else {
+        this.addLayer({
+          type: "itk-vtk",
+          name: "example image",
+          imageUrl:
+            "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+        });
       }
     }
   }
@@ -492,18 +479,9 @@ hr.solid {
   border-top: 2px solid #ccc5c5;
   margin-bottom: 15px;
 }
-section#toolbar > div > div > div > canvas {
-  max-width: 100%;
-  height: 140px;
-}
+
 svg {
   fill: white;
-}
-section#toolbar > div {
-  background: #dedddf;
-}
-section#toolbar > div:first-child {
-  display: none;
 }
 
 .corner-annotation {
