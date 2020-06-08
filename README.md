@@ -10,6 +10,8 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 
 ### As standalone appliction: https://kaibu.org
 
+![Kaibu Screenshot](./public/static/img/kaibu-screenshot-1.png)
+
 ### As ImJoy plugin: https://imjoy.io
 
 ## Why Kaibu?
