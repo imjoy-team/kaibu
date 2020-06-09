@@ -117,7 +117,7 @@ export default {
       blending: "additive",
       visible: true,
       // custom fields
-      draw_enable: true,
+      draw_enable: false,
       draw_freehand: true,
       draw_label: null,
       draw_shape_type: "polygon",
@@ -208,10 +208,41 @@ export default {
           type: "FeatureCollection",
           features: features
         };
-        const geojsonFeatures = new GeoJSON().readFeatures(geojson_data);
+        const format = new GeoJSON();
+        const geojsonFeatures = format.readFeatures(geojson_data);
         this.vector_source.addFeatures(geojsonFeatures);
       }
+      vector_layer.getLayerAPI = this.getLayerAPI;
       return vector_layer;
+    },
+    getLayerAPI() {
+      const me = this;
+      return {
+        _rintf: true,
+        name: this.config.name,
+        id: this.config.id,
+        set_features(geojson_data) {
+          const format = new GeoJSON();
+          const geojsonFeatures = format.readFeatures(geojson_data);
+          me.vector_source.clear(true);
+          me.vector_source.addFeatures(geojsonFeatures);
+        },
+        add_features(geojson_data) {
+          const format = new GeoJSON();
+          const geojsonFeatures = format.readFeatures(geojson_data);
+          me.vector_source.addFeatures(geojsonFeatures);
+        },
+        get_features(config) {
+          config = config || {};
+          if (config.decimals === undefined) config.decimals = 2;
+          const allFeatures = me.vector_source.getFeatures();
+          const format = new GeoJSON();
+          const routeFeatures = format.writeFeaturesObject(allFeatures, {
+            decimals: config.decimals
+          });
+          return routeFeatures;
+        }
+      };
     },
     updateDrawInteraction() {
       if (this.selected && this.visible && this.config.draw_enable) {

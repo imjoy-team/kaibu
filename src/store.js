@@ -18,6 +18,7 @@ export const store = new Vuex.Store({
           config.init().then(layer => {
             if (!layer) debugger;
             layer.config = config;
+            layer.getLayerAPI = layer.getLayerAPI || function() {};
             context.commit("initialized", layer);
             context.commit("setCurrentLayer", layer.config);
             context.commit("sortLayers");

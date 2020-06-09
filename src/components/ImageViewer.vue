@@ -351,8 +351,17 @@ export default {
       });
     },
     addLayer(config) {
-      config.id = randId();
-      this.$store.dispatch("addLayer", config);
+      return new Promise((resolve, reject) => {
+        config.id = randId();
+        this.$store.dispatch("addLayer", config);
+        setTimeout(() => {
+          if (this.layers[config.id]) {
+            resolve(this.layers[config.id]);
+          } else {
+            reject("Failed to add layer");
+          }
+        }, 0);
+      });
     },
     init() {
       const extent = [0, 0, 1024, 968];
