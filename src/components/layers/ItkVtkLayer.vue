@@ -28,6 +28,7 @@ const itkVtkViewer = window.itkVtkViewer;
 
 var CanvasLayer = /*@__PURE__*/ (function(Layer) {
   function CanvasLayer(options) {
+    options = options || {};
     Layer.call(this, options);
     this.viewerElement = document.createElement("div");
     this.viewerElement.classList.add("ol-layer");
@@ -134,17 +135,18 @@ export default {
   },
   data() {
     return {
-      layer: null
+      layer: null,
+      mode: "2D"
     };
   },
   watch: {
     visible: function(newVal) {
       this.layer.setVisible(newVal);
-      this.synchronizeVtkCoordinate();
       this.renderWindow.render();
     }
   },
   mounted() {
+    this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity = 1.0;
     this.config.sliders = [
       {
@@ -184,9 +186,6 @@ export default {
           minZoom: -10
         })
       );
-      this.enableItkInteraction();
-      this.synchronizeVtkCoordinate();
-      this.renderWindow.render();
       this.$forceUpdate();
       return this.layer;
     },
@@ -213,9 +212,7 @@ export default {
         containerStyle: containerStyle
       };
 
-      var itk_layer = new CanvasLayer({
-        sync_callback: this.synchronizeVtkCoordinate
-      });
+      var itk_layer = new CanvasLayer();
 
       let imageData;
       if (typeof this.config.data === "object") imageData = this.config.data;
@@ -253,8 +250,17 @@ export default {
       this.viewProxy.updateOrientation(2, 1, [0, 1, 0]);
       this.renderWindow = this.viewProxy.getRenderWindow();
       this.interactor = this.renderWindow.getInteractor();
+      if (is2D) this.enableSync(itk_layer);
+      this.renderer = this.viewProxy.getRenderer();
+      viewer.setUserInterfaceCollapsed(true);
+      setTimeout(() => {
+        viewer.setUserInterfaceCollapsed(false);
+      }, 10);
+      this.viewer = viewer;
+      return itk_layer;
+    },
+    enableSync(itk_layer) {
       const view = this.interactor.getView();
-
       // we will disable the wheel and mousedown event,
       // but keep mouse move for the corner annotation
       view
@@ -263,14 +269,28 @@ export default {
       view
         .getContainer()
         .removeEventListener("mousedown", this.interactor.handleMouseDown);
+      itk_layer.sync_callback = this.synchronizeVtkCoordinate;
 
-      this.renderer = this.viewProxy.getRenderer();
-      viewer.setUserInterfaceCollapsed(true);
-      setTimeout(() => {
-        viewer.setUserInterfaceCollapsed(false);
-      }, 10);
-      this.viewer = viewer;
-      return itk_layer;
+      this.enableItkInteraction();
+      this.synchronizeVtkCoordinate();
+      this.renderWindow.render();
+    },
+    disableSync(itk_layer) {
+      if (itk_layer.sync_callback) {
+        itk_layer.sync_callback = null;
+
+        const view = this.interactor.getView();
+
+        // we will disable the wheel and mousedown event,
+        // but keep mouse move for the corner annotation
+        view
+          .getContainer()
+          .addEventListener("wheel", this.interactor.handleWheel);
+        view
+          .getContainer()
+          .addEventListener("mousedown", this.interactor.handleMouseDown);
+      }
+      this.disableItkInteraction();
     },
     convertCoordinates(x, y) {
       const view = this.interactor.getView();
@@ -360,6 +380,9 @@ export default {
         return true;
       };
       this.map.addInteraction(this.itkInteraction);
+    },
+    disableItkInteraction() {
+      if (this.itkInteraction) this.map.removeInteraction(this.itkInteraction);
     }
   }
 };

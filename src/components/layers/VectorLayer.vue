@@ -109,7 +109,7 @@ export default {
       edge_color: getRandomColor(),
       face_color: "rgba(255, 255, 255, 0.2)",
       z_index: null,
-      name: "shapes",
+      name: "vector",
       metadata: null,
       scale: 1,
       translate: 0,
@@ -225,6 +225,15 @@ export default {
           const format = new GeoJSON();
           const geojsonFeatures = format.readFeatures(geojson_data);
           me.vector_source.clear(true);
+          me.vector_source.addFeatures(geojsonFeatures);
+        },
+        add_feature(feature) {
+          const geojson_data = {
+            type: "FeatureCollection",
+            features: [feature]
+          };
+          const format = new GeoJSON();
+          const geojsonFeatures = format.readFeatures(geojson_data);
           me.vector_source.addFeatures(geojsonFeatures);
         },
         add_features(geojson_data) {
