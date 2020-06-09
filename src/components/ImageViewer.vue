@@ -242,7 +242,9 @@ function debounce(func, wait, immediate) {
     if (callNow) func.apply(context, args);
   };
 }
-
+function is_touch_device() {
+  return "ontouchstart" in window;
+}
 export default {
   name: "ImageViewer",
   components,
@@ -250,7 +252,7 @@ export default {
   data() {
     return {
       sortableOptions: {
-        delay: 400,
+        delay: is_touch_device() ? 400 : null,
         chosenClass: "is-primary",
         draggable: ".layer-item"
       },
@@ -395,8 +397,7 @@ export default {
               [130.2, 1228.2],
               [129.2, 1218],
               [1281.4, 1198.1],
-              [1271.5, 1184.4],
-              
+              [1271.5, 1184.4]
             ]
           ],
           shape_type: "polygon",
