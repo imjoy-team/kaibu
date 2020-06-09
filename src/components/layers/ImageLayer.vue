@@ -61,7 +61,6 @@ function array2rgba(imageArr, ch, w, h) {
   if (imageArr instanceof Uint8Array) {
     if (ch === 1) {
       for (let i = 0; i < count; i++) {
-        //encode 16bits to the first two bytes
         canvas_img_data[i * 4] = raw[i];
         canvas_img_data[i * 4 + 1] = raw[i];
         canvas_img_data[i * 4 + 2] = raw[i];
