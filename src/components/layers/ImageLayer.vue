@@ -24,9 +24,67 @@ import { Map } from "ol";
 import Static from "ol/source/ImageStatic";
 import ImageLayer from "ol/layer/Image";
 import Projection from "ol/proj/Projection";
+
+async function url2base64(url) {
+  return new Promise((resolve, reject) => {
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function() {
+      var canvas = document.createElement("canvas");
+      var ctx = canvas.getContext("2d");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      resolve({
+        url: canvas.toDataURL("image/png"),
+        w: img.width,
+        h: img.height
+      });
+    };
+    img.onerror = function(e) {
+      reject("image load error:" + String(e));
+    };
+    img.src = url;
+  });
+}
+
+function array2rgba(imageArr, w, h) {
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  const canvas_img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const canvas_img_data = canvas_img.data;
+  const count = w * h;
+  let min = Number.POSITIVE_INFINITY,
+    max = Number.NEGATIVE_INFINITY;
+  const raw = new Uint8Array(imageArr.buffer);
+  if (imageArr instanceof Uint8Array) {
+    for (let i = 0; i < count; i++) {
+      if (imageArr[i] > max) max = imageArr[i];
+      if (imageArr[i] < min) min = imageArr[i];
+      //encode 16bits to the first two bytes
+      canvas_img_data[i * 4] = raw[i];
+      canvas_img_data[i * 4 + 1] = raw[i];
+      canvas_img_data[i * 4 + 2] = raw[i];
+      canvas_img_data[i * 4 + 3] = 255;
+    }
+  } else {
+    throw "unsupported array type";
+  }
+  ctx.putImageData(canvas_img, 0, 0);
+  return {
+    url: canvas.toDataURL("image/png"),
+    w: w,
+    h: h,
+    min: min,
+    max: max
+  };
+}
+
 export default {
   name: "image-layer",
-  type: "image",
+  type: "2d-image",
   props: {
     map: {
       type: Map,
@@ -101,16 +159,52 @@ export default {
       if (this.layer) this.layer.setOpacity(this.config.opacity);
     },
     selectLayer() {},
-    getLayer() {
-      const extent = [0, 0, 1024, 968];
+    async getLayer() {
+      let imgObj;
+      const data = this.config.data;
+      if (typeof data === "string") {
+        imgObj = await url2base64(this.config.data);
+      } else if (
+        data.imageType &&
+        data.size &&
+        data.imageType.componentType &&
+        data.data
+      ) {
+        if (data.imageType.componentType !== "uint8_t") {
+          throw `Unsupported data type: ${data.imageType.componentType}`;
+        }
+
+        if (
+          data.imageType.components !== 1 &&
+          data.imageType.components !== 3
+        ) {
+          throw `Unsupported components number: ${data.imageType.components}`;
+        }
+
+        if (data.imageType.dimension !== 2) {
+          throw `Dimension must be 2`;
+        }
+
+        if (data.imageType.pixelType !== 1) {
+          throw `Pixel type must be 1`;
+        }
+        imgObj = array2rgba(data.data, data.size[0], data.size[1]);
+        // {type: type, url: canvas.toDataURL("image/png"), w:w, h:h, min: min, max: max}
+      } else {
+        imgObj = {
+          url: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg",
+          w: 2048,
+          h: 2048
+        };
+      }
+      const extent = [0, 0, imgObj.w, imgObj.h];
       const projection = new Projection({
-        code: "xkcd-image",
+        code: "image",
         units: "pixels",
         extent: extent
       });
       const image_source = new Static({
-        attributions: '<a href="https://imgs.xkcd.com">xkcd</a>',
-        url: "https://imgs.xkcd.com/comics/online_communities.png",
+        url: imgObj.url,
         projection: projection,
         imageExtent: extent
       });
