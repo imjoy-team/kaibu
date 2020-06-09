@@ -317,7 +317,7 @@ export default {
     updateSize() {
       debounce(() => {
         this.screenWidth = window.innerWidth;
-        if (this.screenWidth > 1024) {
+        if (this.screenWidth > 800) {
           if (this.position != "static") {
             this.open = true;
           }
