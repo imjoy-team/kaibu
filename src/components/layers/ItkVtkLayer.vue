@@ -218,14 +218,14 @@ export default {
       });
 
       let imageData;
-      if (this.config.image) imageData = this.config.image;
-      else if (this.config.imageUrl)
-        imageData = await convertImageUrl2Itk(this.config.imageUrl);
+      if (typeof this.config.data === "object") imageData = this.config.data;
+      else if (typeof this.config.data === "string")
+        imageData = await convertImageUrl2Itk(this.config.data);
       else {
         this.config.name = "example image";
-        this.config.imageUrl =
+        this.config.data =
           "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
-        imageData = await convertImageUrl2Itk(this.config.imageUrl);
+        imageData = await convertImageUrl2Itk(this.config.data);
       }
       const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
         imageData

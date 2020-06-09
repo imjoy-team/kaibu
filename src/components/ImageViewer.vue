@@ -166,6 +166,7 @@ import * as layerComponents from "@/components/layers";
 import Projection from "ol/proj/Projection";
 import { getCenter } from "ol/extent";
 import { mapState } from "vuex";
+import { setupImJoyAPI } from "../imjoyAPI";
 
 const components = {};
 const layerTypes = {};
@@ -240,51 +241,6 @@ function debounce(func, wait, immediate) {
     timeout = setTimeout(later, wait);
     if (callNow) func.apply(context, args);
   };
-}
-const itkVtkViewer = window.itkVtkViewer;
-async function setupImJoy({ addLayer }) {
-  const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
-    api_version: "0.2.3"
-  });
-  const api = await imjoyRPC.setupRPC({
-    name: "Kaibu",
-    version: "0.1.0",
-    description:
-      "Kaibu--a web application for visualizing and annotating multi-dimensional images",
-    type: "rpc-window"
-  });
-  api.registerCodec({
-    name: "itkimage",
-    decoder: itkVtkViewer.utils.convertToItkImage
-  });
-  api.registerCodec({
-    name: "ndarray",
-    decoder: itkVtkViewer.utils.ndarrayToItkImage
-  });
-
-  const service_api = {
-    setup() {
-      api.log("Kaibu loaded successfully.");
-    },
-    async run(ctx) {
-      if (ctx.data && ctx.data.image_array) {
-        await this.imshow(ctx.data.image_array);
-      } else if (ctx.data && ctx.data.layers) {
-        for (let layer of ctx.data.layers) {
-          addLayer(layer);
-        }
-      }
-    },
-    addLayer: addLayer,
-    async imshow(image_array) {
-      const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
-        image_array
-      );
-      addLayer({ type: "itk-vtk", name: "image_array", image: vtkImage });
-    }
-  };
-
-  api.export(service_api);
 }
 
 export default {
@@ -373,13 +329,7 @@ export default {
       }, 250)();
     },
     layerSorted() {
-      for (let i = 0; i < this.layer_configs.length; i++) {
-        if (this.layers[this.layer_configs[i].id])
-          this.layers[this.layer_configs[i].id].setZIndex(i);
-        else {
-          console.warn("Layer not ready", this.layer_configs[i]);
-        }
-      }
+      this.$store.commit("sortLayers");
     },
     removeLayer(layer) {
       this.$store.commit("removeLayer", layer);
@@ -401,9 +351,6 @@ export default {
     addLayer(config) {
       config.id = randId();
       this.$store.dispatch("addLayer", config);
-      this.$nextTick(() => {
-        this.layerSorted();
-      });
     },
     init() {
       const extent = [0, 0, 1024, 968];
@@ -429,13 +376,31 @@ export default {
       this.$store.commit("setMap", map);
       // inside an iframe
       if (window.self !== window.top) {
-        setupImJoy({ addLayer: this.addLayer });
+        setupImJoyAPI({ addLayer: this.addLayer });
       } else {
         this.addLayer({
           type: "itk-vtk",
           name: "example image",
-          imageUrl:
-            "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+        });
+
+        this.addLayer({
+          type: "vector",
+          name: "example vector",
+          data: [
+            [
+              [17.3, 149.3],
+              [13.5, 124.6],
+              [130.4, 123.5],
+              [130.2, 1228.2],
+              [129.2, 1218],
+              [1281.4, 1198.1],
+              [1271.5, 1184.4],
+              
+            ]
+          ],
+          shape_type: "polygon",
+          edge_color: "red"
         });
       }
     }

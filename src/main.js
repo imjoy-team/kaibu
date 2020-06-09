@@ -30,6 +30,7 @@ const store = new Vuex.Store({
             layer.config = config;
             context.commit("initialized", layer);
             context.commit("setCurrentLayer", layer.config);
+            context.commit("sortLayers");
           });
         } else {
           debugger;
@@ -38,6 +39,15 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
+    sortLayers(state) {
+      for (let i = 0; i < state.layer_configs.length; i++) {
+        if (state.layers[state.layer_configs[i].id])
+          state.layers[state.layer_configs[i].id].setZIndex(i);
+        else {
+          console.warn("Layer not ready", state.layer_configs[i]);
+        }
+      }
+    },
     initialized(state, layer) {
       state.layers[layer.config.id] = layer;
       layer.setZIndex(state.layer_configs.length - 1);
