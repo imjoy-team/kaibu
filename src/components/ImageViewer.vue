@@ -415,20 +415,17 @@ export default {
 
         this.addLayer({
           type: "vector",
-          name: "example vector",
+          name: "example shape",
           data: [
             [
               [17.3, 149.3],
-              [13.5, 124.6],
-              [130.4, 123.5],
-              [130.2, 1228.2],
-              [129.2, 1218],
-              [1281.4, 1198.1],
-              [1271.5, 1184.4]
+              [17.5, 400],
+              [800,400],
+              [800, 150],
             ]
           ],
           shape_type: "polygon",
-          edge_color: "red"
+          edge_color: "#7957d5"
         });
       }
     }

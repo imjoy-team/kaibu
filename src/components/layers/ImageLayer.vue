@@ -183,6 +183,7 @@ export default {
       if (typeof data === "string") {
         imgObj = await url2base64(this.config.data);
       } else if (
+        data &&
         data.imageType &&
         data.size &&
         data.imageType.componentType &&
