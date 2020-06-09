@@ -18,11 +18,9 @@
 </template>
 
 <script>
-import { Map, View } from "ol";
+import { Map } from "ol";
 import { Pointer } from "ol/interaction";
 import Layer from "ol/layer/Layer";
-import { Projection } from "ol/proj";
-import { getCenter } from "ol/extent";
 
 const itkVtkViewer = window.itkVtkViewer;
 
@@ -172,20 +170,6 @@ export default {
     async init() {
       this.layer = await this.getLayer();
       this.map.addLayer(this.layer);
-      const projection = new Projection({
-        code: "image",
-        units: "pixels",
-        extent: this.extent
-        // axisOrientation: 'esu',
-      });
-      this.map.setView(
-        new View({
-          projection: projection,
-          center: getCenter(this.extent),
-          zoom: 1,
-          minZoom: -10
-        })
-      );
       this.$forceUpdate();
       return this.layer;
     },
@@ -228,7 +212,7 @@ export default {
         imageData
       );
       const extent_3d = vtkImage.getExtent();
-      this.extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+
       const dims = vtkImage.getDimensions();
       const is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
       const viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, {
@@ -257,6 +241,9 @@ export default {
         viewer.setUserInterfaceCollapsed(false);
       }, 10);
       this.viewer = viewer;
+      //TODO: udpate the extent when selecting different plane
+      const extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+      this.$emit("update-extent", { id: this.config.id, extent: extent });
       return itk_layer;
     },
     enableSync(itk_layer) {

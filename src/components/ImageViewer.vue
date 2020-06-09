@@ -106,6 +106,7 @@
               <component
                 v-for="layer in layer_configs"
                 v-show="currentLayer === layer"
+                @update-extent="updateExtent"
                 :ref="'layer_' + layer.id"
                 :key="layer.id"
                 :is="layerTypes[layer.type]"
@@ -163,7 +164,7 @@ import { defaults } from "ol/interaction";
 import { randId } from "../utils";
 import Gallery from "@/components/Gallery";
 import * as layerComponents from "@/components/layers";
-import Projection from "ol/proj/Projection";
+import { Projection } from "ol/proj";
 import { getCenter } from "ol/extent";
 import { mapState } from "vuex";
 import { setupImJoyAPI } from "../imjoyAPI";
@@ -362,6 +363,23 @@ export default {
           }
         }, 0);
       });
+    },
+    updateExtent(config) {
+      //TODO: calculate the extent for all layers
+      const projection = new Projection({
+        code: "image",
+        units: "pixels",
+        extent: config.extent
+        // axisOrientation: 'esu',
+      });
+      this.map.setView(
+        new View({
+          projection: projection,
+          center: getCenter(config.extent),
+          zoom: 1,
+          minZoom: -10
+        })
+      );
     },
     init() {
       const extent = [0, 0, 1024, 968];

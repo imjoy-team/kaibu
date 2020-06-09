@@ -230,6 +230,7 @@ export default {
       const image_layer = new ImageLayer({
         source: image_source
       });
+      this.$emit("update-extent", { id: this.config.id, extent: extent });
       return image_layer;
     }
   }
