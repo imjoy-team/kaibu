@@ -48,7 +48,7 @@ async function url2base64(url) {
   });
 }
 
-function array2rgba(imageArr, w, h) {
+function array2rgba(imageArr, ch, w, h) {
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
@@ -56,18 +56,38 @@ function array2rgba(imageArr, w, h) {
   const canvas_img = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const canvas_img_data = canvas_img.data;
   const count = w * h;
-  let min = Number.POSITIVE_INFINITY,
-    max = Number.NEGATIVE_INFINITY;
+
   const raw = new Uint8Array(imageArr.buffer);
   if (imageArr instanceof Uint8Array) {
-    for (let i = 0; i < count; i++) {
-      if (imageArr[i] > max) max = imageArr[i];
-      if (imageArr[i] < min) min = imageArr[i];
-      //encode 16bits to the first two bytes
-      canvas_img_data[i * 4] = raw[i];
-      canvas_img_data[i * 4 + 1] = raw[i];
-      canvas_img_data[i * 4 + 2] = raw[i];
-      canvas_img_data[i * 4 + 3] = 255;
+    if (ch === 1) {
+      for (let i = 0; i < count; i++) {
+        //encode 16bits to the first two bytes
+        canvas_img_data[i * 4] = raw[i];
+        canvas_img_data[i * 4 + 1] = raw[i];
+        canvas_img_data[i * 4 + 2] = raw[i];
+        canvas_img_data[i * 4 + 3] = 255;
+      }
+    } else if (ch === 2) {
+      for (let i = 0; i < count; i++) {
+        canvas_img_data[i * 4] = raw[i * 2];
+        canvas_img_data[i * 4 + 1] = raw[i * 2 + 1];
+        canvas_img_data[i * 4 + 2] = 0;
+        canvas_img_data[i * 4 + 3] = 255;
+      }
+    } else if (ch === 3) {
+      for (let i = 0; i < count; i++) {
+        canvas_img_data[i * 4] = raw[i * 3];
+        canvas_img_data[i * 4 + 1] = raw[i * 3 + 1];
+        canvas_img_data[i * 4 + 2] = raw[i * 3 + 2];
+        canvas_img_data[i * 4 + 3] = 255;
+      }
+    } else if (ch === 4) {
+      for (let i = 0; i < count; i++) {
+        canvas_img_data[i * 4] = raw[i * 3];
+        canvas_img_data[i * 4 + 1] = raw[i * 3 + 1];
+        canvas_img_data[i * 4 + 2] = raw[i * 3 + 2];
+        canvas_img_data[i * 4 + 3] = raw[i * 4 + 3];
+      }
     }
   } else {
     throw "unsupported array type";
@@ -76,9 +96,7 @@ function array2rgba(imageArr, w, h) {
   return {
     url: canvas.toDataURL("image/png"),
     w: w,
-    h: h,
-    min: min,
-    max: max
+    h: h
   };
 }
 
@@ -174,10 +192,7 @@ export default {
           throw `Unsupported data type: ${data.imageType.componentType}`;
         }
 
-        if (
-          data.imageType.components !== 1 &&
-          data.imageType.components !== 3
-        ) {
+        if (data.imageType.components < 1 && data.imageType.components > 4) {
           throw `Unsupported components number: ${data.imageType.components}`;
         }
 
@@ -188,8 +203,12 @@ export default {
         if (data.imageType.pixelType !== 1) {
           throw `Pixel type must be 1`;
         }
-        imgObj = array2rgba(data.data, data.size[0], data.size[1]);
-        // {type: type, url: canvas.toDataURL("image/png"), w:w, h:h, min: min, max: max}
+        imgObj = array2rgba(
+          data.data,
+          data.imageType.components,
+          data.size[0],
+          data.size[1]
+        );
       } else {
         imgObj = {
           url: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg",
