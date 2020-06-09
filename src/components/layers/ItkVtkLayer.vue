@@ -18,16 +18,15 @@
 </template>
 
 <script>
-import { Map, View } from "ol";
+import { Map } from "ol";
 import { Pointer } from "ol/interaction";
 import Layer from "ol/layer/Layer";
-import { Projection } from "ol/proj";
-import { getCenter } from "ol/extent";
 
 const itkVtkViewer = window.itkVtkViewer;
 
 var CanvasLayer = /*@__PURE__*/ (function(Layer) {
   function CanvasLayer(options) {
+    options = options || {};
     Layer.call(this, options);
     this.viewerElement = document.createElement("div");
     this.viewerElement.classList.add("ol-layer");
@@ -134,17 +133,18 @@ export default {
   },
   data() {
     return {
-      layer: null
+      layer: null,
+      mode: "2D"
     };
   },
   watch: {
     visible: function(newVal) {
       this.layer.setVisible(newVal);
-      this.synchronizeVtkCoordinate();
       this.renderWindow.render();
     }
   },
   mounted() {
+    this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity = 1.0;
     this.config.sliders = [
       {
@@ -170,23 +170,6 @@ export default {
     async init() {
       this.layer = await this.getLayer();
       this.map.addLayer(this.layer);
-      const projection = new Projection({
-        code: "image",
-        units: "pixels",
-        extent: this.extent
-        // axisOrientation: 'esu',
-      });
-      this.map.setView(
-        new View({
-          projection: projection,
-          center: getCenter(this.extent),
-          zoom: 1,
-          minZoom: -10
-        })
-      );
-      this.enableItkInteraction();
-      this.synchronizeVtkCoordinate();
-      this.renderWindow.render();
       this.$forceUpdate();
       return this.layer;
     },
@@ -213,25 +196,23 @@ export default {
         containerStyle: containerStyle
       };
 
-      var itk_layer = new CanvasLayer({
-        sync_callback: this.synchronizeVtkCoordinate
-      });
+      var itk_layer = new CanvasLayer();
 
       let imageData;
-      if (this.config.image) imageData = this.config.image;
-      else if (this.config.imageUrl)
-        imageData = await convertImageUrl2Itk(this.config.imageUrl);
+      if (typeof this.config.data === "object") imageData = this.config.data;
+      else if (typeof this.config.data === "string")
+        imageData = await convertImageUrl2Itk(this.config.data);
       else {
         this.config.name = "example image";
-        this.config.imageUrl =
+        this.config.data =
           "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
-        imageData = await convertImageUrl2Itk(this.config.imageUrl);
+        imageData = await convertImageUrl2Itk(this.config.data);
       }
       const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
         imageData
       );
       const extent_3d = vtkImage.getExtent();
-      this.extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+
       const dims = vtkImage.getDimensions();
       const is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
       const viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, {
@@ -253,8 +234,20 @@ export default {
       this.viewProxy.updateOrientation(2, 1, [0, 1, 0]);
       this.renderWindow = this.viewProxy.getRenderWindow();
       this.interactor = this.renderWindow.getInteractor();
+      if (is2D) this.enableSync(itk_layer);
+      this.renderer = this.viewProxy.getRenderer();
+      viewer.setUserInterfaceCollapsed(true);
+      setTimeout(() => {
+        viewer.setUserInterfaceCollapsed(false);
+      }, 10);
+      this.viewer = viewer;
+      //TODO: udpate the extent when selecting different plane
+      const extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+      this.$emit("update-extent", { id: this.config.id, extent: extent });
+      return itk_layer;
+    },
+    enableSync(itk_layer) {
       const view = this.interactor.getView();
-
       // we will disable the wheel and mousedown event,
       // but keep mouse move for the corner annotation
       view
@@ -263,14 +256,28 @@ export default {
       view
         .getContainer()
         .removeEventListener("mousedown", this.interactor.handleMouseDown);
+      itk_layer.sync_callback = this.synchronizeVtkCoordinate;
 
-      this.renderer = this.viewProxy.getRenderer();
-      viewer.setUserInterfaceCollapsed(true);
-      setTimeout(() => {
-        viewer.setUserInterfaceCollapsed(false);
-      }, 10);
-      this.viewer = viewer;
-      return itk_layer;
+      this.enableItkInteraction();
+      this.synchronizeVtkCoordinate();
+      this.renderWindow.render();
+    },
+    disableSync(itk_layer) {
+      if (itk_layer.sync_callback) {
+        itk_layer.sync_callback = null;
+
+        const view = this.interactor.getView();
+
+        // we will disable the wheel and mousedown event,
+        // but keep mouse move for the corner annotation
+        view
+          .getContainer()
+          .addEventListener("wheel", this.interactor.handleWheel);
+        view
+          .getContainer()
+          .addEventListener("mousedown", this.interactor.handleMouseDown);
+      }
+      this.disableItkInteraction();
     },
     convertCoordinates(x, y) {
       const view = this.interactor.getView();
@@ -360,6 +367,9 @@ export default {
         return true;
       };
       this.map.addInteraction(this.itkInteraction);
+    },
+    disableItkInteraction() {
+      if (this.itkInteraction) this.map.removeInteraction(this.itkInteraction);
     }
   }
 };

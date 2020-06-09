@@ -3,19 +3,21 @@
   <div class="vector-layer">
     <section>
       <div class="field">
-        <b-switch v-model="config.enableDraw" @input="updateDrawInteraction()"
+        <b-switch v-model="config.draw_enable" @input="updateDrawInteraction()"
           >Enable Draw</b-switch
         >
       </div>
       <div class="field">
-        <b-switch v-model="config.freehand" @input="updateDrawInteraction()"
+        <b-switch
+          v-model="config.draw_freehand"
+          @input="updateDrawInteraction()"
           >Freehand</b-switch
         >
       </div>
       <div class="field">
         <b-dropdown
           aria-role="list"
-          v-model="config.draw_type"
+          v-model="config.draw_shape_type"
           @change="updateDrawInteraction()"
         >
           <button
@@ -23,7 +25,7 @@
             slot="trigger"
             slot-scope="{ active }"
           >
-            <span>{{ config.draw_type }}</span>
+            <span>{{ config.draw_shape_type }}</span>
             <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
           </button>
 
@@ -48,12 +50,11 @@
 <script>
 import { Map } from "ol";
 import VectorLayer from "ol/layer/Vector";
-import { Circle } from "ol/style";
-import { Style } from "ol/style";
-import { Fill } from "ol/style";
-import { Stroke } from "ol/style";
+import { Circle, Style, Fill, Stroke, Text } from "ol/style";
 import { Draw } from "ol/interaction";
 import { Vector } from "ol/source";
+import { GeoJSON } from "ol/format";
+
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
   var color = "#";
@@ -65,7 +66,7 @@ function getRandomColor() {
 
 export default {
   name: "vector-layer",
-  type: "annotation",
+  type: "vector",
   props: {
     map: {
       type: Map,
@@ -101,13 +102,66 @@ export default {
     }
   },
   mounted() {
-    this.config.draw_type = "Polygon";
-    this.config.line_width = 4;
-    this.config.freehand = true;
-    this.config.enableDraw = true;
-    this.config.label = "cell";
-    this.config.color = getRandomColor();
+    this.default_config = {
+      data: null,
+      shape_type: "polygon",
+      edge_width: 2,
+      edge_color: getRandomColor(),
+      face_color: "rgba(255, 255, 255, 0.2)",
+      z_index: null,
+      name: "vector",
+      metadata: null,
+      scale: 1,
+      translate: 0,
+      opacity: 1.0,
+      blending: "additive",
+      visible: true,
+      // custom fields
+      draw_enable: false,
+      draw_freehand: true,
+      draw_label: null,
+      draw_shape_type: "polygon",
+      draw_face_color: "rgba(255, 255, 255, 0.2)",
+      draw_edge_width: 2,
+      draw_edge_color: getRandomColor()
+    };
+    for (let k in this.default_config) {
+      if (!this.config[k]) {
+        this.config[k] = this.default_config[k];
+      }
+    }
+    this.config.label = this.config.label || this.config.name;
     this.config.init = this.init;
+
+    if (this.config.data) {
+      // make sure we have an array of properties
+      for (let key of [
+        "shape_type",
+        "edge_width",
+        "edge_color",
+        "face_color",
+        "z_index",
+        "label"
+      ]) {
+        if (Array.isArray(this.config[key])) {
+          if (this.config[key].length !== this.config.data.length) {
+            throw `Invalid length: ${key} should have ${this.config.data.length} elements.`;
+          }
+        } else {
+          const val = this.config[key];
+          this.config[key] = [];
+          for (let i = 0; i < this.config.data.length; i++) {
+            this.config[key].push(val);
+          }
+        }
+      }
+      this.config.draw_edge_color =
+        this.config.draw_edge_color || this.config.edge_color[0];
+      this.config.draw_edge_width =
+        this.config.draw_edge_width || this.config.edge_width[0];
+      this.config.draw_face_color =
+        this.config.draw_face_color || this.config.face_color[0];
+    }
   },
   beforeDestroy() {
     if (this.layer) {
@@ -127,27 +181,80 @@ export default {
     getLayer() {
       this.vector_source = new Vector();
       const vector_layer = new VectorLayer({
-        source: this.vector_source,
-        style: new Style({
-          fill: new Fill({
-            color: "rgba(255, 255, 255, 0.2)"
-          }),
-          stroke: new Stroke({
-            color: this.config.color,
-            width: 2
-          }),
-          image: new Circle({
-            radius: 7,
-            fill: new Fill({
-              color: "#ffcc33"
-            })
-          })
-        })
+        source: this.vector_source
       });
+      vector_layer.setStyle(this.featureStyle);
+      const data = this.config.data;
+      if (data) {
+        let features = [];
+        for (let i = 0; i < data.length; i++) {
+          const feature = {};
+          let shape_type = this.config.shape_type[i];
+          shape_type = shape_type.charAt(0).toUpperCase() + shape_type.slice(1);
+          feature.type = "Feature";
+          feature.geometry = {
+            type: shape_type,
+            coordinates: [data[i]]
+          };
+          feature.properties = {
+            label: this.config.label[i],
+            edge_width: this.config.edge_width[i],
+            edge_color: this.config.edge_color[i],
+            face_color: this.config.face_color[i]
+          };
+          features.push(feature);
+        }
+        const geojson_data = {
+          type: "FeatureCollection",
+          features: features
+        };
+        const format = new GeoJSON();
+        const geojsonFeatures = format.readFeatures(geojson_data);
+        this.vector_source.addFeatures(geojsonFeatures);
+      }
+      vector_layer.getLayerAPI = this.getLayerAPI;
       return vector_layer;
     },
+    getLayerAPI() {
+      const me = this;
+      return {
+        _rintf: true,
+        name: this.config.name,
+        id: this.config.id,
+        set_features(geojson_data) {
+          const format = new GeoJSON();
+          const geojsonFeatures = format.readFeatures(geojson_data);
+          me.vector_source.clear(true);
+          me.vector_source.addFeatures(geojsonFeatures);
+        },
+        add_feature(feature) {
+          const geojson_data = {
+            type: "FeatureCollection",
+            features: [feature]
+          };
+          const format = new GeoJSON();
+          const geojsonFeatures = format.readFeatures(geojson_data);
+          me.vector_source.addFeatures(geojsonFeatures);
+        },
+        add_features(geojson_data) {
+          const format = new GeoJSON();
+          const geojsonFeatures = format.readFeatures(geojson_data);
+          me.vector_source.addFeatures(geojsonFeatures);
+        },
+        get_features(config) {
+          config = config || {};
+          if (config.decimals === undefined) config.decimals = 2;
+          const allFeatures = me.vector_source.getFeatures();
+          const format = new GeoJSON();
+          const routeFeatures = format.writeFeaturesObject(allFeatures, {
+            decimals: config.decimals
+          });
+          return routeFeatures;
+        }
+      };
+    },
     updateDrawInteraction() {
-      if (this.selected && this.visible && this.config.enableDraw) {
+      if (this.selected && this.visible && this.config.draw_enable) {
         this.setupDrawInteraction();
       } else {
         this.removeDrawInteraction();
@@ -158,34 +265,70 @@ export default {
         this.map.removeInteraction(this.draw);
       }
     },
+    featureStyle(feature) {
+      const label = feature.get("label");
+      const edge_color = feature.get("edge_color");
+      const edge_width = feature.get("edge_width");
+      const face_color = feature.get("face_color");
+      const color_style = new Style({
+        fill: new Fill({
+          color: face_color
+        }),
+        stroke: new Stroke({
+          color: edge_color,
+          width: edge_width
+        }),
+        text: new Text({
+          text: label,
+          font: "14px Calibri,sans-serif",
+          fill: new Fill({
+            color: "#000"
+          }),
+          stroke: new Stroke({
+            color: edge_color,
+            width: 4
+          })
+        }),
+        image: new Circle({
+          radius: 7,
+          fill: new Fill({
+            color: "#ffcc33"
+          })
+        })
+      });
+      return color_style;
+    },
     setupDrawInteraction() {
       if (!this.vector_source) return;
       this.$nextTick(() => {
         if (this.draw) {
           this.map.removeInteraction(this.draw);
         }
+        let draw_type = this.config.draw_shape_type;
+        // title case
+        draw_type = draw_type.charAt(0).toUpperCase() + draw_type.slice(1);
         const draw = new Draw({
           source: this.vector_source,
-          type: this.config.draw_type,
-          freehand: this.config.freehand,
+          type: draw_type,
+          freehand: this.config.draw_freehand,
           style: new Style({
             fill: new Fill({
-              color: "rgba(255, 255, 255, 0.2)"
+              color: this.config.draw_face_color
             }),
             stroke: new Stroke({
-              color: this.config.color,
-              width: this.config.line_width
+              color: this.config.draw_edge_color,
+              width: this.config.draw_edge_width
             })
           })
         });
         this.map.addInteraction(draw);
         draw.on("drawend", async evt => {
           const feature = evt.feature;
-          feature.set("label", this.config.label);
-          // this.draw_feature_list.push(feature)
-          // this.undo_button_flag = true
-          // await this.updateFeatureStyle()
-          // await this.saveAnnotation()
+          feature.set("label", this.config.draw_label);
+          feature.set("edge_color", this.config.draw_edge_color);
+          feature.set("edge_width", this.config.draw_edge_width);
+          feature.set("face_color", this.config.draw_face_color);
+          console.log(this.config);
         });
         this.draw = draw;
       });
