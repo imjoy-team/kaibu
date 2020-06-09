@@ -38,7 +38,6 @@ export async function setupImJoyAPI({ addLayer }) {
     },
     add_layer: addLayer,
     async view_image(image_array, config) {
-      console.log(image_array);
       config = config || {};
       config.type = config.type || "itk-vtk";
       config.data = image_array;
