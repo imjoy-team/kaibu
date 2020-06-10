@@ -415,7 +415,7 @@ export default {
 
         this.addLayer({
           type: "vector",
-          name: "example shape",
+          name: "shape vectors",
           data: [
             [
               [17.3, 149.3],

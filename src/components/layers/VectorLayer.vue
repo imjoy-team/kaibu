@@ -2,58 +2,164 @@
 <template>
   <div class="vector-layer">
     <section>
-      <div class="field">
-        <b-switch v-model="config.draw_enable" @input="updateDrawInteraction()"
-          >Enable Draw</b-switch
-        >
+      <div class="block">
+        <b-tooltip label="Cursor" position="is-bottom">
+          <button
+            :class="{ 'is-primary': !config.draw_enable && !select }"
+            @click="
+              disableSelectInteraction();
+              config.draw_enable = false;
+              updateDrawInteraction();
+              $forceUpdate();
+            "
+            class="button is-medium"
+          >
+            <b-icon icon="cursor-default-outline" size="is-medium"> </b-icon>
+          </button>
+        </b-tooltip>
+        <b-tooltip label="Select/Modify" position="is-bottom">
+          <button
+            :class="{ 'is-primary': !config.draw_enable && select }"
+            @click="
+              enableSelectInteraction();
+              config.draw_enable = false;
+              updateDrawInteraction();
+              $forceUpdate();
+            "
+            class="button is-medium"
+          >
+            <b-icon icon="cursor-default" size="is-medium"> </b-icon>
+          </button>
+        </b-tooltip>
+        <b-tooltip label="Draw Mode" position="is-bottom">
+          <button
+            :class="{ 'is-primary': config.draw_enable }"
+            @click="
+              config.draw_enable = true;
+              updateDrawInteraction();
+              $forceUpdate();
+            "
+            class="button is-medium"
+          >
+            <b-icon icon="lead-pencil" size="is-medium"> </b-icon>
+          </button>
+        </b-tooltip>
+        &nbsp;&nbsp; &nbsp;&nbsp;
+        <b-tooltip label="Freehand Mode" position="is-bottom">
+          <button
+            :disabled="!config.draw_enable"
+            :class="{ 'is-primary': config.draw_freehand }"
+            @click="
+              config.draw_freehand = !config.draw_freehand;
+              updateDrawInteraction();
+              $forceUpdate();
+            "
+            class="button"
+          >
+            <b-icon icon="gesture"> </b-icon>
+          </button>
+        </b-tooltip>
+        <b-tooltip label="Edge Color" position="is-bottom">
+          <v-swatches
+            :disabled="!config.draw_enable"
+            style="top: 10px;margin:1px;"
+            :swatches="[
+              '#0084ff',
+              '#44bec7',
+              '#ffc300',
+              '#fa3c4c',
+              '#d696bb',
+              '#ff48c4',
+              { color: '#ffffff', showBorder: true },
+              '#000000'
+            ]"
+            :show-border="true"
+            :trigger-style="{
+              width: '36px',
+              height: '36px',
+              'border-radius': '5px'
+            }"
+            swatch-size="32"
+            v-model="draw_edge_color"
+            show-fallback
+            fallback-input-type="color"
+            popover-x="left"
+          ></v-swatches>
+        </b-tooltip>
+        <b-tooltip label="Face Color" position="is-bottom">
+          <v-swatches
+            :disabled="!config.draw_enable"
+            style="top: 10px;margin:1px;"
+            :swatches="[
+              '#0084ff60',
+              '#44bec760',
+              '#ffc30060',
+              '#fa3c4c60',
+              '#d696bb60',
+              '#f3ea5f60',
+              '#ff48c460',
+              '#00000000'
+            ]"
+            :show-border="true"
+            :trigger-style="{
+              width: '36px',
+              height: '36px',
+              'border-radius': '5px'
+            }"
+            swatch-size="32"
+            v-model="draw_face_color"
+            show-fallback
+            fallback-input-type="color"
+            popover-x="left"
+          ></v-swatches>
+        </b-tooltip>
       </div>
-      <div class="field">
-        <b-switch
-          v-model="config.draw_freehand"
-          @input="updateDrawInteraction()"
-          >Freehand</b-switch
-        >
-      </div>
-      <div class="field">
-        <b-dropdown
-          aria-role="list"
-          v-model="config.draw_shape_type"
-          @change="updateDrawInteraction()"
+      <div class="block">
+        <b-tooltip
+          v-for="(icon, type) in draw_types"
+          :key="type"
+          :label="type"
+          position="is-bottom"
         >
           <button
-            class="button is-primary"
-            slot="trigger"
-            slot-scope="{ active }"
+            :disabled="!config.draw_enable"
+            :class="{ 'is-primary': config.draw_shape_type === type }"
+            @click="setDrawType(type)"
+            class="button"
           >
-            <span>{{ config.draw_shape_type }}</span>
-            <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+            <b-icon :icon="icon" size="is-medium"> </b-icon>
           </button>
-
-          <b-dropdown-item value="Polygon" aria-role="listitem"
-            >Polygon</b-dropdown-item
-          >
-          <b-dropdown-item value="LineString" aria-role="listitem"
-            >LineString</b-dropdown-item
-          >
-          <b-dropdown-item value="Circle" aria-role="listitem"
-            >Circle</b-dropdown-item
-          >
-          <b-dropdown-item value="Point" aria-role="listitem"
-            >Point</b-dropdown-item
-          >
-        </b-dropdown>
+        </b-tooltip>
       </div>
+      <b-field label="Edge Width">
+        <b-numberinput
+          v-model="config.draw_edge_width"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
+      <b-field label="Point Size" v-if="config.draw_shape_type === 'Point'">
+        <b-numberinput
+          v-model="config.draw_size"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
     </section>
   </div>
 </template>
 
 <script>
+import VSwatches from "vue-swatches";
+import "vue-swatches/dist/vue-swatches.css";
 import { Map } from "ol";
 import VectorLayer from "ol/layer/Vector";
 import { Circle, Style, Fill, Stroke, Text } from "ol/style";
-import { Draw } from "ol/interaction";
+import { Draw, Select, Modify, Snap } from "ol/interaction";
 import { Vector } from "ol/source";
 import { GeoJSON } from "ol/format";
+import Polygon from "ol/geom/Polygon";
+import { createRegularPolygon, createBox } from "ol/interaction/Draw";
 
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
@@ -67,6 +173,7 @@ function getRandomColor() {
 export default {
   name: "vector-layer",
   type: "vector",
+  components: { VSwatches },
   props: {
     map: {
       type: Map,
@@ -89,10 +196,28 @@ export default {
   },
   data() {
     return {
-      layer: null
+      layer: null,
+      select: null,
+      draw_edge_color: null,
+      draw_face_color: null,
+      draw_types: {
+        Polygon: "vector-polygon",
+        LineString: "vector-polyline",
+        Rectangle: "vector-rectangle",
+        Square: "vector-square",
+        Circle: "vector-circle-variant",
+        Star: "octagram-outline",
+        Point: "plus-circle-outline"
+      }
     };
   },
   watch: {
+    draw_edge_color: function(newVal) {
+      this.config.draw_edge_color = newVal;
+    },
+    draw_face_color: function(newVal) {
+      this.config.draw_face_color = newVal;
+    },
     selected: function() {
       this.updateDrawInteraction();
     },
@@ -116,12 +241,14 @@ export default {
       opacity: 1.0,
       blending: "additive",
       visible: true,
+      size: 7,
       // custom fields
       draw_enable: false,
-      draw_freehand: true,
+      draw_freehand: false,
       draw_label: null,
-      draw_shape_type: "polygon",
-      draw_face_color: "rgba(255, 255, 255, 0.2)",
+      draw_size: 7,
+      draw_shape_type: "Polygon",
+      draw_face_color: "#FFFFFF0F",
       draw_edge_width: 2,
       draw_edge_color: getRandomColor()
     };
@@ -130,7 +257,6 @@ export default {
         this.config[k] = this.default_config[k];
       }
     }
-    this.config.label = this.config.label || this.config.name;
     this.config.init = this.init;
 
     if (this.config.data) {
@@ -140,6 +266,7 @@ export default {
         "edge_width",
         "edge_color",
         "face_color",
+        "size",
         "z_index",
         "label"
       ]) {
@@ -147,21 +274,17 @@ export default {
           if (this.config[key].length !== this.config.data.length) {
             throw `Invalid length: ${key} should have ${this.config.data.length} elements.`;
           }
-        } else {
-          const val = this.config[key];
-          this.config[key] = [];
-          for (let i = 0; i < this.config.data.length; i++) {
-            this.config[key].push(val);
-          }
         }
       }
       this.config.draw_edge_color =
-        this.config.draw_edge_color || this.config.edge_color[0];
+        this.config.draw_edge_color || this.getConfig("edge_color", 0);
       this.config.draw_edge_width =
-        this.config.draw_edge_width || this.config.edge_width[0];
+        this.config.draw_edge_width || this.getConfig("edge_width", 0);
       this.config.draw_face_color =
-        this.config.draw_face_color || this.config.face_color[0];
+        this.config.draw_face_color || this.getConfig("face_color", 0);
     }
+    this.draw_edge_color = this.config.draw_edge_color;
+    this.draw_face_color = this.config.draw_face_color;
   },
   beforeDestroy() {
     if (this.layer) {
@@ -178,6 +301,75 @@ export default {
       this.$forceUpdate();
       return this.layer;
     },
+    setDrawType(type) {
+      this.config.draw_shape_type = type;
+      this.$forceUpdate();
+      this.updateDrawInteraction();
+    },
+    getConfig(name, i) {
+      if (Array.isArray(this.config[name])) {
+        return this.config[name][i || 0];
+      } else {
+        return this.config[name];
+      }
+    },
+    getFeaturesFromConfig() {
+      const type_mapping = {
+        line: "LineString",
+        path: "LineString",
+        polygon: "Polygon",
+        rectangle: "Polygon",
+        point: "MultiPoint",
+        "multi-point": "MultiPoint"
+      };
+      let features = [];
+      const data = this.config.data;
+      if (
+        ["point", "multi-point", "MultiPoint"].includes(this.config.shape_type)
+      ) {
+        const feature = {};
+        feature.type = "Feature";
+        feature.geometry = {
+          type: "MultiPoint",
+          coordinates: data
+        };
+        feature.properties = {
+          label: this.getConfig("label"),
+          size: this.getConfig("size"),
+          edge_width: this.getConfig("edge_width"),
+          edge_color: this.getConfig("edge_color"),
+          face_color: this.getConfig("face_color")
+        };
+        features = [feature];
+      } else {
+        for (let i = 0; i < data.length; i++) {
+          const feature = {};
+          let shape_type = this.getConfig("shape_type", i);
+          // converting napari shape types
+          shape_type = type_mapping[shape_type] || shape_type;
+          feature.type = "Feature";
+          feature.geometry = {
+            type: shape_type,
+            coordinates: shape_type === "Polygon" ? [data[i]] : data[i]
+          };
+          feature.properties = {
+            label: this.getConfig("label", i),
+            size: this.getConfig("size"),
+            edge_width: this.getConfig("edge_width", i),
+            edge_color: this.getConfig("edge_color", i),
+            face_color: this.getConfig("face_color", i)
+          };
+          features.push(feature);
+        }
+      }
+
+      const geojson_data = {
+        type: "FeatureCollection",
+        features: features
+      };
+      const format = new GeoJSON();
+      return format.readFeatures(geojson_data);
+    },
     getLayer() {
       this.vector_source = new Vector();
       const vector_layer = new VectorLayer({
@@ -186,31 +378,8 @@ export default {
       vector_layer.setStyle(this.featureStyle);
       const data = this.config.data;
       if (data) {
-        let features = [];
-        for (let i = 0; i < data.length; i++) {
-          const feature = {};
-          let shape_type = this.config.shape_type[i];
-          shape_type = shape_type.charAt(0).toUpperCase() + shape_type.slice(1);
-          feature.type = "Feature";
-          feature.geometry = {
-            type: shape_type,
-            coordinates: [data[i]]
-          };
-          feature.properties = {
-            label: this.config.label[i],
-            edge_width: this.config.edge_width[i],
-            edge_color: this.config.edge_color[i],
-            face_color: this.config.face_color[i]
-          };
-          features.push(feature);
-        }
-        const geojson_data = {
-          type: "FeatureCollection",
-          features: features
-        };
-        const format = new GeoJSON();
-        const geojsonFeatures = format.readFeatures(geojson_data);
-        this.vector_source.addFeatures(geojsonFeatures);
+        const features = this.getFeaturesFromConfig();
+        this.vector_source.addFeatures(features);
       }
       vector_layer.getLayerAPI = this.getLayerAPI;
       return vector_layer;
@@ -253,6 +422,35 @@ export default {
         }
       };
     },
+    enableSelectInteraction() {
+      this.select = new Select({
+        wrapX: false
+      });
+      this.map.addInteraction(this.select);
+
+      this.modify = new Modify({
+        source: this.vector_source
+      });
+      this.modify.createVertices = true;
+      this.map.addInteraction(this.modify);
+
+      this.snap = new Snap({ source: this.vector_source });
+      this.map.addInteraction(this.snap);
+    },
+    disableSelectInteraction() {
+      if (this.select) {
+        this.map.removeInteraction(this.select);
+        this.select = null;
+      }
+      if (this.modify) {
+        this.map.removeInteraction(this.modify);
+        this.modify = null;
+      }
+      if (this.snap) {
+        this.map.removeInteraction(this.snap);
+        this.snap = null;
+      }
+    },
     updateDrawInteraction() {
       if (this.selected && this.visible && this.config.draw_enable) {
         this.setupDrawInteraction();
@@ -265,8 +463,9 @@ export default {
         this.map.removeInteraction(this.draw);
       }
     },
-    featureStyle(feature) {
+    featureStyle(feature, resolution) {
       const label = feature.get("label");
+      const size = feature.get("size");
       const edge_color = feature.get("edge_color");
       const edge_width = feature.get("edge_width");
       const face_color = feature.get("face_color");
@@ -290,9 +489,9 @@ export default {
           })
         }),
         image: new Circle({
-          radius: 7,
+          radius: size / Math.pow(resolution, 1 / 3),
           fill: new Fill({
-            color: "#ffcc33"
+            color: edge_color
           })
         })
       });
@@ -305,8 +504,45 @@ export default {
           this.map.removeInteraction(this.draw);
         }
         let draw_type = this.config.draw_shape_type;
+
         // title case
         draw_type = draw_type.charAt(0).toUpperCase() + draw_type.slice(1);
+
+        let geometryFunction;
+        if (draw_type === "Square") {
+          draw_type = "Circle";
+          geometryFunction = createRegularPolygon(4);
+        } else if (draw_type === "Rectangle") {
+          draw_type = "Circle";
+          geometryFunction = createBox();
+        } else if (draw_type === "Star") {
+          draw_type = "Circle";
+          geometryFunction = function(coordinates, geometry) {
+            var center = coordinates[0];
+            var last = coordinates[1];
+            var dx = center[0] - last[0];
+            var dy = center[1] - last[1];
+            var radius = Math.sqrt(dx * dx + dy * dy);
+            var rotation = Math.atan2(dy, dx);
+            var newCoordinates = [];
+            var numPoints = 12;
+            for (var i = 0; i < numPoints; ++i) {
+              var angle = rotation + (i * 2 * Math.PI) / numPoints;
+              var fraction = i % 2 === 0 ? 1 : 0.5;
+              var offsetX = radius * fraction * Math.cos(angle);
+              var offsetY = radius * fraction * Math.sin(angle);
+              newCoordinates.push([center[0] + offsetX, center[1] + offsetY]);
+            }
+            newCoordinates.push(newCoordinates[0].slice());
+            if (!geometry) {
+              geometry = new Polygon([newCoordinates]);
+            } else {
+              geometry.setCoordinates([newCoordinates]);
+            }
+            return geometry;
+          };
+        }
+
         const draw = new Draw({
           source: this.vector_source,
           type: draw_type,
@@ -319,12 +555,14 @@ export default {
               color: this.config.draw_edge_color,
               width: this.config.draw_edge_width
             })
-          })
+          }),
+          geometryFunction: geometryFunction
         });
         this.map.addInteraction(draw);
         draw.on("drawend", async evt => {
           const feature = evt.feature;
           feature.set("label", this.config.draw_label);
+          feature.set("size", this.config.draw_size);
           feature.set("edge_color", this.config.draw_edge_color);
           feature.set("edge_width", this.config.draw_edge_width);
           feature.set("face_color", this.config.draw_face_color);
@@ -338,4 +576,8 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style></style>
+<style>
+.vue-swatches__trigger {
+  border-style: solid;
+}
+</style>

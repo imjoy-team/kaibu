@@ -40,6 +40,7 @@ export async function setupImJoyAPI({ addLayer }) {
     async view_image(image_array, config) {
       config = config || {};
       config.type = config.type || "2d-image";
+      config.name = config.name || config.type;
       config.data = image_array;
       const layer = await addLayer(config);
       return layer.getLayerAPI();
@@ -54,7 +55,7 @@ export async function setupImJoyAPI({ addLayer }) {
     async add_points(point_array, config) {
       config = config || {};
       config.type = "vector";
-      config.data = [point_array];
+      config.data = point_array;
       config.shape_type = "Point";
       const layer = await addLayer(config);
       return layer.getLayerAPI();
