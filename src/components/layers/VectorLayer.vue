@@ -158,18 +158,18 @@
       <b-button
         v-if="vector_source"
         @click="$refs.file_input.click()"
-        icon-left="add"
+        icon-left="file-import"
       >
         Load
       </b-button>
       <b-button
         v-if="vector_source"
         @click="exportFeatures()"
-        icon-left="download"
+        icon-left="file-export"
       >
         Export
       </b-button>
-      <b-button v-if="vector_source" @click="clearFeatures()" icon-left="clear">
+      <b-button v-if="vector_source" @click="clearFeatures()" icon-left="close">
         Clear
       </b-button>
     </section>
@@ -361,7 +361,30 @@ export default {
         this.deleteDraw();
       } else if (event.code === "KeyZ" && (event.metaKey || event.ctrlKey)) {
         this.undoDraw();
+      } else if (event.code === "ArrowRight") {
+        if (event.metaKey || event.ctrlKey) this.moveSelected(1, 0);
+        else if (event.shiftKey) this.moveSelected(30, 0);
+        else this.moveSelected(10, 0);
+      } else if (event.code === "ArrowLeft") {
+        if (event.metaKey || event.ctrlKey) this.moveSelected(-1, 0);
+        else if (event.shiftKey) this.moveSelected(-30, 0);
+        else this.moveSelected(-10, 0);
+      } else if (event.code === "ArrowUp") {
+        if (event.metaKey || event.ctrlKey) this.moveSelected(0, 1);
+        else if (event.shiftKey) this.moveSelected(0, 30);
+        else this.moveSelected(0, 10);
+      } else if (event.code === "ArrowDown") {
+        if (event.metaKey || event.ctrlKey) this.moveSelected(0, -1);
+        else if (event.shiftKey) this.moveSelected(0, -30);
+        else this.moveSelected(0, -10);
       }
+    },
+    moveSelected(deltaX, deltaY) {
+      const features = this.select.getFeatures();
+
+      features.forEach(feature => {
+        feature.getGeometry().translate(deltaX, deltaY);
+      });
     },
     getConfig(name, i) {
       if (Array.isArray(this.config[name])) {
@@ -428,16 +451,23 @@ export default {
       return format.readFeatures(geojson_data);
     },
     getLayer() {
-      this.vector_source = new Vector();
+      const data = this.config.data;
+      if (typeof data === "string") {
+        this.vector_source = new Vector({
+          url: data,
+          format: new GeoJSON()
+        });
+      } else {
+        this.vector_source = new Vector();
+        const features = this.getFeaturesFromConfig();
+        this.vector_source.addFeatures(features);
+      }
+
       const vector_layer = new VectorLayer({
         source: this.vector_source
       });
       vector_layer.setStyle(this.featureStyle);
-      const data = this.config.data;
-      if (data) {
-        const features = this.getFeaturesFromConfig();
-        this.vector_source.addFeatures(features);
-      }
+
       vector_layer.getLayerAPI = this.getLayerAPI;
       this.vector_source.on("addfeature", event => {
         if (event.feature._undoing) {
