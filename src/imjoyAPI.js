@@ -56,7 +56,7 @@ export async function setupImJoyAPI({ addLayer }) {
       config = config || {};
       config.type = "vector";
       config.data = point_array;
-      config.shape_type = "Point";
+      config.shape_type = "MultiPoint";
       const layer = await addLayer(config);
       return layer.getLayerAPI();
     }
