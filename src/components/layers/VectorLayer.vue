@@ -290,7 +290,7 @@ export default {
       size: 7,
       // custom fields
       draw_enable: false,
-      draw_freehand: false,
+      draw_freehand: true,
       draw_label: null,
       draw_size: 7,
       draw_shape_type: "Polygon",
