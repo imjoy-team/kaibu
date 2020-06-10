@@ -146,6 +146,33 @@
         ></b-numberinput>
       </b-field>
     </section>
+    <br />
+    <section>
+      <input
+        ref="file_input"
+        @change="loadFeatures"
+        type="file"
+        style="display:none;"
+      />
+
+      <b-button
+        v-if="vector_source"
+        @click="$refs.file_input.click()"
+        icon-left="add"
+      >
+        Load
+      </b-button>
+      <b-button
+        v-if="vector_source"
+        @click="exportFeatures()"
+        icon-left="download"
+      >
+        Export
+      </b-button>
+      <b-button v-if="vector_source" @click="clearFeatures()" icon-left="clear">
+        Clear
+      </b-button>
+    </section>
   </div>
 </template>
 
@@ -168,6 +195,23 @@ function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
+}
+
+function saveFile(blob, filename) {
+  if (window.navigator.msSaveOrOpenBlob) {
+    window.navigator.msSaveOrOpenBlob(blob, filename);
+  } else {
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    const url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 0);
+  }
 }
 
 export default {
@@ -198,6 +242,7 @@ export default {
     return {
       layer: null,
       select: null,
+      vector_source: null,
       draw_edge_color: null,
       draw_face_color: null,
       draw_types: {
@@ -390,6 +435,9 @@ export default {
         _rintf: true,
         name: this.config.name,
         id: this.config.id,
+        clear() {
+          me.vector_source.clear(true);
+        },
         set_features(geojson_data) {
           const format = new GeoJSON();
           const geojsonFeatures = format.readFeatures(geojson_data);
@@ -421,6 +469,43 @@ export default {
           return routeFeatures;
         }
       };
+    },
+    clearFeatures() {
+      if (this.vector_source)
+        if (
+          window.confirm(
+            `Are you sure about removing all the features in this layer (${this.config.name})?`
+          )
+        ) {
+          this.vector_source.clear(true);
+        }
+    },
+    loadFeatures(event) {
+      const selected_file = event.target.files[0];
+      var reader = new FileReader();
+      reader.onload = event => {
+        const geojson_data = JSON.parse(event.target.result);
+        const format = new GeoJSON();
+        const geojsonFeatures = format.readFeatures(geojson_data);
+        this.vector_source.addFeatures(geojsonFeatures);
+      };
+      reader.onerror = event => {
+        reader.abort();
+        console.error(event);
+      };
+      reader.readAsText(selected_file);
+    },
+    exportFeatures(decimals) {
+      decimals = decimals === undefined ? 1 : decimals;
+      const allFeatures = this.vector_source.getFeatures();
+      const format = new GeoJSON();
+      const routeFeatures = format.writeFeaturesObject(allFeatures, {
+        decimals: decimals
+      });
+      const blob = new Blob([JSON.stringify(routeFeatures)], {
+        type: "text/plain;charset=utf-8"
+      });
+      saveFile(blob, this.config.name + "_" + this.config.id + ".json");
     },
     enableSelectInteraction() {
       this.select = new Select({
