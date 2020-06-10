@@ -243,6 +243,7 @@ export default {
       layer: null,
       select: null,
       vector_source: null,
+      draw_history: [],
       draw_edge_color: null,
       draw_face_color: null,
       draw_types: {
@@ -330,8 +331,11 @@ export default {
     }
     this.draw_edge_color = this.config.draw_edge_color;
     this.draw_face_color = this.config.draw_face_color;
+
+    document.addEventListener("keydown", this.keyHandler);
   },
   beforeDestroy() {
+    document.removeEventListener("keydown", this.keyHandler);
     if (this.layer) {
       this.removeDrawInteraction();
       this.map.removeLayer(this.layer);
@@ -350,6 +354,14 @@ export default {
       this.config.draw_shape_type = type;
       this.$forceUpdate();
       this.updateDrawInteraction();
+    },
+    keyHandler(event) {
+      if (!this.selected || !this.visible) return;
+      if (event.code === "Backspace" || event.code === "Delete") {
+        this.deleteDraw();
+      } else if (event.code === "KeyZ" && (event.metaKey || event.ctrlKey)) {
+        this.undoDraw();
+      }
     },
     getConfig(name, i) {
       if (Array.isArray(this.config[name])) {
@@ -427,7 +439,56 @@ export default {
         this.vector_source.addFeatures(features);
       }
       vector_layer.getLayerAPI = this.getLayerAPI;
+      this.vector_source.on("addfeature", event => {
+        if (event.feature._undoing) {
+          delete event.feature._undoing;
+        } else {
+          this.draw_history.push({ add: event.feature });
+        }
+      });
+      this.vector_source.on("removefeature", event => {
+        if (event.feature._undoing) {
+          delete event.feature._undoing;
+        } else {
+          this.draw_history.push({ remove: event.feature });
+        }
+      });
       return vector_layer;
+    },
+    deleteDraw() {
+      if (this.vector_source) {
+        if (this.select) {
+          const features = this.select.getFeatures();
+          if (features.length === 0) {
+            this.clearFeatures();
+          } else {
+            features.forEach(feature => {
+              this.vector_source.removeFeature(feature);
+              this.select.getFeatures().remove(feature);
+            });
+          }
+        } else {
+          this.clearFeatures();
+        }
+      }
+    },
+    async undoDraw() {
+      if (this.draw_history.length > 0) {
+        const action = this.draw_history.pop();
+        if (action.add) {
+          const allFeatures = this.vector_source.getFeatures();
+          allFeatures.forEach(feature => {
+            if (action.add === feature) {
+              feature._undoing = true;
+              this.vector_source.removeFeature(feature);
+              this.select.getFeatures().remove(feature);
+            }
+          });
+        } else if (action.remove) {
+          action.remove._undoing = true;
+          this.vector_source.addFeature(action.remove);
+        }
+      }
     },
     getLayerAPI() {
       const me = this;
