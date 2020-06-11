@@ -6,7 +6,7 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 ----
 ***WARNING: This is a work-in-progress repo, you are welcome to try it out but it's not ready for use in production yet.***
 
-## How to use it
+## How to use it?
 
 ### As standalone appliction: https://kaibu.org
 
@@ -15,24 +15,34 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 ### As ImJoy plugin: https://imjoy.io/#/app?plugin=https://kaibu.org
 
 ```python
+from imjoy import api
 import numpy as np
 
-image1 = np.random.randint(30, 255, [50,100], dtype='uint8')
-image2 = np.random.randint(0, 180, [100,50], dtype='uint8')
+class ImJoyPlugin():
+    async def setup(self):
+        pass
 
-# define two layers
-layers = [
-    {"name": "test image 1", "image": image1, "type": "itk-vtk"},
-    {"name": "test image 2", "image": image2, "type": "itk-vtk"}
-]
+    async def run(self, ctx):
+        viewer = await api.createWindow(src="http://127.0.0.1:8080/")
 
-# show the layers with Kaibu
-api.createWindow(type="Kaibu",
-                 src="https://kaibu.org/", 
-                 data={"layers": layers})
+        # create an random image
+        image = np.random.randint(0, 255, [500,500], dtype='uint8')
+        # view image
+        await viewer.view_image(image)
+        
+        # add polygons
+        points = np.random.randint(0, 500, [100, 2], dtype='uint16').tolist()
+        await viewer.add_shapes(points, shape_type="point")
+
+api.export(ImJoyPlugin())
 ```
 
 You can also try the above code in a Jupyter notebook on binder, [click here](https://mybinder.org/v2/gh/imjoy-team/imjoy-binder-image/master?filepath=imjoy-jupyter-tutorial.ipynb) to launch a notebook on Binder (may take a while to start).
+
+### In a Jupyter notebook
+Run `pip install imjoy-jupyter-extension`, then start the the Jupyter notebook. Then you can use the above plugin example in the notebook.
+
+You can also try the demo here: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/oeway/690c2e62311223ae93e644d542eb8949/master?filepath=Kaibu-jupyter-example.ipynb)
 
 ## Why Kaibu?
 
