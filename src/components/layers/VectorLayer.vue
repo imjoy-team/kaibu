@@ -457,10 +457,12 @@ export default {
           url: data,
           format: new GeoJSON()
         });
-      } else {
+      } else if (data) {
         this.vector_source = new Vector();
         const features = this.getFeaturesFromConfig();
         this.vector_source.addFeatures(features);
+      } else {
+        this.vector_source = new Vector();
       }
 
       const vector_layer = new VectorLayer({
@@ -494,7 +496,7 @@ export default {
           } else {
             features.forEach(feature => {
               this.vector_source.removeFeature(feature);
-              this.select.getFeatures().remove(feature);
+              features.remove(feature);
             });
           }
         } else {
@@ -511,7 +513,7 @@ export default {
             if (action.add === feature) {
               feature._undoing = true;
               this.vector_source.removeFeature(feature);
-              this.select.getFeatures().remove(feature);
+              if (this.select) this.select.getFeatures().remove(feature);
             }
           });
         } else if (action.remove) {

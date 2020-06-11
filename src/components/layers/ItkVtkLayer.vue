@@ -203,7 +203,7 @@ export default {
       else if (typeof this.config.data === "string")
         imageData = await convertImageUrl2Itk(this.config.data);
       else {
-        this.config.name = "example image";
+        this.config.name = this.config.type;
         this.config.data =
           "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
         imageData = await convertImageUrl2Itk(this.config.data);
