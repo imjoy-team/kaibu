@@ -30,14 +30,15 @@
             </div> -->
             <div class="field">
               <b-dropdown aria-role="list">
-                <button
-                  class="button is-primary"
+                <b-button
+                  class="is-primary"
                   slot="trigger"
                   slot-scope="{ active }"
+                  icon-left="layers-plus"
                 >
                   <span>+ Add layer</span>
                   <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
-                </button>
+                </b-button>
                 <input
                   ref="file_input"
                   @change="loadFiles($event)"
@@ -55,7 +56,8 @@
 
                 <b-dropdown-item
                   @click="newLayer(type)"
-                  v-for="(name, type) in layerTypes"
+                  v-for="(comp, type) in layerTypes"
+                  v-show="comp.show"
                   :key="type"
                   :value="type"
                   aria-role="listitem"
@@ -221,7 +223,7 @@ const components = {};
 const layerTypes = {};
 for (let c in layerComponents) {
   components[layerComponents[c].name] = layerComponents[c];
-  layerTypes[layerComponents[c].type] = layerComponents[c].name;
+  layerTypes[layerComponents[c].type] = layerComponents[c];
 }
 
 components["gallery"] = Gallery;
@@ -421,6 +423,10 @@ export default {
     },
     toggleVisible(layer) {
       this.$store.commit("toggleVisible", layer);
+      this.$nextTick(() => {
+        this.map.renderSync();
+      });
+
       this.$forceUpdate();
     },
     selectLayer(layer) {

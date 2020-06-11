@@ -129,6 +129,7 @@ function generateData3D() {
 export default {
   name: "itk-vtk-layer",
   type: "itk-vtk",
+  show: true,
   props: {
     map: {
       type: Map,

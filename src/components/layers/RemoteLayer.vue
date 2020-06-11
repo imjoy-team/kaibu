@@ -109,6 +109,7 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
 export default {
   name: "remote-layer",
   type: "remote",
+  show: false,
   props: {
     map: {
       type: Map,

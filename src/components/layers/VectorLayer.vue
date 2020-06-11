@@ -217,6 +217,7 @@ function saveFile(blob, filename) {
 export default {
   name: "vector-layer",
   type: "vector",
+  show: true,
   components: { VSwatches },
   props: {
     map: {
@@ -253,7 +254,7 @@ export default {
         Square: "vector-square",
         Circle: "vector-circle-variant",
         Star: "octagram-outline",
-        Point: "plus-circle-outline"
+        Point: "target"
       }
     };
   },
