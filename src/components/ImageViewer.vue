@@ -38,6 +38,20 @@
                   <span>+ Add layer</span>
                   <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
                 </button>
+                <input
+                  ref="file_input"
+                  @change="loadFiles($event)"
+                  type="file"
+                  style="display:none;"
+                  multiple
+                />
+                <b-dropdown-item
+                  @click="$refs.file_input.click()"
+                  value="file"
+                  aria-role="listitem"
+                  ><b-icon icon="file-import"></b-icon> From
+                  File(s)</b-dropdown-item
+                >
 
                 <b-dropdown-item
                   @click="newLayer(type)"
@@ -45,7 +59,7 @@
                   :key="type"
                   :value="type"
                   aria-role="listitem"
-                  >{{ type }}</b-dropdown-item
+                  ><b-icon icon="layers"></b-icon>{{ type }}</b-dropdown-item
                 >
               </b-dropdown>
               &nbsp;
@@ -80,7 +94,10 @@
                     <b-icon v-if="layer.visible" icon="eye-outline"></b-icon>
                     <b-icon v-else icon="eye-off-outline"></b-icon>
                   </button>
-                  {{ layer.name }}
+                  {{
+                    layer.name.slice(0, 30) +
+                      (layer.name.length > 30 ? "..." : "")
+                  }}
                   <b-dropdown
                     aria-role="list"
                     class="is-pulled-right"
@@ -299,6 +316,37 @@ export default {
     })
   },
   methods: {
+    loadFiles(event) {
+      const files = event.target.files;
+      const file_mapping = {
+        ".json": "vector",
+        ".jpg": "2d-image",
+        ".png": "2d-image",
+        ".tif": "itk-vtk"
+      };
+      for (let file of files) {
+        let detected = false;
+        for (let k of Object.keys(file_mapping)) {
+          if (file.name.endsWith(k)) {
+            this.addLayer({
+              type: file_mapping[k],
+              name: file.name,
+              data: file
+            });
+            detected = true;
+            break;
+          }
+        }
+        // fallback to itk-vtk
+        if (!detected) {
+          this.addLayer({
+            type: "itk-vtk",
+            name: file.name,
+            data: file
+          });
+        }
+      }
+    },
     goto(url) {
       window.open(url, "_blank");
     },
@@ -469,7 +517,7 @@ export default {
   min-height: 100%;
 }
 .sidebar-content {
-  width: 300px !important;
+  width: 320px !important;
   height: 100%;
   padding: 10px;
 }

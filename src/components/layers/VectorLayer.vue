@@ -150,7 +150,7 @@
     <section>
       <input
         ref="file_input"
-        @change="loadFeatures"
+        @change="loadFeatures($event.target.files[0])"
         type="file"
         style="display:none;"
       />
@@ -305,7 +305,7 @@ export default {
     }
     this.config.init = this.init;
 
-    if (this.config.data) {
+    if (Array.isArray(this.config.data)) {
       // make sure we have an array of properties
       for (let key of [
         "shape_type",
@@ -450,13 +450,16 @@ export default {
       const format = new GeoJSON();
       return format.readFeatures(geojson_data);
     },
-    getLayer() {
+    async getLayer() {
       const data = this.config.data;
       if (typeof data === "string") {
         this.vector_source = new Vector({
           url: data,
           format: new GeoJSON()
         });
+      } else if (data instanceof File) {
+        this.vector_source = new Vector();
+        await this.loadFeatures(data);
       } else if (data) {
         this.vector_source = new Vector();
         const features = this.getFeaturesFromConfig();
@@ -464,7 +467,6 @@ export default {
       } else {
         this.vector_source = new Vector();
       }
-
       const vector_layer = new VectorLayer({
         source: this.vector_source
       });
@@ -573,20 +575,23 @@ export default {
           this.vector_source.clear(true);
         }
     },
-    loadFeatures(event) {
-      const selected_file = event.target.files[0];
-      var reader = new FileReader();
-      reader.onload = event => {
-        const geojson_data = JSON.parse(event.target.result);
-        const format = new GeoJSON();
-        const geojsonFeatures = format.readFeatures(geojson_data);
-        this.vector_source.addFeatures(geojsonFeatures);
-      };
-      reader.onerror = event => {
-        reader.abort();
-        console.error(event);
-      };
-      reader.readAsText(selected_file);
+    loadFeatures(selected_file) {
+      return new Promise((resolve, reject) => {
+        if (!selected_file) reject("No file");
+        var reader = new FileReader();
+        reader.onload = event => {
+          const geojson_data = JSON.parse(event.target.result);
+          const format = new GeoJSON();
+          const geojsonFeatures = format.readFeatures(geojson_data);
+          this.vector_source.addFeatures(geojsonFeatures);
+          resolve();
+        };
+        reader.onerror = event => {
+          reader.abort();
+          console.error(event);
+        };
+        reader.readAsText(selected_file);
+      });
     },
     exportFeatures(decimals) {
       decimals = decimals === undefined ? 1 : decimals;

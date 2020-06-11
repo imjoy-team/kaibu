@@ -1,7 +1,7 @@
 <!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="image-layer">
-    <section>
+    <section v-if="layer">
       <b-field label="opacity">
         <b-slider
           v-model="config.opacity"
@@ -11,10 +11,10 @@
           :step="0.1"
         ></b-slider>
       </b-field>
-      <b-field v-if="config.climit" label="contrast limit">
+      <!-- <b-field v-if="config.climit" label="contrast limit">
         <b-slider v-model="config.climit" :min="1" :max="255" :step="0.5" ticks>
         </b-slider>
-      </b-field>
+      </b-field> -->
     </section>
   </div>
 </template>
@@ -24,6 +24,19 @@ import { Map } from "ol";
 import Static from "ol/source/ImageStatic";
 import ImageLayer from "ol/layer/Image";
 import Projection from "ol/proj/Projection";
+
+function file2base64(file) {
+  return new Promise((resolve, reject) => {
+    var reader = new FileReader();
+    reader.onload = event => {
+      resolve(url2base64(event.target.result));
+    };
+    reader.onerror = err => {
+      reject(err);
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 async function url2base64(url) {
   return new Promise((resolve, reject) => {
@@ -181,6 +194,8 @@ export default {
       const data = this.config.data;
       if (typeof data === "string") {
         imgObj = await url2base64(this.config.data);
+      } else if (data instanceof File) {
+        imgObj = await file2base64(this.config.data);
       } else if (
         data &&
         data.imageType &&
