@@ -34,9 +34,9 @@
                   class="is-primary"
                   slot="trigger"
                   slot-scope="{ active }"
-                  icon-left="layers-plus"
+                  icon-left="plus"
                 >
-                  <span>+ Add layer</span>
+                  <span>Add layer</span>
                   <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
                 </b-button>
                 <input
@@ -293,6 +293,7 @@ function debounce(func, wait, immediate) {
     if (callNow) func.apply(context, args);
   };
 }
+
 function is_touch_device() {
   return "ontouchstart" in window;
 }
