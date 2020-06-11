@@ -253,7 +253,7 @@ export default {
   data() {
     return {
       sortableOptions: {
-        delay: is_touch_device() ? 400 : null,
+        delay: is_touch_device() ? 100 : null,
         chosenClass: "is-primary",
         draggable: ".layer-item"
       },
