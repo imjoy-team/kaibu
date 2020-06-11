@@ -457,10 +457,12 @@ export default {
           url: data,
           format: new GeoJSON()
         });
-      } else {
+      } else if (data) {
         this.vector_source = new Vector();
         const features = this.getFeaturesFromConfig();
         this.vector_source.addFeatures(features);
+      } else {
+        this.vector_source = new Vector();
       }
 
       const vector_layer = new VectorLayer({
