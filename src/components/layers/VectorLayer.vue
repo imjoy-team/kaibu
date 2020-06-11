@@ -496,7 +496,7 @@ export default {
           } else {
             features.forEach(feature => {
               this.vector_source.removeFeature(feature);
-              this.select.getFeatures().remove(feature);
+              features.remove(feature);
             });
           }
         } else {
@@ -513,7 +513,7 @@ export default {
             if (action.add === feature) {
               feature._undoing = true;
               this.vector_source.removeFeature(feature);
-              this.select.getFeatures().remove(feature);
+              if (this.select) this.select.getFeatures().remove(feature);
             }
           });
         } else if (action.remove) {
