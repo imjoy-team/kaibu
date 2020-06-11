@@ -224,8 +224,18 @@ export default {
         !(this.config.data instanceof File)
       ) {
         let imageData;
-        if (typeof this.config.data === "object") imageData = this.config.data;
-        else if (typeof this.config.data === "string")
+        if (typeof this.config.data === "object") {
+          imageData = this.config.data;
+          if (imageData._rtype && imageData._rtype === "ndarray") {
+            imageData = itkVtkViewer.utils.ndarrayToItkImage(imageData);
+            // TODO: fix direction to be inline with Fiji
+            // if (imageData.imageType.dimension === 2) {
+            //   imageData.direction.data = [1, 0, 0, -1];
+            // } else if (imageData.imageType.dimension === 3) {
+            //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
+            // }
+          }
+        } else if (typeof this.config.data === "string")
           imageData = await convertImageUrl2Itk(this.config.data);
         // this.config.name = this.config.type;
         // this.config.data =
@@ -278,6 +288,7 @@ export default {
           extent = [0, 0, 100, 100];
         }
       }
+      if (!viewer) throw "Failed to load itk-vtk-viewer";
       this.config.name = this.config.name || this.config.type;
       const viewProxy = viewer.getViewProxy();
       const renderWindow = viewProxy.getRenderWindow();
