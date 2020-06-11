@@ -41,13 +41,15 @@ import Layer from "ol/layer/Layer";
 
 const itkVtkViewer = window.itkVtkViewer;
 
-var CanvasLayer = /*@__PURE__*/ (function(Layer) {
+const CanvasLayer = /*@__PURE__*/ (function(Layer) {
   function CanvasLayer(options) {
     options = options || {};
     Layer.call(this, options);
     this.viewerElement = document.createElement("div");
     this.viewerElement.classList.add("ol-layer");
     this.viewerElement.style.position = "absolute";
+    this.viewerElement.style.width = "100%";
+    this.viewerElement.style.height = "100%";
     this.sync_callback = options.sync_callback;
   }
 
@@ -64,7 +66,6 @@ var CanvasLayer = /*@__PURE__*/ (function(Layer) {
       this.sync_callback();
     }
     this.viewerElement.style.opacity = this.getOpacity();
-    this.viewerElement.style.width = "100%";
     return this.viewerElement; //return the viewer element
   };
 
