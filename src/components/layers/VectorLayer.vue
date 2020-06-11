@@ -3,7 +3,7 @@
   <div class="vector-layer">
     <section>
       <div class="block">
-        <b-tooltip label="Cursor" position="is-bottom">
+        <b-tooltip label="Cursor" position="is-top">
           <button
             :class="{ 'is-primary': !config.draw_enable && !select }"
             @click="
@@ -17,7 +17,7 @@
             <b-icon icon="cursor-default-outline" size="is-medium"> </b-icon>
           </button>
         </b-tooltip>
-        <b-tooltip label="Select/Modify" position="is-bottom">
+        <b-tooltip label="Select/Modify" position="is-top">
           <button
             :class="{ 'is-primary': !config.draw_enable && select }"
             @click="
@@ -31,7 +31,7 @@
             <b-icon icon="cursor-default" size="is-medium"> </b-icon>
           </button>
         </b-tooltip>
-        <b-tooltip label="Draw Mode" position="is-bottom">
+        <b-tooltip label="Draw Mode" position="is-top">
           <button
             :class="{ 'is-primary': config.draw_enable }"
             @click="
@@ -45,7 +45,7 @@
           </button>
         </b-tooltip>
         &nbsp;&nbsp; &nbsp;&nbsp;
-        <b-tooltip label="Freehand Mode" position="is-bottom">
+        <b-tooltip label="Freehand Mode" position="is-top">
           <button
             :disabled="!config.draw_enable"
             :class="{ 'is-primary': config.draw_freehand }"
@@ -59,7 +59,7 @@
             <b-icon icon="gesture"> </b-icon>
           </button>
         </b-tooltip>
-        <b-tooltip label="Edge Color" position="is-bottom">
+        <b-tooltip label="Edge Color" position="is-top">
           <v-swatches
             :disabled="!config.draw_enable"
             style="top: 10px;margin:1px;"
@@ -86,7 +86,7 @@
             popover-x="left"
           ></v-swatches>
         </b-tooltip>
-        <b-tooltip label="Face Color" position="is-bottom">
+        <b-tooltip label="Face Color" position="is-top">
           <v-swatches
             :disabled="!config.draw_enable"
             style="top: 10px;margin:1px;"
