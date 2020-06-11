@@ -94,7 +94,10 @@
                     <b-icon v-if="layer.visible" icon="eye-outline"></b-icon>
                     <b-icon v-else icon="eye-off-outline"></b-icon>
                   </button>
-                  {{ layer.name }}
+                  {{
+                    layer.name.slice(0, 30) +
+                      (layer.name.length > 30 ? "..." : "")
+                  }}
                   <b-dropdown
                     aria-role="list"
                     class="is-pulled-right"
@@ -514,7 +517,7 @@ export default {
   min-height: 100%;
 }
 .sidebar-content {
-  width: 300px !important;
+  width: 320px !important;
   height: 100%;
   padding: 10px;
 }
