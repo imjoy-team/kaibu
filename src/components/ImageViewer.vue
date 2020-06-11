@@ -415,17 +415,9 @@ export default {
 
         this.addLayer({
           type: "vector",
-          name: "example shape",
-          data: [
-            [
-              [17.3, 149.3],
-              [17.5, 400],
-              [800, 400],
-              [800, 150]
-            ]
-          ],
-          shape_type: "polygon",
-          edge_color: "#7957d5"
+          name: "shape vectors",
+          data:
+            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
       }
     }
