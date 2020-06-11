@@ -673,8 +673,12 @@ export default {
         }),
         image: new Circle({
           radius: size / Math.pow(resolution, 1 / 3),
+          stroke: new Stroke({
+            color: edge_color,
+            width: edge_width
+          }),
           fill: new Fill({
-            color: edge_color
+            color: face_color
           })
         })
       });

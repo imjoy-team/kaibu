@@ -228,6 +228,12 @@ export default {
           imageData = this.config.data;
           if (imageData._rtype && imageData._rtype === "ndarray") {
             imageData = itkVtkViewer.utils.ndarrayToItkImage(imageData);
+            // TODO: fix direction to be inline with Fiji
+            // if (imageData.imageType.dimension === 2) {
+            //   imageData.direction.data = [1, 0, 0, -1];
+            // } else if (imageData.imageType.dimension === 3) {
+            //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
+            // }
           }
         } else if (typeof this.config.data === "string")
           imageData = await convertImageUrl2Itk(this.config.data);

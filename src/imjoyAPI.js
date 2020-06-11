@@ -1,4 +1,25 @@
+import { reshape } from "mathjs";
+
 const itkVtkViewer = window.itkVtkViewer;
+
+const dtypeToTypedArray = {
+  int8: "Int8Array",
+  int16: "Int16Array",
+  int32: "Int32Array",
+  uint8: "Uint8Array",
+  uint16: "Uint16Array",
+  uint32: "Uint32Array",
+  float32: "Float32Array",
+  float64: "Float64Array",
+  array: "Array"
+};
+
+function toArray(data) {
+  if (Array.isArray(data)) return data;
+  if (data._rtype !== "ndarray") throw "Invalid input type: " + data._rtype;
+  const arraytype = eval(dtypeToTypedArray[data._rdtype]);
+  return reshape(Array.from(new arraytype(data._rvalue)), data._rshape);
+}
 
 export async function setupImJoyAPI({ addLayer }) {
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
@@ -43,14 +64,14 @@ export async function setupImJoyAPI({ addLayer }) {
     async add_shapes(shape_array, config) {
       config = config || {};
       config.type = "vector";
-      config.data = shape_array;
+      config.data = toArray(shape_array);
       const layer = await addLayer(config);
       return layer.getLayerAPI();
     },
     async add_points(point_array, config) {
       config = config || {};
       config.type = "vector";
-      config.data = point_array;
+      config.data = toArray(point_array);
       config.shape_type = "MultiPoint";
       const layer = await addLayer(config);
       return layer.getLayerAPI();
