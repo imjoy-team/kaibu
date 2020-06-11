@@ -21,7 +21,7 @@ function toArray(data) {
   return reshape(Array.from(new arraytype(data._rvalue)), data._rshape);
 }
 
-export async function setupImJoyAPI({ addLayer }) {
+export async function setupImJoyAPI({ addLayer, setUI }) {
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
     api_version: "0.2.3"
   });
@@ -75,6 +75,9 @@ export async function setupImJoyAPI({ addLayer }) {
       config.shape_type = "MultiPoint";
       const layer = await addLayer(config);
       return layer.getLayerAPI();
+    },
+    async set_ui(config) {
+      await setUI(config);
     }
   };
 

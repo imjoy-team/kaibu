@@ -344,7 +344,7 @@ export default {
   created() {},
   methods: {
     async init() {
-      this.layer = await this.getLayer();
+      this.layer = await this.setupLayer();
       this.map.addLayer(this.layer);
       this.updateDrawInteraction();
       this.$forceUpdate();
@@ -450,7 +450,7 @@ export default {
       const format = new GeoJSON();
       return format.readFeatures(geojson_data);
     },
-    async getLayer() {
+    async setupLayer() {
       const data = this.config.data;
       if (typeof data === "string") {
         this.vector_source = new Vector({

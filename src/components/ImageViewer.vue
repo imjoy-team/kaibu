@@ -86,6 +86,25 @@
               </b-dropdown>
             </div>
           </div>
+          <div v-if="customUI" class="block floating-buttons">
+            <b-menu-list :label="customUI.title || ''">
+              <b-tooltip
+                v-for="elm in customUI.elements"
+                :key="elm.label"
+                :label="elm.tooltip || elm.label"
+                position="is-bottom"
+              >
+                <button
+                  v-if="elm.type === 'button'"
+                  @click="elm.callback()"
+                  class="button"
+                >
+                  <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon
+                  >{{ elm.label }}
+                </button>
+              </b-tooltip>
+            </b-menu-list>
+          </div>
           <b-menu
             class="is-custom-mobile"
             @sorted="layerSorted()"
@@ -296,7 +315,8 @@ export default {
       showGallery: false,
       newLayerType: null,
       collections: null,
-      layerTypes: layerTypes
+      layerTypes: layerTypes,
+      customUI: null
     };
   },
   mounted() {
@@ -466,7 +486,10 @@ export default {
       this.$store.commit("setMap", map);
       // inside an iframe
       if (window.self !== window.top) {
-        setupImJoyAPI({ addLayer: this.addLayer });
+        setupImJoyAPI({
+          addLayer: this.addLayer,
+          setUI: this.setUI
+        });
       } else {
         this.addLayer({
           type: "itk-vtk",
@@ -481,6 +504,9 @@ export default {
             "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
       }
+    },
+    setUI(config) {
+      this.customUI = config;
     },
     screenshot() {
       // TODO: fix rendering for itk-vtk layer
