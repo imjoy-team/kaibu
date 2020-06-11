@@ -70,11 +70,20 @@
               >
                 Github
               </b-button>
-              <b-button
-                @click="goto('/#/about')"
-                icon-left="information-variant"
-              >
-              </b-button>
+
+              <b-dropdown aria-role="list" position="is-bottom-left">
+                <button class="button" slot="trigger">
+                  <b-icon icon="dots-vertical" slot="trigger"></b-icon>
+                </button>
+                <b-dropdown-item @click="screenshot()" aria-role="listitem"
+                  ><b-icon icon="camera"></b-icon> Screenshot</b-dropdown-item
+                >
+                <b-dropdown-item @click="goto('/#/about')" aria-role="listitem"
+                  ><b-icon icon="information-variant"></b-icon> About Kaibu v{{
+                    version
+                  }}</b-dropdown-item
+                >
+              </b-dropdown>
             </div>
           </div>
           <b-menu
@@ -95,8 +104,10 @@
                     <b-icon v-else icon="eye-off-outline"></b-icon>
                   </button>
                   {{
-                    layer.name.slice(0, 30) +
-                      (layer.name.length > 30 ? "..." : "")
+                    (layer.name &&
+                      layer.name.slice(0, 30) +
+                        (layer.name.length > 30 ? "..." : "")) ||
+                      "Unnamed Layer"
                   }}
                   <b-dropdown
                     aria-role="list"
@@ -175,6 +186,7 @@
 </template>
 
 <script>
+import { version } from "../../package.json";
 import "ol/ol.css";
 import { Map, View } from "ol";
 import { defaults } from "ol/interaction";
@@ -269,6 +281,7 @@ export default {
   directives: { sortable },
   data() {
     return {
+      version: version,
       sortableOptions: {
         delay: is_touch_device() ? 100 : null,
         chosenClass: "is-primary",
@@ -468,6 +481,56 @@ export default {
             "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
       }
+    },
+    screenshot() {
+      // TODO: fix rendering for itk-vtk layer
+      this.map.once("rendercomplete", () => {
+        var mapCanvas = document.createElement("canvas");
+        var size = this.map.getSize();
+        mapCanvas.width = size[0];
+        mapCanvas.height = size[1];
+        var mapContext = mapCanvas.getContext("2d");
+        Array.prototype.forEach.call(
+          document.querySelectorAll(".ol-layer canvas"),
+          canvas => {
+            if (canvas.width > 0) {
+              var opacity = canvas.parentNode.style.opacity;
+              mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
+              var transform = canvas.style.transform;
+              if (transform) {
+                // Get the transform parameters from the style's transform matrix
+                var matrix = transform
+                  .match(/^matrix\(([^(]*)\)$/)[1]
+                  .split(",")
+                  .map(Number);
+                // Apply the transform to the export map context
+                CanvasRenderingContext2D.prototype.setTransform.apply(
+                  mapContext,
+                  matrix
+                );
+              }
+
+              mapContext.drawImage(canvas, 0, 0);
+            }
+          }
+        );
+        if (navigator.msSaveBlob) {
+          // link download attribuute does not work on MS browsers
+          navigator.msSaveBlob(mapCanvas.msToBlob(), "kaibu-screenshot.png");
+        } else {
+          const a = document.createElement("a");
+          document.body.appendChild(a);
+          const url = mapCanvas.toDataURL();
+          a.href = url;
+          a.download = "kaibu-screenshot.png";
+          a.click();
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          }, 0);
+        }
+      });
+      this.map.renderSync();
     }
   }
 };
