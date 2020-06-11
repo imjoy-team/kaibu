@@ -180,7 +180,7 @@ export default {
   created() {},
   methods: {
     async init() {
-      this.layer = await this.getLayer();
+      this.layer = await this.setupLayer();
       this.map.addLayer(this.layer);
       this.$forceUpdate();
       return this.layer;
@@ -189,7 +189,7 @@ export default {
       if (this.layer) this.layer.setOpacity(this.config.opacity);
     },
     selectLayer() {},
-    async getLayer() {
+    async setupLayer() {
       let imgObj;
       const data = this.config.data;
       if (typeof data === "string") {
