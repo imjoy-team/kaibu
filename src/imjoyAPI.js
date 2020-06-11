@@ -17,11 +17,6 @@ export async function setupImJoyAPI({ addLayer }) {
     name: "itkimage",
     decoder: itkVtkViewer.utils.convertToItkImage
   });
-  api.registerCodec({
-    name: "ndarray",
-    decoder: itkVtkViewer.utils.ndarrayToItkImage
-  });
-
   const service_api = {
     setup() {
       api.log("Kaibu loaded successfully.");

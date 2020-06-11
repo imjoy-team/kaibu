@@ -224,8 +224,12 @@ export default {
         !(this.config.data instanceof File)
       ) {
         let imageData;
-        if (typeof this.config.data === "object") imageData = this.config.data;
-        else if (typeof this.config.data === "string")
+        if (typeof this.config.data === "object") {
+          imageData = this.config.data;
+          if (imageData._rtype && imageData._rtype === "ndarray") {
+            imageData = itkVtkViewer.utils.ndarrayToItkImage(imageData);
+          }
+        } else if (typeof this.config.data === "string")
           imageData = await convertImageUrl2Itk(this.config.data);
         // this.config.name = this.config.type;
         // this.config.data =
@@ -278,6 +282,7 @@ export default {
           extent = [0, 0, 100, 100];
         }
       }
+      if (!viewer) throw "Failed to load itk-vtk-viewer";
       this.config.name = this.config.name || this.config.type;
       const viewProxy = viewer.getViewProxy();
       const renderWindow = viewProxy.getRenderWindow();
