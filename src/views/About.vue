@@ -8,9 +8,7 @@
       <div class="hero-body">
         <div class="container">
           <h1 class="title">About Kaibu</h1>
-          <h2 class="subtitle">
-            https://kaibu.org
-          </h2>
+          <h2 class="subtitle">v{{ version }}</h2>
           <p>
             Kaibu is a web application for visualizing and annotating
             multi-dimensional images, built with
@@ -65,3 +63,14 @@
     </section>
   </div>
 </template>
+<script>
+import { version } from "../../package.json";
+export default {
+  name: "About",
+  data() {
+    return {
+      version
+    };
+  }
+};
+</script>
