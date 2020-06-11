@@ -148,28 +148,28 @@ export default {
   mounted() {
     this.config.climit = [4, 50];
     this.config.opacity = 1.0;
-    this.config.sliders = [
-      {
-        name: "Z",
-        min: 0,
-        max: 1000,
-        step: 1,
-        value: 3,
-        changed() {
-          console.log("z slider changed.");
-        }
-      },
-      {
-        name: "T",
-        min: 0,
-        max: 100,
-        step: 1,
-        value: 3,
-        changed() {
-          console.log("t slider changed.");
-        }
-      }
-    ];
+    // this.config.sliders = [
+    //   {
+    //     name: "Z",
+    //     min: 0,
+    //     max: 1000,
+    //     step: 1,
+    //     value: 3,
+    //     changed() {
+    //       console.log("z slider changed.");
+    //     }
+    //   },
+    //   {
+    //     name: "T",
+    //     min: 0,
+    //     max: 100,
+    //     step: 1,
+    //     value: 3,
+    //     changed() {
+    //       console.log("t slider changed.");
+    //     }
+    //   }
+    // ];
     this.config.init = this.init;
   },
   beforeDestroy() {
