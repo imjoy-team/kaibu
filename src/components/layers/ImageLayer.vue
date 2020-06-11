@@ -1,7 +1,7 @@
 <!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="image-layer">
-    <section>
+    <section v-if="layer">
       <b-field label="opacity">
         <b-slider
           v-model="config.opacity"
@@ -11,10 +11,10 @@
           :step="0.1"
         ></b-slider>
       </b-field>
-      <b-field v-if="config.climit" label="contrast limit">
+      <!-- <b-field v-if="config.climit" label="contrast limit">
         <b-slider v-model="config.climit" :min="1" :max="255" :step="0.5" ticks>
         </b-slider>
-      </b-field>
+      </b-field> -->
     </section>
   </div>
 </template>

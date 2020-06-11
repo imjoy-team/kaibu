@@ -1,11 +1,29 @@
 <!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="itk-vtk-layer">
+    <section>
+      <input
+        ref="file_input"
+        @change="resolveFiles && resolveFiles($event)"
+        type="file"
+        style="display:none;"
+        multiple
+      />
+
+      <b-button
+        v-if="showLoadButton"
+        @click="$refs.file_input.click()"
+        icon-left="file-import"
+      >
+        Load File(s)
+      </b-button>
+    </section>
+
     <section
       :id="'itk-vtk-control_' + config.id"
       style="position: relative;"
     ></section>
-    <b-field label="opacity">
+    <b-field v-if="layer" label="opacity">
       <b-slider
         v-model="config.opacity"
         @input="updateOpacity"
@@ -134,7 +152,9 @@ export default {
   data() {
     return {
       layer: null,
-      mode: "2D"
+      mode: "2D",
+      resolveFiles: null,
+      showLoadButton: false
     };
   },
   watch: {
@@ -198,34 +218,61 @@ export default {
 
       var itk_layer = new CanvasLayer();
 
-      let imageData;
-      if (typeof this.config.data === "object") imageData = this.config.data;
-      else if (typeof this.config.data === "string")
-        imageData = await convertImageUrl2Itk(this.config.data);
-      else {
-        this.config.name = this.config.type;
-        this.config.data =
-          "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
-        imageData = await convertImageUrl2Itk(this.config.data);
-      }
-      const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
-        imageData
-      );
-      const extent_3d = vtkImage.getExtent();
+      let viewer, extent, is2D;
+      if (this.config.data && !(this.config.data instanceof FileList)) {
+        let imageData;
+        if (typeof this.config.data === "object") imageData = this.config.data;
+        else if (typeof this.config.data === "string")
+          imageData = await convertImageUrl2Itk(this.config.data);
+        // this.config.name = this.config.type;
+        // this.config.data =
+        //   "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
+        // imageData = await convertImageUrl2Itk(this.config.data);
+        const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
+          imageData
+        );
+        const extent_3d = vtkImage.getExtent();
 
-      const dims = vtkImage.getDimensions();
-      const is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
-      const viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, {
-        viewerStyle: viewerStyle,
-        image: vtkImage,
-        pointSets: null,
-        geometries: null,
-        use2D: is2D,
-        rotate: false,
-        uiContainer: document.getElementById(
+        const dims = vtkImage.getDimensions();
+        is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
+        viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, {
+          viewerStyle: viewerStyle,
+          image: vtkImage,
+          pointSets: null,
+          geometries: null,
+          use2D: is2D,
+          rotate: false,
+          uiContainer: document.getElementById(
+            "itk-vtk-control_" + this.config.id
+          )
+        });
+        //TODO: udpate the extent when selecting different plane
+        extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+      } else {
+        let files;
+        if (this.config.data instanceof FileList) {
+          files = this.config.data;
+        } else files = await this.getFiles();
+        this.config.name = this.config.type;
+        const cfg = await itkVtkViewer.utils.readFiles({ files: files });
+        cfg.uiContainer = document.getElementById("toolbar");
+        is2D = cfg.use2D;
+        cfg.uiContainer = document.getElementById(
           "itk-vtk-control_" + this.config.id
-        )
-      });
+        );
+        viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, cfg);
+        const vs = viewer
+          .getViewProxy()
+          .getRenderer()
+          .getVolumes();
+        if (vs.length > 0) {
+          const extent_3d = vs[0].getBounds();
+          extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+        } else {
+          console.warn("Extent is not set.");
+          extent = [0, 0, 100, 100];
+        }
+      }
       const viewProxy = viewer.getViewProxy();
       const renderWindow = viewProxy.getRenderWindow();
       renderWindow.getViews()[0].initialize();
@@ -241,10 +288,18 @@ export default {
         viewer.setUserInterfaceCollapsed(false);
       }, 10);
       this.viewer = viewer;
-      //TODO: udpate the extent when selecting different plane
-      const extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
       this.$emit("update-extent", { id: this.config.id, extent: extent });
       return itk_layer;
+    },
+    getFiles() {
+      return new Promise(resolve => {
+        this.showLoadButton = true;
+        this.resolveFiles = event => {
+          resolve(event.target.files);
+          this.resolveFiles = null;
+          this.showLoadButton = false;
+        };
+      });
     },
     enableSync(itk_layer) {
       const view = this.interactor.getView();
@@ -259,7 +314,6 @@ export default {
       itk_layer.sync_callback = this.synchronizeVtkCoordinate;
 
       this.enableItkInteraction();
-      this.synchronizeVtkCoordinate();
       this.renderWindow.render();
     },
     disableSync(itk_layer) {

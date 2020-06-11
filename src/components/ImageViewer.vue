@@ -38,6 +38,19 @@
                   <span>+ Add layer</span>
                   <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
                 </button>
+                <input
+                  ref="file_input"
+                  @change="loadFiles($event)"
+                  type="file"
+                  style="display:none;"
+                  multiple
+                />
+                <b-dropdown-item
+                  @click="$refs.file_input.click()"
+                  value="file"
+                  aria-role="listitem"
+                  >From File(s)</b-dropdown-item
+                >
 
                 <b-dropdown-item
                   @click="newLayer(type)"
@@ -299,6 +312,14 @@ export default {
     })
   },
   methods: {
+    loadFiles(event) {
+      const files = event.target.files;
+      this.addLayer({
+        type: "itk-vtk",
+        name: files[0].name,
+        data: files
+      });
+    },
     goto(url) {
       window.open(url, "_blank");
     },
