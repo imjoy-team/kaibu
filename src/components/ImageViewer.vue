@@ -49,7 +49,8 @@
                   @click="$refs.file_input.click()"
                   value="file"
                   aria-role="listitem"
-                  >From File(s)</b-dropdown-item
+                  ><b-icon icon="file-import"></b-icon> From
+                  File(s)</b-dropdown-item
                 >
 
                 <b-dropdown-item
@@ -58,7 +59,7 @@
                   :key="type"
                   :value="type"
                   aria-role="listitem"
-                  >{{ type }}</b-dropdown-item
+                  ><b-icon icon="layers"></b-icon>{{ type }}</b-dropdown-item
                 >
               </b-dropdown>
               &nbsp;
@@ -314,11 +315,34 @@ export default {
   methods: {
     loadFiles(event) {
       const files = event.target.files;
-      this.addLayer({
-        type: "itk-vtk",
-        name: files[0].name,
-        data: files
-      });
+      const file_mapping = {
+        ".json": "vector",
+        ".jpg": "2d-image",
+        ".png": "2d-image",
+        ".tif": "itk-vtk"
+      };
+      for (let file of files) {
+        let detected = false;
+        for (let k of Object.keys(file_mapping)) {
+          if (file.name.endsWith(k)) {
+            this.addLayer({
+              type: file_mapping[k],
+              name: file.name,
+              data: file
+            });
+            detected = true;
+            break;
+          }
+        }
+        // fallback to itk-vtk
+        if (!detected) {
+          this.addLayer({
+            type: "itk-vtk",
+            name: file.name,
+            data: file
+          });
+        }
+      }
     },
     goto(url) {
       window.open(url, "_blank");

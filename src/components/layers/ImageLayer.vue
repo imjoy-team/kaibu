@@ -25,6 +25,19 @@ import Static from "ol/source/ImageStatic";
 import ImageLayer from "ol/layer/Image";
 import Projection from "ol/proj/Projection";
 
+function file2base64(file) {
+  return new Promise((resolve, reject) => {
+    var reader = new FileReader();
+    reader.onload = event => {
+      resolve(url2base64(event.target.result));
+    };
+    reader.onerror = err => {
+      reject(err);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 async function url2base64(url) {
   return new Promise((resolve, reject) => {
     var img = new Image();
@@ -181,6 +194,8 @@ export default {
       const data = this.config.data;
       if (typeof data === "string") {
         imgObj = await url2base64(this.config.data);
+      } else if (data instanceof File) {
+        imgObj = await file2base64(this.config.data);
       } else if (
         data &&
         data.imageType &&

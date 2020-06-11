@@ -18,11 +18,6 @@
         Load File(s)
       </b-button>
     </section>
-
-    <section
-      :id="'itk-vtk-control_' + config.id"
-      style="position: relative;"
-    ></section>
     <b-field v-if="layer" label="opacity">
       <b-slider
         v-model="config.opacity"
@@ -32,6 +27,10 @@
         :step="0.1"
       ></b-slider>
     </b-field>
+    <section
+      :id="'itk-vtk-control_' + config.id"
+      style="position: relative;"
+    ></section>
   </div>
 </template>
 
@@ -219,7 +218,11 @@ export default {
       var itk_layer = new CanvasLayer();
 
       let viewer, extent, is2D;
-      if (this.config.data && !(this.config.data instanceof FileList)) {
+      if (
+        this.config.data &&
+        !(this.config.data instanceof FileList) &&
+        !(this.config.data instanceof File)
+      ) {
         let imageData;
         if (typeof this.config.data === "object") imageData = this.config.data;
         else if (typeof this.config.data === "string")
@@ -250,10 +253,12 @@ export default {
         extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
       } else {
         let files;
-        if (this.config.data instanceof FileList) {
+        if (this.config.data instanceof File) {
+          files = [this.config.data];
+        } else if (this.config.data instanceof FileList) {
           files = this.config.data;
         } else files = await this.getFiles();
-        this.config.name = this.config.type;
+
         const cfg = await itkVtkViewer.utils.readFiles({ files: files });
         cfg.uiContainer = document.getElementById("toolbar");
         is2D = cfg.use2D;
@@ -273,6 +278,7 @@ export default {
           extent = [0, 0, 100, 100];
         }
       }
+      this.config.name = this.config.name || this.config.type;
       const viewProxy = viewer.getViewProxy();
       const renderWindow = viewProxy.getRenderWindow();
       renderWindow.getViews()[0].initialize();
