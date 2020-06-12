@@ -12,8 +12,12 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 
 ![Kaibu Screenshot](./public/static/img/kaibu-screenshot-1.png)
 
-### As ImJoy plugin: https://imjoy.io/#/app?plugin=https://kaibu.org
+### As ImJoy plugin: https://imjoy.io/#/app?plugin=https://kaibu.org/#/app
 
+
+You can use Kaibu in your ImJoy plugin, either in Javascript or Python,
+
+Here is an example in Python:
 ```python
 from imjoy import api
 import numpy as np
@@ -23,19 +27,29 @@ class ImJoyPlugin():
         pass
 
     async def run(self, ctx):
-        viewer = await api.createWindow(src="http://127.0.0.1:8080/")
+        viewer = await api.createWindow(src="https://kaibu.org/#/app")
 
-        # create an random image
-        image = np.random.randint(0, 255, [500,500], dtype='uint8')
-        # view image
-        await viewer.view_image(image)
+        # create a random image
+        image = np.random.randint(0, 255, [500, 500], dtype='uint8')
         
-        # add polygons
-        points = np.random.randint(0, 500, [100, 2], dtype='uint16').tolist()
-        await viewer.add_shapes(points, shape_type="point")
+        # or you can try if you also did `pip install imageio` and `import imageio`
+        # image = imageio.imread("https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg")
+
+        # view image
+        await viewer.view_image(image, type="itk-vtk", name="random pixels")
+        
+        # add polygon to a vector layer
+        triangle = np.array([[11, 13], [111, 113], [22, 246]], dtype='uint16')
+        await viewer.add_shapes([ triangle ], shape_type="polygon", edge_color="red", name="triangle")
+
+        # add points to a vector layer
+        points = np.random.randint(0, 500, [100, 2], dtype='uint16')
+        await viewer.add_points(points, face_color="purple", name="points")
 
 api.export(ImJoyPlugin())
 ```
+
+Currently we support `view_image`, `add_shapes` and `add_points`, the definition is mostly the same as [napari](https://napari.org/).
 
 You can also try the above code in a Jupyter notebook on binder, [click here](https://mybinder.org/v2/gh/imjoy-team/imjoy-binder-image/master?filepath=imjoy-jupyter-tutorial.ipynb) to launch a notebook on Binder (may take a while to start).
 
