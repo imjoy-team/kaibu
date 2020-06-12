@@ -25,10 +25,15 @@ function toArray(data) {
     typeof data === "boolean" ||
     data === null ||
     data === undefined ||
-    data instanceof ArrayBuffer ||
     data instanceof ArrayBufferView
   ) {
     return data;
+  }
+  if (data instanceof ArrayBuffer) {
+    return Array.from(new Uint8Array(data));
+  }
+  if (data instanceof ArrayBufferView) {
+    return Array.from(data);
   }
   if (Array.isArray(data)) return data.map(toArray);
   if (data.constructor === Object) {
