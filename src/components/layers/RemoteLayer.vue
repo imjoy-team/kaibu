@@ -50,7 +50,6 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
   };
 
   CanvasLayer.prototype.render = function render(frameState) {
-    debugger;
     this.viewerElement.style.opacity = this.getOpacity();
     if (!this._rendering) {
       this._rendering = true;
