@@ -23,16 +23,24 @@ class ImJoyPlugin():
         pass
 
     async def run(self, ctx):
-        viewer = await api.createWindow(src="http://127.0.0.1:8080/")
+        viewer = await api.createWindow(src="https://kaibu.org/")
 
-        # create an random image
-        image = np.random.randint(0, 255, [500,500], dtype='uint8')
-        # view image
-        await viewer.view_image(image)
+        # create a random image
+        image = np.random.randint(0, 255, [500, 500], dtype='uint8')
         
-        # add polygons
-        points = np.random.randint(0, 500, [100, 2], dtype='uint16').tolist()
-        await viewer.add_shapes(points, shape_type="point")
+        # or you can try if you also did `pip install imageio` and `import imageio`
+        # image = imageio.imread("https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg")
+
+        # view image
+        await viewer.view_image(image, type="itk-vtk", name="random pixels")
+        
+        # add polygon to a vector layer
+        triangle = np.array([[11, 13], [111, 113], [22, 246]], dtype='uint16')
+        await viewer.add_shapes(triangle, shape_type="polygon", edge_color="red", name="triangle")
+
+        # add points to a vector layer
+        points = np.random.randint(0, 500, [100, 2], dtype='uint16')
+        await viewer.add_points(points, face_color="purple", name="points")
 
 api.export(ImJoyPlugin())
 ```

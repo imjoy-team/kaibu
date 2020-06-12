@@ -15,7 +15,7 @@ const dtypeToTypedArray = {
 };
 
 function toArray(data) {
-  if (Array.isArray(data)) return data;
+  if (Array.isArray(data)) return data.map(toArray);
   if (data._rtype !== "ndarray") throw "Invalid input type: " + data._rtype;
   const arraytype = eval(dtypeToTypedArray[data._rdtype]);
   return reshape(Array.from(new arraytype(data._rvalue)), data._rshape);
