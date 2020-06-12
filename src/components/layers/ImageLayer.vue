@@ -115,6 +115,7 @@ function array2rgba(imageArr, ch, w, h) {
 export default {
   name: "image-layer",
   type: "2d-image",
+  show: false,
   props: {
     map: {
       type: Map,

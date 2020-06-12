@@ -217,6 +217,7 @@ function saveFile(blob, filename) {
 export default {
   name: "vector-layer",
   type: "vector",
+  show: true,
   components: { VSwatches },
   props: {
     map: {
@@ -253,7 +254,7 @@ export default {
         Square: "vector-square",
         Circle: "vector-circle-variant",
         Star: "octagram-outline",
-        Point: "plus-circle-outline"
+        Point: "target"
       }
     };
   },
@@ -753,7 +754,6 @@ export default {
           feature.set("edge_color", this.config.draw_edge_color);
           feature.set("edge_width", this.config.draw_edge_width);
           feature.set("face_color", this.config.draw_face_color);
-          console.log(this.config);
         });
         this.draw = draw;
       });
