@@ -12,7 +12,7 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 
 ![Kaibu Screenshot](./public/static/img/kaibu-screenshot-1.png)
 
-### As ImJoy plugin: https://imjoy.io/#/app?plugin=https://kaibu.org
+### As ImJoy plugin: https://imjoy.io/#/app?plugin=https://kaibu.org/#/app
 
 
 You can use Kaibu in your ImJoy plugin, either in Javascript or Python,
@@ -27,7 +27,7 @@ class ImJoyPlugin():
         pass
 
     async def run(self, ctx):
-        viewer = await api.createWindow(src="https://kaibu.org/")
+        viewer = await api.createWindow(src="https://kaibu.org/#/app")
 
         # create a random image
         image = np.random.randint(0, 255, [500, 500], dtype='uint8')
