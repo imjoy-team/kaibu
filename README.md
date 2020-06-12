@@ -1,6 +1,9 @@
 <a href="https://kaibu.org" target="_blank" ><img src="https://raw.githubusercontent.com/imjoy-team/kaibu/master/public/static/img/kaibu-banner.svg?sanitize=true" width="380" alt="Kaibu"></img>
 </a>
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gist/oeway/690c2e62311223ae93e644d542eb8949/master?filepath=Kaibu-jupyter-tutorial.ipynb)
+
+
 Kaibu is a web application for visualizing and annotating multi-dimensional images, built with [OpenLayers](https://openlayers.org/) and [itk-vtk-viewer](https://kitware.github.io/itk-vtk-viewer/).
 
 ----
@@ -51,12 +54,12 @@ api.export(ImJoyPlugin())
 
 Currently we support `view_image`, `add_shapes` and `add_points`, the definition is mostly the same as [napari](https://napari.org/).
 
-You can also try the above code in a Jupyter notebook on binder, [click here](https://mybinder.org/v2/gh/imjoy-team/imjoy-binder-image/master?filepath=imjoy-jupyter-tutorial.ipynb) to launch a notebook on Binder (may take a while to start).
+You can also try the above code in a Jupyter notebook on binder, [click here](https://mybinder.org/v2/gist/oeway/690c2e62311223ae93e644d542eb8949/master?filepath=Kaibu-jupyter-tutorial.ipynb) to launch a notebook on Binder (may take a while to start).
 
 ### In a Jupyter notebook
 Run `pip install imjoy-jupyter-extension`, then start the the Jupyter notebook. Then you can use the above plugin example in the notebook.
 
-You can also try the demo here: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/oeway/690c2e62311223ae93e644d542eb8949/master?filepath=Kaibu-jupyter-example.ipynb)
+You can try the demo on Binder here: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gist/oeway/690c2e62311223ae93e644d542eb8949/master?filepath=Kaibu-jupyter-tutorial.ipynb)
 
 ## Why Kaibu?
 
