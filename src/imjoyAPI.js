@@ -24,8 +24,7 @@ function toArray(data) {
     typeof data === "string" ||
     typeof data === "boolean" ||
     data === null ||
-    data === undefined ||
-    data instanceof ArrayBufferView
+    data === undefined
   ) {
     return data;
   }
@@ -37,15 +36,19 @@ function toArray(data) {
   }
   if (Array.isArray(data)) return data.map(toArray);
   if (data.constructor === Object) {
+    if (data._rtype) {
+      if (data._rtype !== "ndarray") throw "Invalid input type: " + data._rtype;
+      const arraytype = eval(dtypeToTypedArray[data._rdtype]);
+      return reshape(Array.from(new arraytype(data._rvalue)), data._rshape);
+    }
     const obj = {};
     Object.entries(data).forEach(arr => {
       obj[arr[0]] = toArray(arr[1]);
     });
     return obj;
+  } else {
+    throw new Error("Unsupported type conversion");
   }
-  if (data._rtype !== "ndarray") throw "Invalid input type: " + data._rtype;
-  const arraytype = eval(dtypeToTypedArray[data._rdtype]);
-  return reshape(Array.from(new arraytype(data._rvalue)), data._rshape);
 }
 
 export async function setupImJoyAPI({ addLayer, setUI }) {
