@@ -40,7 +40,7 @@ class ImJoyPlugin():
         
         # add polygon to a vector layer
         triangle = np.array([[11, 13], [111, 113], [22, 246]], dtype='uint16')
-        await viewer.add_shapes(triangle, shape_type="polygon", edge_color="red", name="triangle")
+        await viewer.add_shapes([ triangle ], shape_type="polygon", edge_color="red", name="triangle")
 
         # add points to a vector layer
         points = np.random.randint(0, 500, [100, 2], dtype='uint16')

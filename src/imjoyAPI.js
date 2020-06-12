@@ -14,8 +14,30 @@ const dtypeToTypedArray = {
   array: "Array"
 };
 
+const ArrayBufferView = Object.getPrototypeOf(
+  Object.getPrototypeOf(new Uint8Array())
+).constructor;
+
 function toArray(data) {
+  if (
+    typeof data === "number" ||
+    typeof data === "string" ||
+    typeof data === "boolean" ||
+    data === null ||
+    data === undefined ||
+    data instanceof ArrayBuffer ||
+    data instanceof ArrayBufferView
+  ) {
+    return data;
+  }
   if (Array.isArray(data)) return data.map(toArray);
+  if (data.constructor === Object) {
+    const obj = {};
+    Object.entries(data).map(arr => {
+      obj[arr[0]] = toArray(arr[1]);
+    });
+    return obj;
+  }
   if (data._rtype !== "ndarray") throw "Invalid input type: " + data._rtype;
   const arraytype = eval(dtypeToTypedArray[data._rdtype]);
   return reshape(Array.from(new arraytype(data._rvalue)), data._rshape);
