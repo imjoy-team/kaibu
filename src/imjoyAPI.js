@@ -33,7 +33,7 @@ function toArray(data) {
   if (Array.isArray(data)) return data.map(toArray);
   if (data.constructor === Object) {
     const obj = {};
-    Object.entries(data).map(arr => {
+    Object.entries(data).forEach(arr => {
       obj[arr[0]] = toArray(arr[1]);
     });
     return obj;
