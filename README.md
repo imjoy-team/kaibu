@@ -14,6 +14,10 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 
 ### As ImJoy plugin: https://imjoy.io/#/app?plugin=https://kaibu.org
 
+
+You can use Kaibu in your ImJoy plugin, either in Javascript or Python,
+
+Here is an example in Python:
 ```python
 from imjoy import api
 import numpy as np
@@ -44,6 +48,8 @@ class ImJoyPlugin():
 
 api.export(ImJoyPlugin())
 ```
+
+Currently we support `view_image`, `add_shapes` and `add_points`, the definition is mostly the same as [napari](https://napari.org/).
 
 You can also try the above code in a Jupyter notebook on binder, [click here](https://mybinder.org/v2/gh/imjoy-team/imjoy-binder-image/master?filepath=imjoy-jupyter-tutorial.ipynb) to launch a notebook on Binder (may take a while to start).
 
