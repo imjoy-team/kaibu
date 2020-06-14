@@ -45,7 +45,11 @@ export const store = new Vuex.Store({
               }
             });
         } else {
-          debugger;
+          if (config._promise) {
+            config._promise.reject(
+              "No init function found for layer: " + config.name
+            );
+          }
         }
       });
     }
