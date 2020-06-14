@@ -11,6 +11,12 @@
           :step="0.1"
         ></b-slider>
       </b-field>
+      <p
+        v-for="(sel, k) in config.viewerConfig.loaderSelection"
+        :key="sel.channel"
+      >
+        {{ sel.channel }}:{{ pixelValues[k] }}
+      </p>
     </section>
   </div>
 </template>
@@ -44,20 +50,20 @@ const defaultData = {
 };
 
 const defaultViewerConfig = {
-  sliders: [
+  sliderValues: [
     [1500, 20000],
     [1500, 20000],
     [1500, 20000],
     [1500, 20000]
   ],
-  colors: [
+  colorValues: [
     [0, 0, 255],
     [0, 255, 0],
     [255, 0, 0],
     [255, 255, 0]
   ],
-  isOn: [true, true, true, false],
-  selections: defaultData.selections,
+  channelIsOn: [true, true, true, false],
+  loaderSelection: defaultData.selections,
   initialViewState: defaultData.initialViewState || DEFAULT_VIEW_STATE,
   colormap: false,
   overview: {
@@ -122,7 +128,8 @@ export default {
   },
   data() {
     return {
-      layer: null
+      layer: null,
+      pixelValues: []
     };
   },
   watch: {
@@ -156,7 +163,17 @@ export default {
     selectLayer() {},
     async setupLayer() {
       const loader = await createZarrLoader(this.config.data);
-      return new CanvasLayer({ loader: loader, ...this.config.viewerConfig });
+      const hooks = {
+        handleValue: this.showPixelValues
+      };
+      return new CanvasLayer({
+        loader: loader,
+        hoverHooks: hooks,
+        ...this.config.viewerConfig
+      });
+    },
+    showPixelValues(values) {
+      this.pixelValues = values;
     }
   }
 };
