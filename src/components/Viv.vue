@@ -1,7 +1,6 @@
 <template>
   <div class="viv" style="height:100%;width:100%;">
     <react
-      :passedProps="passedProps"
       :component="component"
       :loader="options.loader"
       :sliderValues="options.sliders"
@@ -30,11 +29,6 @@ export default {
     };
   },
   components: { react: ReactWrapper },
-  computed: {
-    passedProps() {
-      return this.options;
-    }
-  },
   methods: {
     setPixelValues(event) {
       console.log("Pixel value", event);
