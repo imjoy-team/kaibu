@@ -3,15 +3,15 @@
     <react
       :component="component"
       :loader="options.loader"
-      :sliderValues="options.sliders"
-      :colorValues="options.colors"
-      :channelIsOn="options.isOn"
-      :loaderSelection="options.selections"
+      :sliderValues="options.sliderValues"
+      :colorValues="options.colorValues"
+      :channelIsOn="options.channelIsOn"
+      :loaderSelection="options.loaderSelection"
       :initialViewState="options.initialViewState"
       :colormap="options.colormap.length > 0 && options.colormap"
       :overview="options.overview"
       :overviewOn="options.overviewOn"
-      :hoverHooks="{ handleValue: setPixelValues }"
+      :hoverHooks="options.hoverHooks"
     />
   </div>
 </template>
