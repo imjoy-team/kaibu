@@ -8,7 +8,6 @@ import "buefy/dist/buefy.css";
 import { store } from "./store";
 
 Vue.use(Buefy);
-
 Vue.config.productionTip = false;
 
 new Vue({

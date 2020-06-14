@@ -499,17 +499,21 @@ export default {
         });
       } else {
         this.addLayer({
-          type: "itk-vtk",
-          name: "example image",
-          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+          type: "viv",
+          name: "example viv"
         });
+        // this.addLayer({
+        //   type: "itk-vtk",
+        //   name: "example image",
+        //   data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+        // });
 
-        this.addLayer({
-          type: "vector",
-          name: "shape vectors",
-          data:
-            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
-        });
+        // this.addLayer({
+        //   type: "vector",
+        //   name: "shape vectors",
+        //   data:
+        //     "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
+        // });
       }
     },
     setUI(config) {

@@ -18,7 +18,12 @@ export const store = new Vuex.Store({
           config
             .init()
             .then(layer => {
-              if (!layer) debugger;
+              if (!layer) {
+                if (config._add_layer_promise) {
+                  config._add_layer_promise.reject("failed to add layer");
+                }
+                return;
+              }
               layer.config = config;
               layer.setVisible(config.visible);
               layer.getLayerAPI = layer.getLayerAPI || function() {};
@@ -39,7 +44,11 @@ export const store = new Vuex.Store({
               }
             });
         } else {
-          debugger;
+          if (config._promise) {
+            config._promise.reject(
+              "No init function found for layer: " + config.name
+            );
+          }
         }
       });
     }
