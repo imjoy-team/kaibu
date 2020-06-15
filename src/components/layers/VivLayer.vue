@@ -84,6 +84,7 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
     const instance = new VivComponent({ propsData: { options: options } });
     instance.$mount();
     this.viewerElement.appendChild(instance.$el);
+    this.sync_callback = options.sync_callback;
   }
 
   if (Layer) CanvasLayer.__proto__ = Layer;
@@ -96,6 +97,9 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
 
   CanvasLayer.prototype.render = function render() {
     this.viewerElement.style.opacity = this.getOpacity();
+    if (this.sync_callback) {
+      this.sync_callback();
+    }
     return this.viewerElement;
   };
 
@@ -155,6 +159,12 @@ export default {
       this.layer = await this.setupLayer();
       this.map.addLayer(this.layer);
       this.$forceUpdate();
+      const view = this.map.getView();
+      view.setCenter([
+        this.config.viewerConfig.initialViewState.target[0],
+        -this.config.viewerConfig.initialViewState.target[1]
+      ]);
+      view.setZoom(-4);
       return this.layer;
     },
     updateOpacity() {
@@ -164,16 +174,46 @@ export default {
     async setupLayer() {
       const loader = await createZarrLoader(this.config.data);
       const hooks = {
-        handleValue: this.showPixelValues
+        handleValue: this.showPixelValues,
+        initVivView: this.updateVivView
       };
       return new CanvasLayer({
+        sync_callback: this.synchronizeVivCoordinate,
         loader: loader,
         hoverHooks: hooks,
+        viewStateHook: this.updateViewState,
         ...this.config.viewerConfig
       });
     },
     showPixelValues(values) {
       this.pixelValues = values;
+    },
+    updateViewState(viewId, viewState) {
+      const mapView = this.map.getView();
+      mapView.setCenter([viewState.target[0], viewState.target[1]]);
+      mapView.setZoom(viewState.zoom);
+    },
+    updateVivView({ deck }) {
+      this.deck = deck;
+    },
+    convertCoordinates(x, y) {
+      const deck = this.deck.current.deck;
+      const viewport = deck.layerManager.context.viewport;
+      const worldPosition = viewport.unproject([x, y, 0]);
+      const mapPosition = this.map.getCoordinateFromPixelInternal([x, y]);
+      return { mapPosition: mapPosition, worldPosition: worldPosition };
+    },
+    synchronizeVivCoordinate() {
+      const deck = this.deck.current.deck;
+      const center = this.map.getView().getCenter();
+      deck.setProps({
+        viewState: {
+          target: [center[0], -center[1]],
+          zoom: Math.log2(1 / this.map.getView().getResolution())
+        }
+      });
+      deck._drawLayers();
+      deck.redraw();
     }
   }
 };

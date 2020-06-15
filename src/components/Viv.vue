@@ -12,6 +12,8 @@
       :overview="options.overview"
       :overviewOn="options.overviewOn"
       :hoverHooks="options.hoverHooks"
+      :viewStateHook="options.viewStateHook"
+      :controller="false"
     />
   </div>
 </template>
