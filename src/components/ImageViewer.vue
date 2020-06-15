@@ -126,8 +126,8 @@
                   </button>
                   {{
                     (layer.name &&
-                      layer.name.slice(0, 30) +
-                        (layer.name.length > 30 ? "..." : "")) ||
+                      layer.name.slice(0, 22) +
+                        (layer.name.length > 22 ? "..." : "")) ||
                       "Unnamed Layer"
                   }}
                   <b-dropdown
@@ -462,8 +462,9 @@ export default {
         new View({
           projection: projection,
           center: getCenter(config.extent),
-          zoom: 1,
-          minZoom: -10
+          zoom: -3,
+          minZoom: -Infinity,
+          maxZoom: Infinity
         })
       );
     },
@@ -484,8 +485,9 @@ export default {
         view: new View({
           projection: projection,
           center: getCenter(extent),
-          zoom: 2,
-          maxZoom: 8
+          zoom: -3,
+          maxZoom: 100,
+          minZoom: -100
         })
       });
       this.$store.commit("setMap", map);
