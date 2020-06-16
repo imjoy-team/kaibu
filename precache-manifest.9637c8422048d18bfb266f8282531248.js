@@ -36,6 +36,14 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/robots.txt"
   },
   {
+    "revision": "775988ad49d750c57408f6eb6292181d",
+    "url": "/static/badge/open-with-kaibu.svg"
+  },
+  {
+    "revision": "dc15ce5eecbc5df8eea5cf2ff69078f0",
+    "url": "/static/badge/view-in-kaibu.svg"
+  },
+  {
     "revision": "a462849f5c969b8259f1fe7cdac837c4",
     "url": "/static/icons/android-icon-144x144.png"
   },
