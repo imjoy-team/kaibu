@@ -62,6 +62,13 @@ Run `pip install imjoy-jupyter-extension`, then start the the Jupyter notebook. 
 
 You can try the demo on Binder here: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gist/oeway/690c2e62311223ae93e644d542eb8949/master?filepath=Kaibu-jupyter-tutorial.ipynb)
 
+### Kaibu badges
+We provide two badges for you to add to your project:
+
+![](https://kaibu.org/static/badge/open-with-kaibu.svg)
+
+![](https://kaibu.org/static/badge/view-in-kaibu.svg)
+
 ## Why Kaibu?
 
 `Kaibu` is [a small island in Fiji](https://www.google.com/maps/place/Kaibu+Island/), and we name it to pay tribute to the open source image processing package [Fiji](https://fiji.sc/)/[ImageJ](https://imagej.net). Meanwhile, the layered design of Kaibu is inspired by [Napari](https://napari.org/) which is also named after an island. `Kaibu` in Chinese(开步), it means "to step forward", and yes, it is time to step forward with Kaibu!
