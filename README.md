@@ -65,9 +65,15 @@ You can try the demo on Binder here: [![Binder](https://mybinder.org/badge_logo.
 ### Kaibu badges
 We provide two badges for you to add to your project:
 
-![](https://kaibu.org/static/badge/open-with-kaibu.svg)
+![open with kaibu](https://kaibu.org/static/badge/open-with-kaibu.svg)
 
-![](https://kaibu.org/static/badge/view-in-kaibu.svg)
+![view in kaibu](https://kaibu.org/static/badge/view-in-kaibu.svg)
+
+```
+![open with kaibu](https://kaibu.org/static/badge/open-with-kaibu.svg)
+
+![view in kaibu](https://kaibu.org/static/badge/view-in-kaibu.svg)
+```
 
 ## Why Kaibu?
 
