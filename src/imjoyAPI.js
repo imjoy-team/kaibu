@@ -85,7 +85,7 @@ export async function setupImJoyAPI({ addLayer, setUI }) {
     add_layer: addLayer,
     async view_image(image_array, config) {
       config = config || {};
-      config.type = config.type || "2d-image";
+      config.type = config.type || "itk-vtk";
       config.name = config.name || config.type;
       config.data = image_array;
       const layer = await addLayer(config);
