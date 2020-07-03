@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -11,6 +11,7 @@
     "format": "prettier --write \"{src,tests}/**/**\""
   },
   "dependencies": {
+    "@mdi/font": "^5.3.45",
     "buefy": "^0.8.0",
     "core-js": "^3.6.5",
     "json-stringify-safe": "^5.0.1",
