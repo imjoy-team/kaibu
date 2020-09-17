@@ -15,15 +15,29 @@ export const store = new Vuex.Store({
       context.commit("addLayer", config);
       Vue.nextTick(() => {
         if (config.init) {
-          config.init().then(layer => {
-            if (!layer) debugger;
-            layer.config = config;
-            layer.setVisible(config.visible);
-            layer.getLayerAPI = layer.getLayerAPI || function() {};
-            context.commit("initialized", layer);
-            context.commit("setCurrentLayer", layer.config);
-            context.commit("sortLayers");
-          });
+          config
+            .init()
+            .then(layer => {
+              if (!layer) debugger;
+              layer.config = config;
+              layer.setVisible(config.visible);
+              layer.getLayerAPI = layer.getLayerAPI || function() {};
+              context.commit("initialized", layer);
+              context.commit("setCurrentLayer", layer.config);
+              context.commit("sortLayers");
+              if (config._add_layer_promise) {
+                config._add_layer_promise.resolve(layer.getLayerAPI());
+                delete config._add_layer_promise;
+              }
+            })
+            .catch(e => {
+              if (config._add_layer_promise) {
+                config._add_layer_promise.reject(e);
+                delete config._add_layer_promise;
+              } else {
+                console.error(e);
+              }
+            });
         } else {
           debugger;
         }

@@ -443,13 +443,7 @@ export default {
       return new Promise((resolve, reject) => {
         config.id = randId();
         this.$store.dispatch("addLayer", config);
-        setTimeout(() => {
-          if (this.layers[config.id]) {
-            resolve(this.layers[config.id]);
-          } else {
-            reject("Failed to add layer");
-          }
-        }, 0);
+        config._add_layer_promise = { resolve, reject };
       });
     },
     updateExtent(config) {
