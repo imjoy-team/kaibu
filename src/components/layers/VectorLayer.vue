@@ -580,11 +580,15 @@ export default {
         if (!selected_file) reject("No file");
         var reader = new FileReader();
         reader.onload = event => {
-          const geojson_data = JSON.parse(event.target.result);
-          const format = new GeoJSON();
-          const geojsonFeatures = format.readFeatures(geojson_data);
-          this.vector_source.addFeatures(geojsonFeatures);
-          resolve();
+          try {
+            const geojson_data = JSON.parse(event.target.result);
+            const format = new GeoJSON();
+            const geojsonFeatures = format.readFeatures(geojson_data);
+            this.vector_source.addFeatures(geojsonFeatures);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
         };
         reader.onerror = event => {
           reader.abort();
