@@ -18,7 +18,13 @@ export const store = new Vuex.Store({
           config
             .init()
             .then(layer => {
-              if (!layer) debugger;
+              if (!layer) {
+                if (config._add_layer_promise) {
+                  config._add_layer_promise.reject(
+                    "Failed to create layer for " + config.name
+                  );
+                }
+              }
               layer.config = config;
               layer.setVisible(config.visible);
               layer.getLayerAPI = layer.getLayerAPI || function() {};
