@@ -160,8 +160,18 @@ export default {
   },
   watch: {
     visible: function(newVal) {
-      this.layer.setVisible(newVal);
-      this.renderWindow.render();
+      // since setVisible(false) will remove the canvas entirely
+      // here we use opacity as an workaround for visibility setting
+      // this.layer.setVisible(newVal);
+      if (!newVal) {
+        this._lastOpacity = this.config.opacity;
+        this.config.opacity = 0;
+      } else {
+        if (this._lastOpacity) this.config.opacity = this._lastOpacity;
+        else this.config.opacity = 1;
+      }
+      this.layer.setOpacity(this.config.opacity);
+      this.$forceUpdate();
     }
   },
   mounted() {
