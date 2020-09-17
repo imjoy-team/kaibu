@@ -26,7 +26,7 @@ export const store = new Vuex.Store({
               context.commit("setCurrentLayer", layer.config);
               context.commit("sortLayers");
               if (config._add_layer_promise) {
-                config._add_layer_promise.resolve(layer.getLayerAPI());
+                config._add_layer_promise.resolve(layer);
                 delete config._add_layer_promise;
               }
             })
@@ -64,10 +64,10 @@ export const store = new Vuex.Store({
     },
     removeLayer(state, layer) {
       layer.selected = false;
-      const idx = state.layer_configs.indexOf(layer);
-      if (idx >= 0) {
-        state.layer_configs.splice(idx, 1);
-      }
+      state.layer_configs = state.layer_configs.filter(l => l.id !== layer.id);
+    },
+    clearLayers(state) {
+      state.layer_configs = [];
     },
     toggleVisible(state, layer) {
       layer.visible = !layer.visible;

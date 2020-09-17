@@ -198,6 +198,31 @@ export default {
       if (this.layer) this.layer.setOpacity(this.config.opacity);
     },
     selectLayer() {},
+    async normalizeImage(data) {
+      let imageData;
+      if (typeof data === "object") {
+        imageData = data;
+        if (imageData._rtype && imageData._rtype === "ndarray") {
+          imageData = itkVtkViewer.utils.ndarrayToItkImage(imageData);
+          // TODO: fix direction to be inline with Fiji
+          // if (imageData.imageType.dimension === 2) {
+          //   imageData.direction.data = [1, 0, 0, -1];
+          // } else if (imageData.imageType.dimension === 3) {
+          //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
+          // }
+        }
+      } else if (typeof data === "string")
+        imageData = await convertImageUrl2Itk(data);
+
+      // this.config.name = this.config.type;
+      // this.config.data =
+      //   "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
+      // imageData = await convertImageUrl2Itk(this.config.data);
+      const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
+        imageData
+      );
+      return vtkImage;
+    },
     async setupLayer() {
       const containerStyle = {
         position: "absolute",
@@ -225,27 +250,8 @@ export default {
         !(this.config.data instanceof FileList) &&
         !(this.config.data instanceof File)
       ) {
-        let imageData;
-        if (typeof this.config.data === "object") {
-          imageData = this.config.data;
-          if (imageData._rtype && imageData._rtype === "ndarray") {
-            imageData = itkVtkViewer.utils.ndarrayToItkImage(imageData);
-            // TODO: fix direction to be inline with Fiji
-            // if (imageData.imageType.dimension === 2) {
-            //   imageData.direction.data = [1, 0, 0, -1];
-            // } else if (imageData.imageType.dimension === 3) {
-            //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
-            // }
-          }
-        } else if (typeof this.config.data === "string")
-          imageData = await convertImageUrl2Itk(this.config.data);
-        // this.config.name = this.config.type;
-        // this.config.data =
-        //   "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
-        // imageData = await convertImageUrl2Itk(this.config.data);
-        const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
-          imageData
-        );
+        const vtkImage = await this.normalizeImage(this.config.data);
+
         const extent_3d = vtkImage.getExtent();
 
         const dims = vtkImage.getDimensions();
@@ -308,7 +314,21 @@ export default {
       }, 10);
       this.viewer = viewer;
       this.$emit("update-extent", { id: this.config.id, extent: extent });
+
+      itk_layer.getLayerAPI = this.getLayerAPI;
       return itk_layer;
+    },
+    getLayerAPI() {
+      const me = this;
+      return {
+        _rintf: true,
+        name: this.config.name,
+        id: this.config.id,
+        async set_image(image) {
+          const vtkImage = await me.normalizeImage(image);
+          me.viewer.setImage(vtkImage);
+        }
+      };
     },
     getFiles() {
       return new Promise(resolve => {

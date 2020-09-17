@@ -51,7 +51,12 @@ function toArray(data) {
   }
 }
 
-export async function setupImJoyAPI({ addLayer, setUI }) {
+export async function setupImJoyAPI({
+  addLayer,
+  removeLayer,
+  clearLayers,
+  setUI
+}) {
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
     api_version: "0.2.3"
   });
@@ -83,6 +88,8 @@ export async function setupImJoyAPI({ addLayer, setUI }) {
       }
     },
     add_layer: addLayer,
+    remove_layer: removeLayer,
+    clear_layers: clearLayers,
     async view_image(image_array, config) {
       config = config || {};
       config.type = config.type || "itk-vtk";

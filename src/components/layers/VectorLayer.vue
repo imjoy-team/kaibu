@@ -472,8 +472,6 @@ export default {
         source: this.vector_source
       });
       vector_layer.setStyle(this.featureStyle);
-
-      vector_layer.getLayerAPI = this.getLayerAPI;
       this.vector_source.on("addfeature", event => {
         if (event.feature._undoing) {
           delete event.feature._undoing;
@@ -488,6 +486,7 @@ export default {
           this.draw_history.push({ remove: event.feature });
         }
       });
+      vector_layer.getLayerAPI = this.getLayerAPI;
       return vector_layer;
     },
     deleteDraw() {

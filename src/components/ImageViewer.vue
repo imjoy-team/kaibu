@@ -422,6 +422,10 @@ export default {
       this.$store.commit("removeLayer", layer);
       this.$forceUpdate();
     },
+    clearLayers() {
+      this.$store.commit("clearLayers");
+      this.$forceUpdate();
+    },
     toggleVisible(layer) {
       this.$store.commit("toggleVisible", layer);
       this.$nextTick(() => {
@@ -489,6 +493,8 @@ export default {
       if (window.self !== window.top) {
         setupImJoyAPI({
           addLayer: this.addLayer,
+          removeLayer: this.removeLayer,
+          clearLayers: this.clearLayers,
           setUI: this.setUI
         });
       } else {
