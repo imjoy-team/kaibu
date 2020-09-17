@@ -53,7 +53,13 @@ class ImJoyPlugin():
 api.export(ImJoyPlugin())
 ```
 
-Currently we support `view_image`, `add_shapes` and `add_points`, the definition is mostly the same as [napari](https://napari.org/).
+Currently we support `view_image`, `add_image`, `add_shapes` and `add_points`, the definition is mostly the same as [napari](https://napari.org/).
+
+#### API functions
+
+The supported api functions are not documented at the moment, but please take a look at the implementation [here](https://github.com/imjoy-team/kaibu/blob/master/src/imjoyAPI.js) (search for the `service_api` object).
+
+Each layer object also exposes api, you can find the defined functions for [VectorLayer](https://github.com/imjoy-team/kaibu/blob/master/src/components/layers/VectorLayer.vue) and [ItkVtkLayer](https://github.com/imjoy-team/kaibu/blob/master/src/components/layers/ItkVtkLayer.vue)(search for the `getLayerAPI()` function).
 
 You can also try the above code in a Jupyter notebook on binder, [click here](https://mybinder.org/v2/gist/oeway/690c2e62311223ae93e644d542eb8949/master?filepath=Kaibu-jupyter-tutorial.ipynb) to launch a notebook on Binder (may take a while to start).
 
