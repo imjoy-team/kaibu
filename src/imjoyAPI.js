@@ -118,5 +118,6 @@ export async function setupImJoyAPI({
     }
   };
 
+  service_api.add_image = service_api.view_image;
   api.export(service_api);
 }
