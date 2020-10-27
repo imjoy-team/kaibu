@@ -88,25 +88,68 @@
               </b-dropdown>
             </div>
           </div>
-          <div v-if="customUI" class="block floating-buttons">
-            <b-menu-list :label="customUI.title || ''">
-              <b-tooltip
-                v-for="elm in customUI.elements"
-                :key="elm.label"
-                :label="elm.tooltip || elm.label"
-                position="is-bottom"
+          <b-tabs size="is-small" class="block">
+            <b-tab-item
+              v-for="(widget, id) in widgets"
+              :key="id"
+              :label="widget.title"
+              :icon="widget.icon"
+            >
+              <div
+                class="block floating-buttons"
+                v-if="!widget.type || widget.type === 'control'"
               >
-                <button
-                  v-if="elm.type === 'button'"
-                  @click="elm.callback()"
-                  class="button"
+                <b-tooltip
+                  v-for="elm in widget.elements"
+                  :key="elm.label"
+                  :label="elm.tooltip || elm.label"
+                  position="is-bottom"
                 >
-                  <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon
-                  >{{ elm.label }}
-                </button>
-              </b-tooltip>
-            </b-menu-list>
-          </div>
+                  <button
+                    v-if="elm.type === 'button'"
+                    @click="elm.callback()"
+                    class="button is-small"
+                    style="min-width:120px;"
+                  >
+                    <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon
+                    >{{ elm.label }}
+                  </button>
+                </b-tooltip>
+              </div>
+              <div
+                class="block floating-buttons"
+                v-else-if="widget.type === 'list'"
+              >
+                <b-menu-list>
+                  <b-menu-item
+                    v-for="elm in widget.elements"
+                    :key="elm.label"
+                    @click="widget.select_callback(elm)"
+                  >
+                    <template slot="label">
+                      {{ elm.label }}
+                    </template>
+                  </b-menu-item>
+                </b-menu-list>
+                <b-tooltip
+                  v-for="elm in widget.elements"
+                  :key="elm.label"
+                  :label="elm.tooltip || elm.label"
+                  position="is-bottom"
+                >
+                  <button
+                    v-if="elm.type === 'button'"
+                    @click="elm.callback()"
+                    class="button is-small"
+                    style="min-width:120px;"
+                  >
+                    <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon
+                    >{{ elm.label }}
+                  </button>
+                </b-tooltip>
+              </div>
+            </b-tab-item>
+          </b-tabs>
           <b-menu
             class="is-custom-mobile"
             @sorted="layerSorted()"
@@ -149,7 +192,6 @@
           </b-menu>
 
           <hr class="solid" />
-
           <div class="block" v-show="currentLayer" style="min-height: 150px;">
             <b-menu-list label="Properties">
               <component
@@ -319,7 +361,7 @@ export default {
       newLayerType: null,
       collections: null,
       layerTypes: layerTypes,
-      customUI: null
+      widgets: {}
     };
   },
   mounted() {
@@ -495,6 +537,7 @@ export default {
           addLayer: this.addLayer,
           removeLayer: this.removeLayer,
           clearLayers: this.clearLayers,
+          addWidget: this.addWidget,
           setUI: this.setUI
         });
       } else {
@@ -512,8 +555,13 @@ export default {
         });
       }
     },
+    addWidget(config) {
+      config.title = config.title || "default";
+      this.widgets[config.title] = config;
+    },
     setUI(config) {
-      this.customUI = config;
+      config.title = config.title || "default";
+      this.widgets[config.title] = config;
     },
     screenshot() {
       // TODO: fix rendering for itk-vtk layer
@@ -623,7 +671,7 @@ export default {
 /* Solid border */
 hr.solid {
   margin-top: 10px;
-  border-top: 2px solid #ccc5c5;
+  border-top: 1px solid #ccc5c553;
   margin-bottom: 15px;
 }
 
