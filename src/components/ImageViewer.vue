@@ -1,6 +1,12 @@
 <template>
   <div class="sidebar-page">
     <section class="sidebar-layout">
+      <div class="lds-ellipsis" v-show="loading">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
       <b-sidebar
         :position="position"
         :fullheight="true"
@@ -24,7 +30,7 @@
             </button>
           </div>
 
-          <div class="block">
+          <div class="block" v-if="mode == 'full'">
             <!-- <div class="field">
               <b-switch v-model="showGallery">Gallery</b-switch>
             </div> -->
@@ -92,62 +98,14 @@
             <b-tab-item
               v-for="(widget, id) in widgets"
               :key="id"
-              :label="widget.title"
+              :label="widget.name"
               :icon="widget.icon"
             >
-              <div
-                class="block floating-buttons"
-                v-if="!widget.type || widget.type === 'control'"
-              >
-                <b-tooltip
-                  v-for="elm in widget.elements"
-                  :key="elm.label"
-                  :label="elm.tooltip || elm.label"
-                  position="is-bottom"
-                >
-                  <button
-                    v-if="elm.type === 'button'"
-                    @click="elm.callback()"
-                    class="button is-small"
-                    style="min-width:120px;"
-                  >
-                    <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon
-                    >{{ elm.label }}
-                  </button>
-                </b-tooltip>
-              </div>
-              <div
-                class="block floating-buttons"
-                v-else-if="widget.type === 'list'"
-              >
-                <b-menu-list>
-                  <b-menu-item
-                    v-for="elm in widget.elements"
-                    :key="elm.label"
-                    @click="widget.select_callback(elm)"
-                  >
-                    <template slot="label">
-                      {{ elm.label }}
-                    </template>
-                  </b-menu-item>
-                </b-menu-list>
-                <b-tooltip
-                  v-for="elm in widget.elements"
-                  :key="elm.label"
-                  :label="elm.tooltip || elm.label"
-                  position="is-bottom"
-                >
-                  <button
-                    v-if="elm.type === 'button'"
-                    @click="elm.callback()"
-                    class="button is-small"
-                    style="min-width:120px;"
-                  >
-                    <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon
-                    >{{ elm.label }}
-                  </button>
-                </b-tooltip>
-              </div>
+              <component
+                :is="widgetTypes[widget.type]"
+                @loading="loading = $event"
+                :config="widget"
+              />
             </b-tab-item>
           </b-tabs>
           <b-menu
@@ -201,6 +159,7 @@
                 :ref="'layer_' + layer.id"
                 :key="layer.id"
                 :is="layerTypes[layer.type]"
+                @loading="loading = $event"
                 :selected="layer.selected"
                 :visible="layer.visible"
                 :map="map"
@@ -256,6 +215,7 @@ import { defaults } from "ol/interaction";
 import { randId } from "../utils";
 import Gallery from "@/components/Gallery";
 import * as layerComponents from "@/components/layers";
+import * as widgetComponents from "@/components/widgets";
 import { Projection } from "ol/proj";
 import { getCenter } from "ol/extent";
 import { mapState } from "vuex";
@@ -266,6 +226,12 @@ const layerTypes = {};
 for (let c in layerComponents) {
   components[layerComponents[c].name] = layerComponents[c];
   layerTypes[layerComponents[c].type] = layerComponents[c];
+}
+
+const widgetTypes = {};
+for (let c in widgetComponents) {
+  components[widgetComponents[c].name] = widgetComponents[c];
+  widgetTypes[widgetComponents[c].type] = widgetComponents[c];
 }
 
 components["gallery"] = Gallery;
@@ -345,6 +311,7 @@ export default {
   directives: { sortable },
   data() {
     return {
+      mode: "full",
       version: version,
       sortableOptions: {
         delay: is_touch_device() ? 100 : null,
@@ -360,8 +327,10 @@ export default {
       showGallery: false,
       newLayerType: null,
       collections: null,
-      layerTypes: layerTypes,
-      widgets: {}
+      layerTypes,
+      widgetTypes,
+      widgets: {},
+      loading: false
     };
   },
   mounted() {
@@ -424,6 +393,10 @@ export default {
           });
         }
       }
+    },
+    setMode(mode) {
+      this.mode = mode;
+      this.$forceUpdate();
     },
     goto(url) {
       window.open(url, "_blank");
@@ -538,7 +511,8 @@ export default {
           removeLayer: this.removeLayer,
           clearLayers: this.clearLayers,
           addWidget: this.addWidget,
-          setUI: this.setUI
+          setLoader: this.setLoader,
+          setMode: this.setMode
         });
       } else {
         this.addLayer({
@@ -555,13 +529,22 @@ export default {
         });
       }
     },
-    addWidget(config) {
-      config.title = config.title || "default";
-      this.widgets[config.title] = config;
+    setLoader(enable) {
+      this.loading = enable;
+      this.$forceUpdate();
     },
-    setUI(config) {
-      config.title = config.title || "default";
-      this.widgets[config.title] = config;
+    addWidget(config) {
+      return new Promise((resolve, reject) => {
+        config.name = config.name || "default";
+        if (!config.type) {
+          reject("Please specify a widget type");
+          return;
+        }
+        config._resolve = resolve;
+        config._reject = reject;
+        this.widgets[config.name] = config;
+        this.$forceUpdate();
+      });
     },
     screenshot() {
       // TODO: fix rendering for itk-vtk layer
@@ -624,6 +607,10 @@ export default {
 #map {
   height: 100%;
   position: fixed;
+}
+.tab-content {
+  background: white;
+  max-height: 400px;
 }
 .slider-container {
   padding-left: 10px;
@@ -722,5 +709,80 @@ svg {
 
 .ol-zoom {
   top: 50px;
+}
+
+.ol-control button {
+  background: #5e0ae680 !important;
+}
+
+.lds-ellipsis {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  top: calc(50% - 70px);
+  left: 50%;
+  z-index: 9999;
+  transform: translate(-50%, 0);
+}
+
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #7957d5;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(0);
+  }
+}
+
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(24px, 0);
+  }
 }
 </style>

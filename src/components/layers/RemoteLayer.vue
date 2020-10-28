@@ -1,4 +1,3 @@
-<!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="itk-vtk-layer">
     <section
