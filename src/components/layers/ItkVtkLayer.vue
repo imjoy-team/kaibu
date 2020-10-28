@@ -1,4 +1,3 @@
-<!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="itk-vtk-layer">
     <section>
@@ -287,23 +286,28 @@ export default {
           files = this.config.data;
         } else files = await this.getFiles();
 
-        const cfg = await itkVtkViewer.utils.readFiles({ files: files });
-        cfg.uiContainer = document.getElementById("toolbar");
-        is2D = cfg.use2D;
-        cfg.uiContainer = document.getElementById(
-          "itk-vtk-control_" + this.config.id
-        );
-        viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, cfg);
-        const vs = viewer
-          .getViewProxy()
-          .getRenderer()
-          .getVolumes();
-        if (vs.length > 0) {
-          const extent_3d = vs[0].getBounds();
-          extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
-        } else {
-          console.warn("Extent is not set.");
-          extent = [0, 0, 100, 100];
+        try {
+          this.$emit("loading", true);
+          const cfg = await itkVtkViewer.utils.readFiles({ files: files });
+          cfg.uiContainer = document.getElementById("toolbar");
+          is2D = cfg.use2D;
+          cfg.uiContainer = document.getElementById(
+            "itk-vtk-control_" + this.config.id
+          );
+          viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, cfg);
+          const vs = viewer
+            .getViewProxy()
+            .getRenderer()
+            .getVolumes();
+          if (vs.length > 0) {
+            const extent_3d = vs[0].getBounds();
+            extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+          } else {
+            console.warn("Extent is not set.");
+            extent = [0, 0, 100, 100];
+          }
+        } finally {
+          this.$emit("loading", false);
         }
       }
       if (!viewer) throw "Failed to load itk-vtk-viewer";

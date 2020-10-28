@@ -1,4 +1,3 @@
-<!-- taken from https://vuejsexamples.com/responsive-image-content-comparison-slider-built-with-vue/ -->
 <template>
   <div class="image-layer">
     <section v-if="layer">

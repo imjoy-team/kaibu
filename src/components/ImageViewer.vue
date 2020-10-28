@@ -1,6 +1,12 @@
 <template>
   <div class="sidebar-page">
     <section class="sidebar-layout">
+      <div class="lds-ellipsis" v-show="loading">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
       <b-sidebar
         :position="position"
         :fullheight="true"
@@ -24,7 +30,7 @@
             </button>
           </div>
 
-          <div class="block">
+          <div class="block" v-if="mode == 'full'">
             <!-- <div class="field">
               <b-switch v-model="showGallery">Gallery</b-switch>
             </div> -->
@@ -88,25 +94,20 @@
               </b-dropdown>
             </div>
           </div>
-          <div v-if="customUI" class="block floating-buttons">
-            <b-menu-list :label="customUI.title || ''">
-              <b-tooltip
-                v-for="elm in customUI.elements"
-                :key="elm.label"
-                :label="elm.tooltip || elm.label"
-                position="is-bottom"
-              >
-                <button
-                  v-if="elm.type === 'button'"
-                  @click="elm.callback()"
-                  class="button"
-                >
-                  <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon
-                  >{{ elm.label }}
-                </button>
-              </b-tooltip>
-            </b-menu-list>
-          </div>
+          <b-tabs size="is-small" class="block">
+            <b-tab-item
+              v-for="(widget, id) in widgets"
+              :key="id"
+              :label="widget.name"
+              :icon="widget.icon"
+            >
+              <component
+                :is="widgetTypes[widget.type]"
+                @loading="loading = $event"
+                :config="widget"
+              />
+            </b-tab-item>
+          </b-tabs>
           <b-menu
             class="is-custom-mobile"
             @sorted="layerSorted()"
@@ -149,7 +150,6 @@
           </b-menu>
 
           <hr class="solid" />
-
           <div class="block" v-show="currentLayer" style="min-height: 150px;">
             <b-menu-list label="Properties">
               <component
@@ -159,6 +159,7 @@
                 :ref="'layer_' + layer.id"
                 :key="layer.id"
                 :is="layerTypes[layer.type]"
+                @loading="loading = $event"
                 :selected="layer.selected"
                 :visible="layer.visible"
                 :map="map"
@@ -214,6 +215,7 @@ import { defaults } from "ol/interaction";
 import { randId } from "../utils";
 import Gallery from "@/components/Gallery";
 import * as layerComponents from "@/components/layers";
+import * as widgetComponents from "@/components/widgets";
 import { Projection } from "ol/proj";
 import { getCenter } from "ol/extent";
 import { mapState } from "vuex";
@@ -224,6 +226,12 @@ const layerTypes = {};
 for (let c in layerComponents) {
   components[layerComponents[c].name] = layerComponents[c];
   layerTypes[layerComponents[c].type] = layerComponents[c];
+}
+
+const widgetTypes = {};
+for (let c in widgetComponents) {
+  components[widgetComponents[c].name] = widgetComponents[c];
+  widgetTypes[widgetComponents[c].type] = widgetComponents[c];
 }
 
 components["gallery"] = Gallery;
@@ -303,6 +311,7 @@ export default {
   directives: { sortable },
   data() {
     return {
+      mode: "full",
       version: version,
       sortableOptions: {
         delay: is_touch_device() ? 100 : null,
@@ -318,8 +327,10 @@ export default {
       showGallery: false,
       newLayerType: null,
       collections: null,
-      layerTypes: layerTypes,
-      customUI: null
+      layerTypes,
+      widgetTypes,
+      widgets: {},
+      loading: false
     };
   },
   mounted() {
@@ -382,6 +393,10 @@ export default {
           });
         }
       }
+    },
+    setMode(mode) {
+      this.mode = mode;
+      this.$forceUpdate();
     },
     goto(url) {
       window.open(url, "_blank");
@@ -495,7 +510,9 @@ export default {
           addLayer: this.addLayer,
           removeLayer: this.removeLayer,
           clearLayers: this.clearLayers,
-          setUI: this.setUI
+          addWidget: this.addWidget,
+          setLoader: this.setLoader,
+          setMode: this.setMode
         });
       } else {
         this.addLayer({
@@ -512,8 +529,22 @@ export default {
         });
       }
     },
-    setUI(config) {
-      this.customUI = config;
+    setLoader(enable) {
+      this.loading = enable;
+      this.$forceUpdate();
+    },
+    addWidget(config) {
+      return new Promise((resolve, reject) => {
+        config.name = config.name || "default";
+        if (!config.type) {
+          reject("Please specify a widget type");
+          return;
+        }
+        config._resolve = resolve;
+        config._reject = reject;
+        this.widgets[config.name] = config;
+        this.$forceUpdate();
+      });
     },
     screenshot() {
       // TODO: fix rendering for itk-vtk layer
@@ -577,6 +608,10 @@ export default {
   height: 100%;
   position: fixed;
 }
+.tab-content {
+  background: white;
+  max-height: 400px;
+}
 .slider-container {
   padding-left: 10px;
   padding-right: 10px;
@@ -623,7 +658,7 @@ export default {
 /* Solid border */
 hr.solid {
   margin-top: 10px;
-  border-top: 2px solid #ccc5c5;
+  border-top: 1px solid #ccc5c553;
   margin-bottom: 15px;
 }
 
@@ -674,5 +709,80 @@ svg {
 
 .ol-zoom {
   top: 50px;
+}
+
+.ol-control button {
+  background: #5e0ae680 !important;
+}
+
+.lds-ellipsis {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  top: calc(50% - 70px);
+  left: 50%;
+  z-index: 9999;
+  transform: translate(-50%, 0);
+}
+
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #7957d5;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(0);
+  }
+}
+
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(24px, 0);
+  }
 }
 </style>

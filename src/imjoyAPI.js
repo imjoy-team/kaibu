@@ -55,8 +55,11 @@ export async function setupImJoyAPI({
   addLayer,
   removeLayer,
   clearLayers,
-  setUI
+  addWidget,
+  setLoader,
+  setMode
 }) {
+  setMode("lite");
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
     api_version: "0.2.3"
   });
@@ -114,7 +117,24 @@ export async function setupImJoyAPI({
       return layer.getLayerAPI();
     },
     async set_ui(config) {
-      await setUI(config);
+      config.type = config.type || "control";
+      config.name = config.title;
+      return await addWidget(config);
+    },
+    async add_widget(config) {
+      return await addWidget(config);
+    },
+    async set_loader(enable) {
+      setLoader(enable);
+    },
+    async set_timeout(func, time) {
+      return setTimeout(func, time);
+    },
+    async clear_timeout(id) {
+      clearTimeout(id);
+    },
+    async set_mode(mode) {
+      setMode(mode);
     }
   };
 
