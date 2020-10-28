@@ -21,7 +21,10 @@
       >
         <div class="p-1">
           <div class="block">
-            <img style="width: 220px;" src="static/img/kaibu-banner.svg" />
+            <img
+              :style="{ width: mode === 'full' ? '220px' : '120px' }"
+              src="static/img/kaibu-banner.svg"
+            />
             <button
               class="button floating-close-btn is-small"
               @click="closeSidebar"
@@ -30,7 +33,7 @@
             </button>
           </div>
 
-          <div class="block" v-if="mode == 'full'">
+          <div class="block" v-if="mode === 'full'">
             <!-- <div class="field">
               <b-switch v-model="showGallery">Gallery</b-switch>
             </div> -->
@@ -94,7 +97,11 @@
               </b-dropdown>
             </div>
           </div>
-          <b-tabs size="is-small" class="block">
+          <b-tabs
+            size="is-small"
+            class="block"
+            v-if="Object.keys(widgets).length > 0"
+          >
             <b-tab-item
               v-for="(widget, id) in widgets"
               :key="id"
@@ -108,6 +115,7 @@
               />
             </b-tab-item>
           </b-tabs>
+          <br v-else />
           <b-menu
             class="is-custom-mobile"
             @sorted="layerSorted()"
@@ -664,6 +672,10 @@ hr.solid {
 
 svg {
   fill: white;
+}
+
+.block {
+  margin-bottom: 10px !important;
 }
 
 .corner-annotation {
