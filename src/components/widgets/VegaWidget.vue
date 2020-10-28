@@ -53,7 +53,7 @@ export default {
         this.config._resolve({
           _rintf: true,
           append: this.appendDataPoint,
-          // clear: this.clearData,
+          clear_data: this.clearData,
           set_title: this.setTitle,
           set_expression_function(name, func) {
             vega.expressionFunction(name, func);
@@ -66,11 +66,11 @@ export default {
       this.$forceUpdate();
     },
     appendDataPoint(dataName, data) {
-      this.$refs.main.updateView(dataName, data);
+      this.$refs.main.updateData(dataName, data);
+    },
+    clearData() {
+      this.$refs.main.clearData();
     }
-    // clearData(){
-    //   this.$refs.main.clearView();
-    // }
   }
 };
 </script>

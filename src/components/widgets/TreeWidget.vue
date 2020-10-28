@@ -69,7 +69,21 @@ export default {
   },
   mounted() {
     if (this.config._resolve) {
-      this.config._resolve({});
+      const me = this;
+      this.config._resolve({
+        _rintf: true,
+        get_nodes() {
+          return me.config.nodes;
+        },
+        clear_nodes() {
+          me.config.nodes = [];
+          me.$forceUpdate();
+        },
+        set_nodes(nodes) {
+          me.config.nodes = nodes;
+          me.$forceUpdate();
+        }
+      });
     }
   },
   methods: {

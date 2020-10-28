@@ -529,7 +529,7 @@ export default {
         _rintf: true,
         name: this.config.name,
         id: this.config.id,
-        clear() {
+        clear_features() {
           me.vector_source.clear(true);
         },
         set_features(geojson_data) {
