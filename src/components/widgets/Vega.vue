@@ -24,16 +24,16 @@ export default {
     };
   },
   methods: {
-    updateView(dataName, data) {
+    updateData(dataName, data) {
       const changeSet = vega.changeset().insert(data);
       this.view.change(dataName, changeSet).run();
+    },
+    clearData(dataName) {
+      const changeSet = vega.changeset().remove(() => {
+        return true;
+      });
+      this.view.change(dataName, changeSet).run();
     }
-    // clearView(dataName){
-    //   const changeSet = vega.changeset().remove(()=>{
-    //     return true
-    //   });
-    //   this.view.change(dataName, changeSet).run();
-    // }
   }
 };
 </script>

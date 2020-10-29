@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -18,15 +18,16 @@
     "mathjs": "^7.0.1",
     "ol": "^6.3.1",
     "register-service-worker": "^1.7.1",
+    "sl-vue-tree": "^1.8.5",
     "sortablejs": "^1.10.2",
-    "vue": "^2.6.11",
-    "vue-router": "^3.2.0",
-    "vue-swatches": "^2.1.0",
-    "vuex": "^3.4.0",
     "vega": "^5.7.3",
     "vega-embed": "^6.0.0",
     "vega-lite": "^4.12.2",
-    "vue-form-generator": "^2.3.4"
+    "vue": "^2.6.11",
+    "vue-form-generator": "^2.3.4",
+    "vue-router": "^3.2.0",
+    "vue-swatches": "^2.1.0",
+    "vuex": "^3.4.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",

@@ -619,6 +619,10 @@ export default {
 .tab-content {
   background: white;
   max-height: 400px;
+  padding: 2px;
+}
+.tab-item {
+  max-height: 400px;
 }
 .slider-container {
   padding-left: 10px;
