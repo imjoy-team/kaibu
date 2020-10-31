@@ -215,7 +215,6 @@ function saveFile(blob, filename) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
 function polygonCut(polygon, line, properties) {
   const THICK_LINE_WIDTH = 10;
   let i, j, intersectPoints, forCut, forSelect;
@@ -738,8 +737,10 @@ export default {
     featureStyle(feature, resolution) {
       const label = feature.get("label");
       const size = feature.get("size");
-      const edge_color = feature.get("edge_color");
-      const edge_width = feature.get("edge_width");
+      const edge_color =
+        feature.get("edge_color") || this.config.draw_edge_color;
+      const edge_width =
+        feature.get("edge_width") || this.config.draw_edge_width;
       const face_color = feature.get("face_color");
       const color_style = new Style({
         fill: new Fill({
@@ -761,13 +762,16 @@ export default {
           })
         }),
         image: new Circle({
-          radius: size / Math.pow(resolution, 1 / 3),
+          radius:
+            size && resolution
+              ? size / Math.pow(resolution, 1 / 3)
+              : this.config.draw_size / 2,
           stroke: new Stroke({
             color: edge_color,
             width: edge_width
           }),
           fill: new Fill({
-            color: face_color
+            color: face_color || "#fbe00870"
           })
         })
       });
@@ -828,25 +832,27 @@ export default {
           source: this.vector_source,
           type: _draw_type,
           freehand: this.config.draw_freehand,
-          style: new Style({
-            fill: new Fill({
-              color: this.config.draw_face_color
-            }),
-            stroke: new Stroke({
-              color: this.config.draw_edge_color,
-              width: this.config.draw_edge_width
-            })
-          }),
-          geometryFunction: geometryFunction
+          geometryFunction: geometryFunction,
+          style: this.featureStyle
         });
         this.map.addInteraction(draw);
-        draw.on("drawend", async evt => {
+        draw.on("drawstart", async evt => {
           const feature = evt.feature;
           feature.set("label", this.config.draw_label);
           feature.set("size", this.config.draw_size);
           feature.set("edge_color", this.config.draw_edge_color);
           feature.set("edge_width", this.config.draw_edge_width);
           feature.set("face_color", this.config.draw_face_color);
+          feature.setStyle(
+            this.featureStyle(
+              feature,
+              evt.frameState && evt.frameState.viewState.resolution
+            )
+          );
+        });
+        draw.on("drawend", async evt => {
+          const feature = evt.feature;
+
           if (draw_type === "PolygonCutter") {
             feature._skip_history = true;
             setTimeout(() => {
@@ -861,6 +867,7 @@ export default {
                 const geo = pfeature.getGeometry();
                 const type = geo.getType();
                 if (intersects(geo.getExtent(), bbox)) {
+                  // split the polygon
                   if (["Polygon", "MultiPolygon"].includes(type)) {
                     let lineGeometry = turf.getGeom(
                       format.writeFeatureObject(feature)
