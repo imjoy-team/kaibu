@@ -135,8 +135,8 @@
                   </button>
                   {{
                     (layer.name &&
-                      layer.name.slice(0, 30) +
-                        (layer.name.length > 30 ? "..." : "")) ||
+                      layer.name.slice(0, 22) +
+                        (layer.name.length > 22 ? "..." : "")) ||
                       "Unnamed Layer"
                   }}
                   <b-dropdown
@@ -485,8 +485,9 @@ export default {
         new View({
           projection: projection,
           center: getCenter(config.extent),
-          zoom: 1,
-          minZoom: -10
+          zoom: -3,
+          minZoom: -Infinity,
+          maxZoom: Infinity
         })
       );
     },
@@ -507,8 +508,9 @@ export default {
         view: new View({
           projection: projection,
           center: getCenter(extent),
-          zoom: 2,
-          maxZoom: 8
+          zoom: -3,
+          maxZoom: 100,
+          minZoom: -100
         })
       });
       this.$store.commit("setMap", map);
@@ -524,17 +526,21 @@ export default {
         });
       } else {
         this.addLayer({
-          type: "itk-vtk",
-          name: "example image",
-          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+          type: "viv",
+          name: "example viv"
         });
+        // this.addLayer({
+        //   type: "itk-vtk",
+        //   name: "example image",
+        //   data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+        // });
 
-        this.addLayer({
-          type: "vector",
-          name: "shape vectors",
-          data:
-            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
-        });
+        // this.addLayer({
+        //   type: "vector",
+        //   name: "shape vectors",
+        //   data:
+        //     "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
+        // });
       }
     },
     setLoader(enable) {
