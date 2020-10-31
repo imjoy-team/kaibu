@@ -11,10 +11,11 @@
     "format": "prettier --write \"{src,tests}/**/**\""
   },
   "dependencies": {
+    "@deck.gl/mesh-layers": "^8.3.5",
+    "@hms-dbmi/vizarr": "^0.1.0",
+    "@hubmap/vitessce-image-viewer": "^0.3.3",
     "@mdi/font": "^5.3.45",
     "@turf/turf": "^5.1.6",
-    "@deck.gl/mesh-layers": "^8.3.5",
-    "@hubmap/vitessce-image-viewer": "^0.3.3",
     "buefy": "^0.8.0",
     "core-js": "^3.6.5",
     "json-stringify-safe": "^5.0.1",

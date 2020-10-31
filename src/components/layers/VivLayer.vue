@@ -173,14 +173,14 @@ export default {
     selectLayer() {},
     async setupLayer() {
       const loader = await createZarrLoader(this.config.data);
-      const hooks = {
-        handleValue: this.showPixelValues,
-        initVivView: this.updateVivView
-      };
+      // const hooks = {
+      //   handleValue: this.showPixelValues,
+      //   initVivView: this.updateVivView
+      // };
       return new CanvasLayer({
-        sync_callback: this.synchronizeVivCoordinate,
+        // sync_callback: this.synchronizeVivCoordinate,
         loader: loader,
-        hoverHooks: hooks,
+        // hoverHooks: hooks,
         viewStateHook: this.updateViewState,
         ...this.config.viewerConfig
       });
