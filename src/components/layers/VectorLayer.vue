@@ -185,7 +185,9 @@ import { Draw, Select, Modify, Snap } from "ol/interaction";
 import { Vector } from "ol/source";
 import { GeoJSON } from "ol/format";
 import Polygon from "ol/geom/Polygon";
+import { intersects } from "ol/extent";
 import { createRegularPolygon, createBox } from "ol/interaction/Draw";
+import * as turf from "@turf/turf";
 
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
@@ -211,6 +213,75 @@ function saveFile(blob, filename) {
       document.body.removeChild(a);
     }, 0);
   }
+}
+
+// eslint-disable-next-line no-unused-vars
+function polygonCut(polygon, line, properties) {
+  const THICK_LINE_WIDTH = 10;
+  let i, j, intersectPoints, forCut, forSelect;
+  let thickLineString, thickLinePolygon, clipped, polyg, intersect;
+  let cutPolyGeoms = [];
+  let cutFeatures = [];
+  let offsetLine = [];
+  let retVal = null;
+  properties = properties || {};
+
+  if (
+    (polygon.type != "Polygon" && polygon.type != "MultiPolygon") ||
+    line.type != "LineString"
+  ) {
+    return retVal;
+  }
+
+  intersectPoints = turf.lineIntersect(polygon, line);
+  if (intersectPoints.features.length == 0) {
+    return retVal;
+  }
+
+  const lineCoords = turf.getCoords(line);
+  if (
+    turf.booleanWithin(turf.point(lineCoords[0]), polygon) ||
+    turf.booleanWithin(turf.point(lineCoords[lineCoords.length - 1]), polygon)
+  ) {
+    return retVal;
+  }
+
+  offsetLine[0] = turf.lineOffset(line, THICK_LINE_WIDTH);
+  offsetLine[1] = turf.lineOffset(line, -THICK_LINE_WIDTH);
+
+  for (i = 0; i <= 1; i++) {
+    forCut = i;
+    forSelect = (i + 1) % 2;
+    const polyCoords = [];
+    for (j = 0; j < line.coordinates.length; j++) {
+      polyCoords.push(line.coordinates[j]);
+    }
+    for (j = offsetLine[forCut].geometry.coordinates.length - 1; j >= 0; j--) {
+      polyCoords.push(offsetLine[forCut].geometry.coordinates[j]);
+    }
+    polyCoords.push(line.coordinates[0]);
+
+    thickLineString = turf.lineString(polyCoords);
+    thickLinePolygon = turf.lineToPolygon(thickLineString);
+    clipped = turf.difference(polygon, thickLinePolygon);
+
+    cutPolyGeoms = [];
+    for (j = 0; j < clipped.geometry.coordinates.length; j++) {
+      polyg = turf.polygon(clipped.geometry.coordinates[j]);
+      intersect = turf.lineIntersect(polyg, offsetLine[forSelect]);
+      if (intersect.features.length > 0) {
+        cutPolyGeoms.push(polyg.geometry.coordinates);
+      }
+    }
+
+    cutPolyGeoms.forEach(function(geometry) {
+      cutFeatures.push(turf.polygon(geometry, properties));
+    });
+  }
+
+  if (cutFeatures.length > 0) retVal = turf.featureCollection(cutFeatures);
+
+  return retVal;
 }
 
 export default {
@@ -251,6 +322,7 @@ export default {
         LineString: "vector-polyline",
         Rectangle: "vector-rectangle",
         Square: "vector-square",
+        PolygonCutter: "box-cutter-off",
         Circle: "vector-circle-variant",
         Star: "octagram-outline",
         Point: "target"
@@ -475,14 +547,16 @@ export default {
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
-          this.draw_history.push({ add: event.feature });
+          if (!event.feature._skip_history)
+            this.draw_history.push({ add: event.feature });
         }
       });
       this.vector_source.on("removefeature", event => {
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
-          this.draw_history.push({ remove: event.feature });
+          if (!event.feature._skip_history)
+            this.draw_history.push({ remove: event.feature });
         }
       });
       vector_layer.getLayerAPI = this.getLayerAPI;
@@ -509,17 +583,29 @@ export default {
       if (this.draw_history.length > 0) {
         const action = this.draw_history.pop();
         if (action.add) {
+          if (!Array.isArray(action.add)) {
+            action.add = [action.add];
+          }
           const allFeatures = this.vector_source.getFeatures();
           allFeatures.forEach(feature => {
-            if (action.add === feature) {
-              feature._undoing = true;
-              this.vector_source.removeFeature(feature);
-              if (this.select) this.select.getFeatures().remove(feature);
+            for (const f of action.add) {
+              if (f === feature) {
+                feature._undoing = true;
+                this.vector_source.removeFeature(feature);
+                if (this.select) this.select.getFeatures().remove(feature);
+              }
             }
           });
-        } else if (action.remove) {
-          action.remove._undoing = true;
-          this.vector_source.addFeature(action.remove);
+        }
+
+        if (action.remove) {
+          if (!Array.isArray(action.remove)) {
+            action.remove = [action.remove];
+          }
+          for (const f of action.remove) {
+            f._undoing = true;
+            this.vector_source.addFeature(f);
+          }
         }
       }
     },
@@ -699,14 +785,15 @@ export default {
         draw_type = draw_type.charAt(0).toUpperCase() + draw_type.slice(1);
 
         let geometryFunction;
+        let _draw_type;
         if (draw_type === "Square") {
-          draw_type = "Circle";
+          _draw_type = "Circle";
           geometryFunction = createRegularPolygon(4);
         } else if (draw_type === "Rectangle") {
-          draw_type = "Circle";
+          _draw_type = "Circle";
           geometryFunction = createBox();
         } else if (draw_type === "Star") {
-          draw_type = "Circle";
+          _draw_type = "Circle";
           geometryFunction = function(coordinates, geometry) {
             var center = coordinates[0];
             var last = coordinates[1];
@@ -731,11 +818,15 @@ export default {
             }
             return geometry;
           };
+        } else if (draw_type === "PolygonCutter") {
+          _draw_type = "LineString";
+          // this.config.draw_freehand = false;
+        } else {
+          _draw_type = draw_type;
         }
-
         const draw = new Draw({
           source: this.vector_source,
-          type: draw_type,
+          type: _draw_type,
           freehand: this.config.draw_freehand,
           style: new Style({
             fill: new Fill({
@@ -756,6 +847,64 @@ export default {
           feature.set("edge_color", this.config.draw_edge_color);
           feature.set("edge_width", this.config.draw_edge_width);
           feature.set("face_color", this.config.draw_face_color);
+          if (draw_type === "PolygonCutter") {
+            feature._skip_history = true;
+            setTimeout(() => {
+              const bbox = feature.getGeometry().getExtent();
+              const featuers = this.vector_source.getFeatures();
+              const format = new GeoJSON();
+              let added = [],
+                removed = [];
+              for (let j = 0; j < featuers.length; j++) {
+                const pfeature = featuers[j];
+                if (pfeature === feature) continue;
+                const geo = pfeature.getGeometry();
+                const type = geo.getType();
+                if (intersects(geo.getExtent(), bbox)) {
+                  if (["Polygon", "MultiPolygon"].includes(type)) {
+                    let lineGeometry = turf.getGeom(
+                      format.writeFeatureObject(feature)
+                    );
+                    const pf = format.writeFeatureObject(pfeature);
+                    const pGeometry = turf.getGeom(pf);
+                    try {
+                      lineGeometry = turf.simplify(lineGeometry, {
+                        tolerance: 0.1,
+                        highQuality: false
+                      });
+                      const cuttedPolygons = polygonCut(
+                        pGeometry,
+                        lineGeometry,
+                        pf.properties
+                      );
+                      if (
+                        cuttedPolygons &&
+                        cuttedPolygons.features.length > 0
+                      ) {
+                        const cuttedFeatures = format.readFeatures(
+                          cuttedPolygons
+                        );
+                        this.vector_source.removeFeature(pfeature);
+                        this.vector_source.addFeatures(cuttedFeatures);
+                        added = added.concat(cuttedFeatures);
+                        removed.push(pfeature);
+                      }
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }
+                }
+              }
+              if (removed.length > 0 || added.length > 0) {
+                this.draw_history.push({
+                  remove: removed,
+                  add: added
+                });
+              }
+
+              this.vector_source.removeFeature(feature);
+            }, 100);
+          }
         });
         this.draw = draw;
       });

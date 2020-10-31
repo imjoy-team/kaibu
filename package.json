@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mdi/font": "^5.3.45",
+    "@turf/turf": "^5.1.6",
     "buefy": "^0.8.0",
     "core-js": "^3.6.5",
     "json-stringify-safe": "^5.0.1",
