@@ -139,6 +139,10 @@ function saveFile(blob, filename) {
   }
 }
 
+class LabelsLayer extends VectorLayer {
+  //TODO: add rendering
+}
+
 export default {
   name: "label-layer",
   type: "label",
@@ -262,7 +266,7 @@ export default {
       } else {
         this.vector_source = new Vector();
       }
-      const vector_layer = new VectorLayer({
+      const vector_layer = new LabelsLayer({
         source: this.vector_source
       });
       vector_layer.setStyle(this.featureStyle);
