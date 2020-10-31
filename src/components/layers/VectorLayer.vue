@@ -233,7 +233,6 @@ function polygonCut(polygon, line, properties) {
     return retVal;
   }
 
-  line = turf.simplify(line, { tolerance: 0.01, highQuality: false });
   intersectPoints = turf.lineIntersect(polygon, line);
   if (intersectPoints.features.length == 0) {
     return retVal;
@@ -548,14 +547,16 @@ export default {
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
-          this.draw_history.push({ add: event.feature });
+          if (!event.feature._skip_history)
+            this.draw_history.push({ add: event.feature });
         }
       });
       this.vector_source.on("removefeature", event => {
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
-          this.draw_history.push({ remove: event.feature });
+          if (!event.feature._skip_history)
+            this.draw_history.push({ remove: event.feature });
         }
       });
       vector_layer.getLayerAPI = this.getLayerAPI;
@@ -582,17 +583,29 @@ export default {
       if (this.draw_history.length > 0) {
         const action = this.draw_history.pop();
         if (action.add) {
+          if (!Array.isArray(action.add)) {
+            action.add = [action.add];
+          }
           const allFeatures = this.vector_source.getFeatures();
           allFeatures.forEach(feature => {
-            if (action.add === feature) {
-              feature._undoing = true;
-              this.vector_source.removeFeature(feature);
-              if (this.select) this.select.getFeatures().remove(feature);
+            for (const f of action.add) {
+              if (f === feature) {
+                feature._undoing = true;
+                this.vector_source.removeFeature(feature);
+                if (this.select) this.select.getFeatures().remove(feature);
+              }
             }
           });
-        } else if (action.remove) {
-          action.remove._undoing = true;
-          this.vector_source.addFeature(action.remove);
+        }
+
+        if (action.remove) {
+          if (!Array.isArray(action.remove)) {
+            action.remove = [action.remove];
+          }
+          for (const f of action.remove) {
+            f._undoing = true;
+            this.vector_source.addFeature(f);
+          }
         }
       }
     },
@@ -835,10 +848,13 @@ export default {
           feature.set("edge_width", this.config.draw_edge_width);
           feature.set("face_color", this.config.draw_face_color);
           if (draw_type === "PolygonCutter") {
+            feature._skip_history = true;
             setTimeout(() => {
               const bbox = feature.getGeometry().getExtent();
               const featuers = this.vector_source.getFeatures();
               const format = new GeoJSON();
+              let added = [],
+                removed = [];
               for (let j = 0; j < featuers.length; j++) {
                 const pfeature = featuers[j];
                 if (pfeature === feature) continue;
@@ -846,26 +862,46 @@ export default {
                 const type = geo.getType();
                 if (intersects(geo.getExtent(), bbox)) {
                   if (["Polygon", "MultiPolygon"].includes(type)) {
-                    const fGeometry = turf.getGeom(
+                    let lineGeometry = turf.getGeom(
                       format.writeFeatureObject(feature)
                     );
                     const pf = format.writeFeatureObject(pfeature);
                     const pGeometry = turf.getGeom(pf);
-                    const cuttedPolygons = polygonCut(
-                      pGeometry,
-                      fGeometry,
-                      pf.properties
-                    );
-                    if (cuttedPolygons && cuttedPolygons.features.length > 0) {
-                      const cuttedFeatures = format.readFeatures(
-                        cuttedPolygons
+                    try {
+                      lineGeometry = turf.simplify(lineGeometry, {
+                        tolerance: 0.1,
+                        highQuality: false
+                      });
+                      const cuttedPolygons = polygonCut(
+                        pGeometry,
+                        lineGeometry,
+                        pf.properties
                       );
-                      this.vector_source.removeFeature(pfeature);
-                      this.vector_source.addFeatures(cuttedFeatures);
+                      if (
+                        cuttedPolygons &&
+                        cuttedPolygons.features.length > 0
+                      ) {
+                        const cuttedFeatures = format.readFeatures(
+                          cuttedPolygons
+                        );
+                        this.vector_source.removeFeature(pfeature);
+                        this.vector_source.addFeatures(cuttedFeatures);
+                        added = added.concat(cuttedFeatures);
+                        removed.push(pfeature);
+                      }
+                    } catch (e) {
+                      console.error(e);
                     }
                   }
                 }
               }
+              if (removed.length > 0 || added.length > 0) {
+                this.draw_history.push({
+                  remove: removed,
+                  add: added
+                });
+              }
+
               this.vector_source.removeFeature(feature);
             }, 100);
           }
