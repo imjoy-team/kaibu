@@ -12,7 +12,7 @@ module.exports = {
   configureWebpack: {
     plugins: [
       new CopyWebpackPlugin([{
-        from: path.join(__dirname, "../docs"),
+        from: path.join(__dirname, "./docs"),
         to: path.join(__dirname, "dist/docs"),
         toType: "dir"
       }
