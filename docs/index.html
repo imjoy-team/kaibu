@@ -22,12 +22,11 @@
     const GITHUB_REPO = 'kaibu'
     const homepage = 'https://raw.githubusercontent.com/imjoy-team/kaibu/master/README.md',
     const repo = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`;
-    const basePath = window.location.pathname === '/' ? '/' : '/' + GITHUB_REPO;
     window.$docsify = window.$docsify || {
       name: "Kaibu Docs",
       nameLink: '/',
       logo: "https://kaibu.org/static/img/kaibu-banner.svg",
-      basePath: basePath,
+      basePath: '/docs',
       loadSidebar: true,
       coverpage: false,
       auto2top: true,
