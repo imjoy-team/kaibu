@@ -10,10 +10,35 @@
         v-if="elm.type === 'button'"
         @click="triggerCallback(elm)"
         class="button is-small"
+        :style="elm.style"
         style="min-width:120px;"
       >
         <b-icon v-if="elm.icon" :icon="elm.icon"> </b-icon>{{ elm.label }}
       </button>
+      <b-dropdown
+        v-else-if="elm.type === 'dropdown'"
+        v-model="elm.value"
+        :style="elm.style"
+        @change="triggerCallback(elm, elm.value)"
+        aria-role="list"
+      >
+        <b-button
+          class="is-primary"
+          slot="trigger"
+          slot-scope="{ active }"
+          :icon-left="elm.icon"
+        >
+          <span>{{ elm.value === undefined ? elm.label : elm.value }}</span>
+          <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+        </b-button>
+        <b-dropdown-item
+          v-for="opt in elm.options"
+          :key="opt"
+          :value="opt"
+          aria-role="listitem"
+          >{{ opt }}</b-dropdown-item
+        >
+      </b-dropdown>
     </b-tooltip>
   </div>
 </template>
@@ -39,10 +64,11 @@ export default {
     }
   },
   methods: {
-    async triggerCallback(elm) {
+    async triggerCallback(elm, opt) {
       try {
         this.$emit("loading", true);
-        await elm.callback();
+        if (opt !== undefined) await elm.callback(opt);
+        else await elm.callback();
       } finally {
         this.$emit("loading", false);
       }

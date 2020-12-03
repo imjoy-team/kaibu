@@ -75,11 +75,11 @@
               </b-dropdown>
               &nbsp;
               <b-button
-                @click="goto('https://github.com/imjoy-team/kaibu/')"
+                @click="goto('/docs')"
                 target="_blank"
-                icon-left="github-circle"
+                icon-left="book-open-outline"
               >
-                Github
+                Docs
               </b-button>
 
               <b-dropdown aria-role="list" position="is-bottom-left">
