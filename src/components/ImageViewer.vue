@@ -75,7 +75,7 @@
               </b-dropdown>
               &nbsp;
               <b-button
-                @click="goto('https://kaibu.org/docs')"
+                @click="goto('/docs')"
                 target="_blank"
                 icon-left="book-open-outline"
               >
