@@ -10,17 +10,21 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 ----
 ***WARNING: This is a work-in-progress repo, you are welcome to try it out but it's not ready for use in production yet.***
 
+Documentation: https://kaibu.org/docs/
+
 ## How to use it?
 
 ### As standalone appliction: https://kaibu.org
 
 ![Kaibu Screenshot](https://raw.githubusercontent.com/imjoy-team/kaibu/master/public/static/img/kaibu-screenshot-1.png)
 
-### As ImJoy plugin: https://imjoy.io/#/app?plugin=https://kaibu.org/#/app
+### As ImJoy plugin
+
+https://imjoy.io/#/app?plugin=https://kaibu.org/#/app
 
 Currently we support `view_image`, `add_image`, `add_shapes` and `add_points`, the definition is mostly the same as [napari](https://napari.org/).
 
-#### API functions
+### Kaibu API functions for ImJoy
 See documentation https://kaibu.org/docs/#/api
 
 ### In a Jupyter notebook
