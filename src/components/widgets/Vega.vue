@@ -7,9 +7,9 @@ import vegaEmbed from "vega-embed";
 
 export default {
   name: "vega",
-  props: ["schema", "options"],
+  props: ["spec", "options"],
   mounted() {
-    vegaEmbed(this.$el, this.schema, this.options || { actions: false }).then(
+    vegaEmbed(this.$el, this.spec, this.options || { actions: false }).then(
       res => {
         this.embed = res;
         this.view = res.view;

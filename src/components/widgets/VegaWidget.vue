@@ -2,7 +2,7 @@
   <div>
     <p v-if="title" class="vega-title">{{ title }}</p>
     <vega
-      :schema="config.schema"
+      :spec="config.spec"
       :options="config.options"
       @ready="vegaReady"
       ref="main"
@@ -31,6 +31,8 @@ export default {
     };
   },
   created() {
+    // TODO: switch to spec key completely later
+    this.config.spec = this.config.spec || this.config.schema
     this.config.options = this.config.options || {};
     this.config.options.width = this.config.options.width || 200;
   },
