@@ -32,7 +32,7 @@ export default {
   },
   created() {
     // TODO: switch to spec key completely later
-    this.config.spec = this.config.spec || this.config.schema
+    this.config.spec = this.config.spec || this.config.schema;
     this.config.options = this.config.options || {};
     this.config.options.width = this.config.options.width || 200;
   },
