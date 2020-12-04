@@ -222,7 +222,7 @@ api.export(ImJoyPlugin())
 ```
 
 
-For `type="tree"`, 
+For `type="tree"`, you can pass a tree with nodes and set callback for the double click events. See an example below:
 
 <!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["imageio", "numpy"]} -->
 ```python
@@ -260,6 +260,49 @@ class ImJoyPlugin():
 
 api.export(ImJoyPlugin())
 ```
+
+For `type="vega"`, you can pass any vega schema which enables supporting a large variety of chart types, see examples here: https://vega.github.io/vega/examples/.
+
+
+<!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["numpy"]} -->
+```python
+from imjoy import api
+
+class ImJoyPlugin():
+    async def setup(self):
+        pass
+
+    async def run(self, ctx):
+        viewer = await api.createWindow(src="http://localhost:8094/#/app")
+
+        async def node_dbclick_callback(node):
+            await api.alert("selected node:" + str(node))
+
+        chart = await viewer.add_widget(
+            {
+                "_rintf": True,
+                "name": "Bar chart",
+                "type": "vega",
+                "spec": "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json",
+            }
+        )
+
+api.export(ImJoyPlugin())
+```
+
+For displaying a line chart for example, you can take the spec from https://vega.github.io/vega/examples/line-chart/ and replace the `values`(under `data`) with your line data.
+
+In Python, you can also use [altair](https://altair-viz.github.io/) to obtain the spec.
+
+
+## Example: Interactive segmentation with Kaibu
+
+See the example project repository [here](https://github.com/imjoy-team/imjoy-interactive-segmentation).
+
+[![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=kaibu&plugin=https://raw.githubusercontent.com/imjoy-team/imjoy-interactive-segmentation/master/interactive_trainer.py)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/imjoy-team/imjoy-interactive-segmentation/master?filepath=Tutorial.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/imjoy-team/imjoy-interactive-segmentation/blob/master/Tutorial.ipynb)
+
 
 
 ## Implementation details
