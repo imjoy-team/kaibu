@@ -5,7 +5,7 @@ Kaibu is a web application for visualizing and annotating multi-dimensional imag
 
 You can use Kaibu as an standalone web app at https://kaibu.org, or as an [ImJoy](https://imjoy.io/) plugin in Python or Javascript:
 
-?> This is a ImJoy interactive document which you can directly edit and run sample code, please make sure you are reading this via https://kaibu.org/docs.
+?> Note: This is an ImJoy interactive document with which you can directly edit and run sample code, please make sure you are reading this from https://kaibu.org/docs/#/api.
 
 <!-- tabs:start -->
 
