@@ -23,6 +23,7 @@
         aria-role="list"
       >
         <b-button
+          style="height: 27px;"
           class="is-primary"
           slot="trigger"
           slot-scope="{ active }"
