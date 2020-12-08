@@ -273,7 +273,7 @@ class ImJoyPlugin():
         pass
 
     async def run(self, ctx):
-        viewer = await api.createWindow(src="http://localhost:8094/#/app")
+        viewer = await api.createWindow(src="https://kaibu.org/#/app")
 
         async def node_dbclick_callback(node):
             await api.alert("selected node:" + str(node))
