@@ -2,31 +2,37 @@
 <html lang="en">
 
 <head>
-  <title>ImJoy Docs</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="description" content="ImJoy Docs">
-  <meta name="author" content="ImJoy-Team">
-  <link rel="stylesheet" href="https://imjoy.io/docs/static/vue.css" />
-  <link rel="stylesheet" href="https://imjoy.io/docs/static/style.css" />
-  <link rel="icon" href="https://kaibu.org/favicon.ico">
+  <meta name="author" content="ImJoy Team">
+  <link rel="icon" href="https://imjoy.io/static/icons/favicon.ico" type="image/x-icon" />
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://imjoy-team.github.io/imjoy-docs/static/vue.css" />
+  <link rel="stylesheet" href="https://imjoy-team.github.io/imjoy-docs/static/style.css" />
 </head>
 
 <body>
   <div id="app"></div>
   <script>
-    const GITHUB_USER = 'imjoy-team'
-    const GITHUB_REPO = 'kaibu'
-    const homepage = 'https://raw.githubusercontent.com/imjoy-team/kaibu/master/README.md'
+    //---------------------Configurations------------------------------
+    const GITHUB_USER = 'imjoy-team' // your github user name
+    const GITHUB_REPO = 'kaibu' // your github repo name
+    const homepage = 'https://raw.githubusercontent.com/imjoy-team/kaibu/master/README.md' // the home page markdown file (relative path to the current folder)
+    const name = 'Kaibu' // name of this documentation
+    const logo = 'https://imjoy.io/static/img/imjoy-logo-black.svg' // a logo show on the upper-left corner
+    //--------------------------End------------------------------------
     const repo = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`;
+    const basePath = window.location.pathname === '/' ? '/' : '/' + GITHUB_REPO;
+    document.title = `${GITHUB_USER}|${name}`;
     window.$docsify = window.$docsify || {
-      name: "Kaibu Docs",
+      name,
       nameLink: '/',
-      logo: "https://kaibu.org/static/img/kaibu-banner.svg",
-      basePath: '/docs',
+      logo,
+      basePath: basePath,
       loadSidebar: true,
       coverpage: false,
       auto2top: true,
@@ -42,30 +48,29 @@
         depth: 2
       },
       tabs: {
-        persist: true, // default
-        sync: true, // default
-        theme: 'classic', // default
-        tabComments: true, // default
-        tabHeadings: true // default
+        persist: true,
+        sync: true,
+        theme: 'classic',
+        tabComments: true,
+        tabHeadings: true
       }
     };
   </script>
-  <script src="https://imjoy.io/docs/static/docsify-run-code.js"></script>
-  <script src="https://imjoy.io/docs/static/docsify-copy-code.min.js"></script>
-  <script src="https://imjoy.io/docs/static/docsify.min.js"></script>
-  <script src="https://imjoy.io/docs/static/prism-python.min.js"></script>
-  <script src="https://imjoy.io/docs/static/prism-json.min.js"></script>
-  <script src="https://imjoy.io/docs/static/prism-bash.min.js"></script>
-  <script src="https://imjoy.io/docs/static/prism-json.min.js"></script>
-  <script src="https://imjoy.io/docs/static/search.min.js"></script>
-  <script src="https://imjoy.io/docs/static/external-script.min.js"></script>
-  <script src="https://imjoy.io/docs/static/docsify-pagination.min.js"></script>
-  <script src="https://imjoy.io/docs/static/docsify-tabs@1.js"></script>
-  <script src="https://imjoy.io/docs/static/zoom-image.min.js"></script>
-  <script src="https://imjoy.io/docs/static/docsify-sidebar-collapse.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
-  <script src="https://imjoy.io/docs/static/imjoy-app.js"></script>
-  
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/docsify-run-code.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/docsify-copy-code.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/docsify.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/prism-python.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/prism-json.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/prism-bash.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/prism-json.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/search.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/external-script.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/docsify-pagination.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/docsify-tabs@1.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/zoom-image.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/docsify-sidebar-collapse.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/require.min.js"></script>
+  <script src="https://imjoy-team.github.io/imjoy-docs/static/imjoy-app.js"></script>
 </body>
 
 </html>
