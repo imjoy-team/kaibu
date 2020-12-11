@@ -19,15 +19,16 @@
   <div id="app"></div>
   <script>
     //---------------------Configurations------------------------------
-    const GITHUB_USER = 'imjoy-team' // your github user name
-    const GITHUB_REPO = 'kaibu' // your github repo name
+    const githubUser = 'imjoy-team' // your github user name
+    const githubRepo = 'kaibu' // your github repo name
     const homepage = 'https://raw.githubusercontent.com/imjoy-team/kaibu/master/README.md' // the home page markdown file (relative path to the current folder)
     const name = 'Kaibu' // name of this documentation
     const logo = 'https://imjoy.io/static/img/imjoy-logo-black.svg' // a logo show on the upper-left corner
+    const isCustomDomain = true // set to true if you are using a custom domain
     //--------------------------End------------------------------------
-    const repo = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`;
-    const basePath = window.location.pathname === '/' ? '/' : '/' + GITHUB_REPO;
-    document.title = `${GITHUB_USER}|${name}`;
+    const repo = `https://github.com/${githubUser}/${githubRepo}`;
+    const basePath = (window.location.pathname === '/' || isCustomDomain) ? '/' : '/' + githubRepo;
+    document.title = `${githubUser}|${name}`;
     window.$docsify = window.$docsify || {
       name,
       nameLink: '/',
