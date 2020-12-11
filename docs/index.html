@@ -27,7 +27,7 @@
     const isCustomDomain = true // set to true if you are using a custom domain
     //--------------------------End------------------------------------
     const repo = `https://github.com/${githubUser}/${githubRepo}`;
-    const basePath = (window.location.pathname === '/' || isCustomDomain) ? '/' : '/' + githubRepo;
+    const basePath = isCustomDomain? window.location.pathname : window.location.pathname.replace('/'+githubRepo, '/').replace('//', '/');
     document.title = `${githubUser}|${name}`;
     window.$docsify = window.$docsify || {
       name,
