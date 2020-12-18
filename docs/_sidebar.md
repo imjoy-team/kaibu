@@ -1,2 +1,2 @@
 * [Overview](/)
-* [API](api.md)
+* [Kaibu API](api.md)
