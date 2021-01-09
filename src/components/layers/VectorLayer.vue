@@ -181,8 +181,7 @@ import "vue-swatches/dist/vue-swatches.css";
 import { Map } from "ol";
 import VectorLayer from "ol/layer/Vector";
 import { Circle, Style, Fill, Stroke, Text } from "ol/style";
-import { Draw, Select, Snap } from "ol/interaction";
-import { shiftKeyOnly } from "ol/events/condition";
+import { Draw, Select } from "ol/interaction";
 import { Vector } from "ol/source";
 import { GeoJSON } from "ol/format";
 import Polygon from "ol/geom/Polygon";
@@ -527,18 +526,29 @@ export default {
       const data = this.config.data;
       if (typeof data === "string") {
         this.vector_source = new Vector({
+          renderMode: "image",
+          renderBuffer: 10,
           url: data,
           format: new GeoJSON()
         });
       } else if (data instanceof File) {
-        this.vector_source = new Vector();
+        this.vector_source = new Vector({
+          renderMode: "image",
+          renderBuffer: 10
+        });
         await this.loadFeatures(data);
       } else if (data) {
-        this.vector_source = new Vector();
+        this.vector_source = new Vector({
+          renderMode: "image",
+          renderBuffer: 10
+        });
         const features = this.getFeaturesFromConfig();
         this.vector_source.addFeatures(features);
       } else {
-        this.vector_source = new Vector();
+        this.vector_source = new Vector({
+          renderMode: "image",
+          renderBuffer: 10
+        });
       }
       const vector_layer = new VectorLayer({
         source: this.vector_source
@@ -700,21 +710,11 @@ export default {
         wrapX: false
       });
       this.map.addInteraction(this.select);
-
-      this.snap = new Snap({
-        source: this.vector_source,
-        condition: shiftKeyOnly
-      });
-      this.map.addInteraction(this.snap);
     },
     disableSelectInteraction() {
       if (this.select) {
         this.map.removeInteraction(this.select);
         this.select = null;
-      }
-      if (this.snap) {
-        this.map.removeInteraction(this.snap);
-        this.snap = null;
       }
     },
     updateDrawInteraction() {
