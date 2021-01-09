@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -17,7 +17,7 @@
     "core-js": "^3.6.5",
     "json-stringify-safe": "^5.0.1",
     "mathjs": "^7.0.1",
-    "ol": "^6.3.1",
+    "ol": "^6.5.0",
     "register-service-worker": "^1.7.1",
     "sl-vue-tree": "^1.8.5",
     "sortablejs": "^1.10.2",
