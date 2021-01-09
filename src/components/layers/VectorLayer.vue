@@ -16,7 +16,7 @@
             <b-icon icon="cursor-default-outline" size="is-medium"> </b-icon>
           </button>
         </b-tooltip>
-        <b-tooltip label="Select/Modify" position="is-top">
+        <b-tooltip label="Select" position="is-top">
           <button
             :class="{ 'is-primary': !config.draw_enable && select }"
             @click="
@@ -181,7 +181,8 @@ import "vue-swatches/dist/vue-swatches.css";
 import { Map } from "ol";
 import VectorLayer from "ol/layer/Vector";
 import { Circle, Style, Fill, Stroke, Text } from "ol/style";
-import { Draw, Select, Modify, Snap } from "ol/interaction";
+import { Draw, Select, Snap } from "ol/interaction";
+import { shiftKeyOnly } from "ol/events/condition";
 import { Vector } from "ol/source";
 import { GeoJSON } from "ol/format";
 import Polygon from "ol/geom/Polygon";
@@ -700,23 +701,16 @@ export default {
       });
       this.map.addInteraction(this.select);
 
-      this.modify = new Modify({
-        source: this.vector_source
+      this.snap = new Snap({
+        source: this.vector_source,
+        condition: shiftKeyOnly
       });
-      this.modify.createVertices = true;
-      this.map.addInteraction(this.modify);
-
-      this.snap = new Snap({ source: this.vector_source });
       this.map.addInteraction(this.snap);
     },
     disableSelectInteraction() {
       if (this.select) {
         this.map.removeInteraction(this.select);
         this.select = null;
-      }
-      if (this.modify) {
-        this.map.removeInteraction(this.modify);
-        this.modify = null;
       }
       if (this.snap) {
         this.map.removeInteraction(this.snap);
