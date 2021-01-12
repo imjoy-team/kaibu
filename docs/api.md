@@ -294,7 +294,29 @@ For displaying a line chart for example, you can take the spec from https://vega
 
 In Python, you can also use [altair](https://altair-viz.github.io/) to obtain the spec.
 
+### clear_layers()
+Remove all the layers
 
+### remove_layer(options)
+Remove a specific layer by its id
+ - options:
+    - id: String, id of the layer to be removed
+
+### set_loader(enable)
+Show a loading animation
+ - enable: Boolean, whether the loader should be displayed
+
+### set_mode(mode)
+Set the UI mode of the viewer
+ - mode: String, it should be one of the following options:
+    - `"lite"`: minimal UI mode
+    - `"full"`: full UI mode
+
+### set_timeout(callback, time)
+A simple wrapper to the `setTimeout` function in Javascript
+
+### clear_timeout(callback, time)
+A simple wrapper to the `clearTimeout` function in Javascript
 ## Example: Interactive segmentation with Kaibu
 
 See the example project repository [here](https://github.com/imjoy-team/imjoy-interactive-segmentation).
