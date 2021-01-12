@@ -19,7 +19,7 @@
         v-else-if="elm.type === 'dropdown'"
         v-model="elm.value"
         :style="elm.style"
-        @change="triggerCallback(elm, elm.value)"
+        @change="triggerCallback(elm, $event)"
         aria-role="list"
       >
         <b-button
