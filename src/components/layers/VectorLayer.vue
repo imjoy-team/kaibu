@@ -730,11 +730,14 @@ export default {
       }
     },
     featureStyle(feature, resolution) {
-      const label = feature.get("label");
-      const size = feature.get("size");
-      const edge_color = feature.get("edge_color");
-      const edge_width = feature.get("edge_width");
-      const face_color = feature.get("face_color");
+      const label = feature.get("label") || this.config.draw_label;
+      const size = feature.get("size") || this.config.draw_size;
+      const edge_color =
+        feature.get("edge_color") || this.config.draw_edge_color;
+      const edge_width =
+        feature.get("edge_width") || this.config.draw_edge_width;
+      const face_color =
+        feature.get("face_color") || this.config.draw_face_color;
       const color_style = new Style({
         fill: new Fill({
           color: face_color

@@ -74,11 +74,15 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
 function convertImageUrl2Itk(url) {
   return new Promise(resolve => {
     const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+
     const image = new Image();
     image.onload = function() {
       canvas.width = image.width;
       canvas.height = image.height;
+      const ctx = canvas.getContext("2d");
+      // flip the image to make it upside down
+      ctx.translate(0, image.height);
+      ctx.scale(1, -1);
       ctx.drawImage(image, 0, 0, image.width, image.height);
       const imageData = ctx.getImageData(0, 0, image.width, image.height);
       resolve({

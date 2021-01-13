@@ -97,12 +97,21 @@ Add a vector layer with polygons
  - shapes: a list of shapes, each shape is a list of coordinates
  - options:
     - name: String, name of the image layer
-    - shape_type: String, type of the shape, "polygon", "path", "rectangle"
+    - shape_type: String, type of the shape, should be one of the following: "polygon", "path", "rectangle"
     - edge_width: String, width of the edge
     - edge_color: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
     - face_color: String, color for filling the face, hex string format, same as `edge_color`
     - size: Number, size of the shape
     - label: String, label fo the shape
+    - draw_enable: Boolean, switch on the markup tool
+    - draw_label: String, set the label for the markup tool
+    - draw_freehand: Boolean, switch on freehand mode for the markup tool
+    - draw_shape_type: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
+    - draw_edge_width: Integer, set the edge width of the markup tool
+    - draw_edge_color: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
+    - draw_face_color: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
+    - draw_size: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
+
 
 
 Example in Python:
@@ -142,7 +151,14 @@ Add a vector layer with points
     - face_color: String, color for filling the face, hex string format, same as `edge_color`
     - size: Number, size of the shape
     - label: String, label fo the shape
-
+    - draw_enable: Boolean, switch on the markup tool
+    - draw_label: String, set the label for the markup tool
+    - draw_freehand: Boolean, switch on freehand mode for the markup tool
+    - draw_shape_type: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
+    - draw_edge_width: Integer, set the edge width of the markup tool
+    - draw_edge_color: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
+    - draw_face_color: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
+    - draw_size: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
 
 Example in Python:
 
