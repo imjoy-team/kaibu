@@ -273,8 +273,18 @@ class ImJoyPlugin():
                 ],
             }
         )
+        # To update the tree later, you can use 
 
 api.export(ImJoyPlugin())
+```
+
+In the above example, if you want to update the tree later, you can do the following:
+```python
+await tree.clear_nodes()
+nodes = [
+    #...new tree nodes...
+]
+await tree.set_nodes(nodes)
 ```
 
 For `type="vega"`, you can pass any vega schema which enables supporting a large variety of chart types, see examples here: https://vega.github.io/vega/examples/.
