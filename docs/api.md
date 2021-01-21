@@ -195,7 +195,7 @@ Add a widget panel with buttons, file tree or graph.
  - `options`:
     - `name`: String, name of the widget panel
     - `type`: String, type of the widget panel, the supported types are: `control`, `tree`, `vega`.
-    - other type-specific options 
+    - other type-specific options
 
 For `type="control"`, you can add buttons and dropdown with callback function attached, the supported elements types are `button`, `dropdown`.
 
@@ -275,13 +275,14 @@ class ImJoyPlugin():
                 ],
             }
         )
-        # To update the tree later, you can use 
 
 api.export(ImJoyPlugin())
 ```
 
 In the above example, if you want to update the tree later, you can do the following:
+
 ```python
+# Update the tree
 await tree.clear_nodes()
 nodes = [
     #...new tree nodes...
@@ -290,7 +291,6 @@ await tree.set_nodes(nodes)
 ```
 
 For `type="vega"`, you can pass any vega schema which enables supporting a large variety of chart types, see examples here: https://vega.github.io/vega/examples/.
-
 
 <!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["numpy"]} -->
 ```python
@@ -323,23 +323,24 @@ For displaying a line chart for example, you can take the spec from https://vega
 In Python, you can also use [altair](https://altair-viz.github.io/) to obtain the spec.
 
 ### clear_layers()
+
 Remove all the layers
 
 ### remove_layer(options)
 
 Remove a specific layer by its id
- - options:
-    - id: String, id of the layer to be removed
+ - `options`:
+    - `id`: String, id of the layer to be removed
 
 ### set_loader(enable)
 
 Show a loading animation
- - enable: Boolean, whether the loader should be displayed
+ - `enable`: Boolean, whether the loader should be displayed
 
 ### set_mode(mode)
 
 Set the UI mode of the viewer
- - mode: String, it should be one of the following options:
+ - `mode`: String, it should be one of the following options:
     - `"lite"`: minimal UI mode
     - `"full"`: full UI mode
 
