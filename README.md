@@ -14,7 +14,9 @@ Documentation: https://kaibu.org/docs/
 
 ## How to use it?
 
-### As standalone appliction: https://kaibu.org
+### As standalone application
+
+Visit [https://kaibu.org](https://kaibu.org) to see Kaibu as a stand-alone appliction running in your browser.
 
 ![Kaibu Screenshot](https://raw.githubusercontent.com/imjoy-team/kaibu/master/public/static/img/kaibu-screenshot-1.png)
 
