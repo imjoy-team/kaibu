@@ -1,6 +1,7 @@
 # Kaibu API for ImJoy
 
 ## Basic usage
+
 Kaibu is a web application for visualizing and annotating multi-dimensional images, built with [OpenLayers](https://openlayers.org/) and [itk-vtk-viewer](https://kitware.github.io/itk-vtk-viewer/).
 
 You can use Kaibu as an standalone web app at https://kaibu.org, or as an [ImJoy](https://imjoy.io/) plugin in Python or Javascript:
@@ -10,6 +11,7 @@ You can use Kaibu as an standalone web app at https://kaibu.org, or as an [ImJoy
 <!-- tabs:start -->
 
 #### ** JavaScript **
+
 ```js
 // show as an inline window
 api.createWindow({src: "https://kaibu.org/#/app", name: "Kaibu"})
@@ -31,6 +33,7 @@ api.export(new ImJoyPlugin())
 ```
 
 #### ** Python **
+
 ```js
 // show as an inline window
 api.createWindow(src="https://kaibu.org/#/app", name="Kaibu")
@@ -58,15 +61,15 @@ api.export(ImJoyPlugin())
 <!-- tabs:end -->
 
 ## Kaibu API
+
 ### view_image(image, options)
 
 Add an image layer
 
- - image: an image URL, base64 encoded image or a numpy array in Python
- - options:
-    - type: String, image layer type, currently supports `2d-image`(OpenLayers 2D image layer), `itk-vtk` (ITK/VTK Viewer 2D/3D layer) or `vector`(OpenLayers vector feature layer).
-    - name: String, name of the image layer
-
+- `image`: an image URL, base64 encoded image or a numpy array in Python
+- options:
+    - `type`: String, image layer type, currently supports `2d-image`(OpenLayers 2D image layer), `itk-vtk` (ITK/VTK Viewer 2D/3D layer) or `vector`(OpenLayers vector feature layer).
+    - `name`: String, name of the image layer
 
 Example in Python:
 
@@ -94,25 +97,23 @@ api.export(ImJoyPlugin())
 ### add_shapes(shapes, options)
 Add a vector layer with polygons
 
- - shapes: a list of shapes, each shape is a list of coordinates
- - options:
-    - name: String, name of the image layer
-    - shape_type: String, type of the shape, should be one of the following: "polygon", "path", "rectangle"
-    - edge_width: String, width of the edge
-    - edge_color: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
-    - face_color: String, color for filling the face, hex string format, same as `edge_color`
-    - size: Number, size of the shape
-    - label: String, label fo the shape
-    - draw_enable: Boolean, switch on the markup tool
-    - draw_label: String, set the label for the markup tool
-    - draw_freehand: Boolean, switch on freehand mode for the markup tool
-    - draw_shape_type: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
-    - draw_edge_width: Integer, set the edge width of the markup tool
-    - draw_edge_color: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
-    - draw_face_color: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
-    - draw_size: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
-
-
+ - `shapes`: a list of shapes, each shape is a list of coordinates
+ - `options`:
+    - `name`: String, name of the image layer
+    - `shape_type`: String, type of the shape, should be one of the following: "polygon", "path", "rectangle"
+    - `edge_width`: String, width of the edge
+    - `edge_color`: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
+    - `face_color`: String, color for filling the face, hex string format, same as `edge_color`
+    - `size`: Number, size of the shape
+    - `label`: String, label fo the shape
+    - `draw_enable`: Boolean, switch on the markup tool
+    - `draw_label`: String, set the label for the markup tool
+    - `draw_freehand`: Boolean, switch on freehand mode for the markup tool
+    - `draw_shape_type`: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
+    - `draw_edge_width`: Integer, set the edge width of the markup tool
+    - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
+    - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
+    - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
 
 Example in Python:
 
@@ -141,24 +142,25 @@ api.export(ImJoyPlugin())
 ```
 
 ### add_points(points, options)
+
 Add a vector layer with points
 
- - points: a list of points, each point is a list of two values for the coordinate with x, y.
- - options:
-    - name: String, name of the image layer
-    - edge_width: String, width of the edge
-    - edge_color: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
-    - face_color: String, color for filling the face, hex string format, same as `edge_color`
-    - size: Number, size of the shape
-    - label: String, label fo the shape
-    - draw_enable: Boolean, switch on the markup tool
-    - draw_label: String, set the label for the markup tool
-    - draw_freehand: Boolean, switch on freehand mode for the markup tool
-    - draw_shape_type: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
-    - draw_edge_width: Integer, set the edge width of the markup tool
-    - draw_edge_color: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
-    - draw_face_color: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
-    - draw_size: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
+ - `points`: a list of points, each point is a list of two values for the coordinate with x, y.
+ - `options`:
+    - `name`: String, name of the image layer
+    - `edge_width`: String, width of the edge
+    - `edge_color`: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
+    - `face_color`: String, color for filling the face, hex string format, same as `edge_color`
+    - `size`: Number, size of the shape
+    - `label`: String, label fo the shape
+    - `draw_enable`: Boolean, switch on the markup tool
+    - `draw_label`: String, set the label for the markup tool
+    - `draw_freehand`: Boolean, switch on freehand mode for the markup tool
+    - `draw_shape_type`: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
+    - `draw_edge_width`: Integer, set the edge width of the markup tool
+    - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
+    - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
+    - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
 
 Example in Python:
 
@@ -187,11 +189,12 @@ api.export(ImJoyPlugin())
 ```
 
 ### add_widget(options)
+
 Add a widget panel with buttons, file tree or graph.
 
- - options:
-    - name: String, name of the widget panel
-    - type: String, type of the widget panel, the supported types are: `control`, `tree`, `vega`.
+ - `options`:
+    - `name`: String, name of the widget panel
+    - `type`: String, type of the widget panel, the supported types are: `control`, `tree`, `vega`.
     - other type-specific options 
 
 For `type="control"`, you can add buttons and dropdown with callback function attached, the supported elements types are `button`, `dropdown`.
@@ -236,7 +239,6 @@ class ImJoyPlugin():
 
 api.export(ImJoyPlugin())
 ```
-
 
 For `type="tree"`, you can pass a tree with nodes and set callback for the double click events. See an example below:
 
@@ -324,25 +326,31 @@ In Python, you can also use [altair](https://altair-viz.github.io/) to obtain th
 Remove all the layers
 
 ### remove_layer(options)
+
 Remove a specific layer by its id
  - options:
     - id: String, id of the layer to be removed
 
 ### set_loader(enable)
+
 Show a loading animation
  - enable: Boolean, whether the loader should be displayed
 
 ### set_mode(mode)
+
 Set the UI mode of the viewer
  - mode: String, it should be one of the following options:
     - `"lite"`: minimal UI mode
     - `"full"`: full UI mode
 
 ### set_timeout(callback, time)
+
 A simple wrapper to the `setTimeout` function in Javascript
 
 ### clear_timeout(callback, time)
+
 A simple wrapper to the `clearTimeout` function in Javascript
+
 ## Example: Interactive segmentation with Kaibu
 
 See the example project repository [here](https://github.com/imjoy-team/imjoy-interactive-segmentation).
@@ -350,8 +358,6 @@ See the example project repository [here](https://github.com/imjoy-team/imjoy-in
 [![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=kaibu&plugin=https://raw.githubusercontent.com/imjoy-team/imjoy-interactive-segmentation/master/interactive_trainer.py)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/imjoy-team/imjoy-interactive-segmentation/master?filepath=Tutorial.ipynb)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/imjoy-team/imjoy-interactive-segmentation/blob/master/Tutorial.ipynb)
-
-
 
 ## Implementation details
 
