@@ -11,7 +11,7 @@
         :position="position"
         :fullheight="true"
         :fullwidth="false"
-        :overlay="false"
+        :overlay="screenWidth <= 800"
         :open.sync="open"
         :mobile="mobile"
         :can-cancel="true"
@@ -452,6 +452,7 @@ export default {
     toggleVisible(layer) {
       this.$store.commit("toggleVisible", layer);
       this.$nextTick(() => {
+        this.map.updateSize();
         this.map.renderSync();
       });
 
@@ -490,7 +491,7 @@ export default {
         })
       );
     },
-    init() {
+    async init() {
       const extent = [0, 0, 1024, 968];
       const projection = new Projection({
         code: "xkcd-image",
@@ -529,11 +530,24 @@ export default {
           data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
         });
 
-        this.addLayer({
+        const vector = await this.addLayer({
           type: "vector",
           name: "shape vectors",
           data:
-            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
+            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json",
+          add_feature_callback(feature) {
+            console.log("======add=====>", feature);
+            vector.getLayerAPI().select_feature(feature.properties.id);
+          },
+          select_feature_callback(feature) {
+            console.log("======select=====>", feature);
+          },
+          remove_feature_callback(feature) {
+            console.log("======remove==>", feature);
+            setTimeout(() => {
+              vector.getLayerAPI().add_feature(feature);
+            }, 3000);
+          }
         });
       }
     },
