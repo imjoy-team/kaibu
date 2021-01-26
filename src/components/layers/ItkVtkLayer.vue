@@ -372,6 +372,9 @@ export default {
       view
         .getContainer()
         .removeEventListener("mousedown", this.interactor.handleMouseDown);
+      view
+        .getContainer()
+        .removeEventListener("touchstart", this.interactor.handleTouchStart);
       itk_layer.sync_callback = this.synchronizeVtkCoordinate;
 
       this.enableItkInteraction();
