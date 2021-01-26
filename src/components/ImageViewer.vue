@@ -530,24 +530,11 @@ export default {
           data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
         });
 
-        const vector = await this.addLayer({
+        await this.addLayer({
           type: "vector",
           name: "shape vectors",
           data:
-            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json",
-          add_feature_callback(feature) {
-            console.log("======add=====>", feature);
-            vector.getLayerAPI().select_feature(feature.properties.id);
-          },
-          select_feature_callback(feature) {
-            console.log("======select=====>", feature);
-          },
-          remove_feature_callback(feature) {
-            console.log("======remove==>", feature);
-            setTimeout(() => {
-              vector.getLayerAPI().add_feature(feature);
-            }, 3000);
-          }
+            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
       }
     },
