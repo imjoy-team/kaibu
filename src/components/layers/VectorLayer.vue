@@ -198,6 +198,11 @@ function getRandomColor() {
   return color;
 }
 
+function randId() {
+  const randLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  return randLetter + Date.now();
+}
+
 function saveFile(blob, filename) {
   if (window.navigator.msSaveOrOpenBlob) {
     window.navigator.msSaveOrOpenBlob(blob, filename);
@@ -554,7 +559,23 @@ export default {
         source: this.vector_source
       });
       vector_layer.setStyle(this.featureStyle);
+
       this.vector_source.on("addfeature", event => {
+        if (!event.feature.get("id")) {
+          const id = randId();
+          event.feature.setId(id);
+          event.feature.set("id", id);
+        } else {
+          event.feature.setId(event.feature.get("id"));
+        }
+
+        if (this.config.add_feature_callback) {
+          const format = new GeoJSON();
+          this.config.add_feature_callback(
+            format.writeFeatureObject(event.feature)
+          );
+        }
+
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
@@ -562,7 +583,21 @@ export default {
             this.draw_history.push({ add: event.feature });
         }
       });
+      this.vector_source.on("changefeature", event => {
+        if (this.config.change_feature_callback) {
+          const format = new GeoJSON();
+          this.config.change_feature_callback(
+            format.writeFeatureObject(event.feature)
+          );
+        }
+      });
       this.vector_source.on("removefeature", event => {
+        if (this.config.remove_feature_callback) {
+          const format = new GeoJSON();
+          this.config.remove_feature_callback(
+            format.writeFeatureObject(event.feature)
+          );
+        }
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
@@ -629,20 +664,43 @@ export default {
         clear_features() {
           me.vector_source.clear(true);
         },
+        update_feature(id, geojsonFeature) {
+          const feature = me.vector_source.getFeatureById(id);
+          if (!feature) throw new Error(`Feature not found (id=${id})`);
+          const format = new GeoJSON();
+          const newFeature = format.readFeature(geojsonFeature);
+          feature.setGeometry(newFeature.getGeometry());
+          feature.setProperties(newFeature.getProperties());
+        },
         set_features(geojson_data) {
           const format = new GeoJSON();
           const geojsonFeatures = format.readFeatures(geojson_data);
           me.vector_source.clear(true);
           me.vector_source.addFeatures(geojsonFeatures);
         },
-        add_feature(feature) {
-          const geojson_data = {
-            type: "FeatureCollection",
-            features: [feature]
-          };
+        select_feature(id) {
+          const selectedFeatures = me.select.getFeatures();
+          selectedFeatures.clear();
+          const feature = me.vector_source.getFeatureById(id);
+          if (feature) selectedFeatures.push(feature);
+          me.selectCallBack();
+        },
+        select_features(ids) {
+          if (!Array.isArray(ids)) {
+            throw new Error("Please pass an id array");
+          }
+          const selectedFeatures = me.select.getFeatures();
+          selectedFeatures.clear();
+          for (let id of ids) {
+            const feature = me.vector_source.getFeatureById(id);
+            if (feature) selectedFeatures.push(feature);
+          }
+          me.selectCallBack();
+        },
+        add_feature(geojsonFeature) {
           const format = new GeoJSON();
-          const geojsonFeatures = format.readFeatures(geojson_data);
-          me.vector_source.addFeatures(geojsonFeatures);
+          const feature = format.readFeature(geojsonFeature);
+          me.vector_source.addFeature(feature);
         },
         add_features(geojson_data) {
           const format = new GeoJSON();
@@ -706,16 +764,10 @@ export default {
       saveFile(blob, this.config.name + "_" + this.config.id + ".json");
     },
     enableSelectInteraction() {
-      this.select = new Select({
-        wrapX: false
-      });
-      this.map.addInteraction(this.select);
+      this.select.setActive(true);
     },
     disableSelectInteraction() {
-      if (this.select) {
-        this.map.removeInteraction(this.select);
-        this.select = null;
-      }
+      this.select.setActive(false);
     },
     updateDrawInteraction() {
       if (this.selected && this.visible && this.config.draw_enable) {
@@ -769,6 +821,17 @@ export default {
         })
       });
       return color_style;
+    },
+    selectCallBack() {
+      const features = this.select.getFeatures().getArray();
+      if (this.config.select_feature_callback) {
+        const format = new GeoJSON();
+        const fs = [];
+        for (let j = 0; j < features.length; j++) {
+          fs.push(format.writeFeatureObject(features[j]));
+        }
+        this.config.select_feature_callback(fs.length > 1 ? fs : fs[0]);
+      }
     },
     setupDrawInteraction() {
       if (!this.vector_source) return;
@@ -836,6 +899,14 @@ export default {
           }),
           geometryFunction: geometryFunction
         });
+
+        this.select = new Select({
+          wrapX: false
+        });
+        this.select.on("select", this.selectCallBack.bind(this));
+        this.select.setActive(false);
+        this.map.addInteraction(this.select);
+
         this.map.addInteraction(draw);
         draw.on("drawend", async evt => {
           const feature = evt.feature;
@@ -848,12 +919,12 @@ export default {
             feature._skip_history = true;
             setTimeout(() => {
               const bbox = feature.getGeometry().getExtent();
-              const featuers = this.vector_source.getFeatures();
+              const features = this.vector_source.getFeatures();
               const format = new GeoJSON();
               let added = [],
                 removed = [];
-              for (let j = 0; j < featuers.length; j++) {
-                const pfeature = featuers[j];
+              for (let j = 0; j < features.length; j++) {
+                const pfeature = features[j];
                 if (pfeature === feature) continue;
                 const geo = pfeature.getGeometry();
                 const type = geo.getType();

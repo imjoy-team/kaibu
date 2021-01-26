@@ -61,7 +61,18 @@ export default {
   },
   mounted() {
     if (this.config._resolve) {
-      this.config._resolve({});
+      const me = this;
+      this.config._resolve({
+        _rintf: true,
+        clear_elements() {
+          me.config.elements = [];
+          me.$forceUpdate();
+        },
+        set_elements(elements) {
+          me.config.elements = elements;
+          me.$forceUpdate();
+        }
+      });
     }
   },
   methods: {
