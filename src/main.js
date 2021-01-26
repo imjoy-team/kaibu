@@ -16,11 +16,18 @@ Vue.use(Buefy);
 Vue.config.productionTip = false;
 
 Vue.component("ValidationProvider", ValidationProvider);
+
 Object.keys(rules).forEach(rule => {
   extend(rule, {
     ...rules[rule],
     message: messages[rule]
   });
+});
+
+extend("password", {
+  params: ["target"],
+  validate: (value, { target }) => value === target,
+  message: "Password does not match"
 });
 
 new Vue({

@@ -1,5 +1,5 @@
 <template>
-  <div class="form-widgett">
+  <div class="form-widget">
     <form-json
       :btnReset="{ value: 'Reset' }"
       :btnSubmit="{ value: 'Submit' }"
@@ -12,7 +12,6 @@
 </template>
 
 <script>
-import "bulma/css/bulma.min.css";
 import "vue-form-json/dist/vue-form-json.css";
 import formJson from "vue-form-json";
 

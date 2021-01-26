@@ -534,14 +534,14 @@ export default {
           type: "vector",
           name: "shape vectors",
           data:
-            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json",
+            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
 
         await this.addWidget({
-            "_rintf": true,
-            "name": "Form",
-            "type": "form"
-        })
+          _rintf: true,
+          name: "Form",
+          type: "form"
+        });
       }
     },
     setLoader(enable) {
