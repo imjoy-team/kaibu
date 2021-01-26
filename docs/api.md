@@ -97,6 +97,7 @@ api.export(ImJoyPlugin())
 ### add_shapes(shapes, options)
 Add a vector layer with polygons
 
+**Arguments**
  - `shapes`: a list of shapes, each shape is a list of coordinates
  - `options`:
     - `name`: String, name of the image layer
@@ -114,6 +115,30 @@ Add a vector layer with polygons
     - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
     - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
     - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
+    - `select_feature_callback`: Function, a function which will be called when a new feature is selected, the feature object will be passed as input argument
+    - `add_feature_callback`: Function, a function which will be called when a new feature is added to the layer, the feature object will be passed as input argument
+    - `remove_feature_callback`: Function, a function which will be called when a new feature is removed from the layer, the feature object will be passed as input argument
+    - `change_feature_callback`: Function, a function which will be called when a new feature is updated, the feature object will be passed as input argument
+
+**Returns**
+An object with the layer api functions:
+ - `name`: String, the name of the layer
+ - `id`: String, the id of the layer
+ - `clear_features`: Function, a function that can be called for clear all the features in the layer, it takes no arguments
+ - `update_feature`: Function, a function for updating the feature, it takes two arguments:
+    - `id`: String, the id of an existing feature to be updated
+    - `new_feature`: Object, the new feature object with geometry and properties
+ - `set_features`: Function, replace the features in the layer with an array of new features, it takes one argument:
+    - `features`: Array, an array of new features
+ - `select_feature`: Function, select a feature, it takes one argument:
+    - `id`: String, the id of an existing feature to be selected
+ - `select_features`: Function, select an array of features, it takes one argument:
+    - `ids`: Array, an array of features ids
+ - `add_feature`: Function, add a new feature, it takes one argument:
+    - `new_feature`: Object, the new feature object
+ - `add_features`: Function, add an array of new features, it takes one argument:
+    - `new_features`: Array, an array of features
+ - `get_features`: Function, get all the features of the layer, it takes no argument
 
 Example in Python:
 
@@ -145,22 +170,13 @@ api.export(ImJoyPlugin())
 
 Add a vector layer with points
 
+**Arguments**
  - `points`: a list of points, each point is a list of two values for the coordinate with x, y.
- - `options`:
-    - `name`: String, name of the image layer
-    - `edge_width`: String, width of the edge
-    - `edge_color`: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
-    - `face_color`: String, color for filling the face, hex string format, same as `edge_color`
-    - `size`: Number, size of the shape
-    - `label`: String, label fo the shape
-    - `draw_enable`: Boolean, switch on the markup tool
-    - `draw_label`: String, set the label for the markup tool
-    - `draw_freehand`: Boolean, switch on freehand mode for the markup tool
-    - `draw_shape_type`: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
-    - `draw_edge_width`: Integer, set the edge width of the markup tool
-    - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
-    - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
-    - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
+ - `options`: same as `add_shapes` above
+
+**Returns**
+same as `add_shapes` above
+
 
 Example in Python:
 
@@ -192,12 +208,19 @@ api.export(ImJoyPlugin())
 
 Add a widget panel with buttons, file tree or graph.
 
+**Arguments**
  - `options`:
     - `name`: String, name of the widget panel
     - `type`: String, type of the widget panel, the supported types are: `control`, `tree`, `vega`.
     - other type-specific options
 
-For `type="control"`, you can add buttons and dropdown with callback function attached, the supported elements types are `button`, `dropdown`.
+**Returns**
+An object with the layer api functions, depending on the widget types, the api functions are different, see below.
+
+For `type="control"`, you can add buttons and dropdown with callback function attached, the supported elements types are `button`, `dropdown`. The returned layer api object consist of:
+ - `clear_elements`: Function, a function for clearing all the control elements
+ - `set_elements`: Function, a function for setting the control elements, it takes one argument:
+    - `elements`: Array, an array of control elements, each element can have `type` (`button`, `dropdown`), `label` and `callback`, see the example below.
 
 See an example below:
 <!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["imageio", "numpy"]} -->
@@ -240,7 +263,14 @@ class ImJoyPlugin():
 api.export(ImJoyPlugin())
 ```
 
-For `type="tree"`, you can pass a tree with nodes and set callback for the double click events. See an example below:
+For `type="tree"`, you can pass a tree with nodes and set callback for the double click events. The returned layer api object consist of:
+ - `clear_nodes`: Function, a function for clearing all the nodes in the tree, it takes no argument
+ - `set_nodes`: Function, a function for setting new nodes in the tree, it takes one argument:
+    - `nodes`: Array, an array of nodes
+ - `get_nodes`: Function, a function for retrieving the nodes in the tree, it takes no argument. 
+
+
+See an example below:
 
 <!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["imageio", "numpy"]} -->
 ```python
@@ -290,7 +320,14 @@ nodes = [
 await tree.set_nodes(nodes)
 ```
 
-For `type="vega"`, you can pass any vega schema which enables supporting a large variety of chart types, see examples here: https://vega.github.io/vega/examples/.
+For `type="vega"`, you can pass any vega schema which enables supporting a large variety of chart types, see examples here: https://vega.github.io/vega/examples/. 
+The returned layer api object consist of:
+ - `append`: Function, a function for appending a data point to the chart, it takes two arguments:
+    - `dataName`: the name of the dataset in the chart
+    - `data`: the data point to be appended
+ - `clear_data`: Function, clear all the data point in the chart, it takes no argument
+ - `set_title`: Function, set the title of the chart, it takes a string as input argument
+ - `set_expression_function`: set a custom vega expressionFunction, for example, to be used in the spec for transforming data
 
 <!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["numpy"]} -->
 ```python
@@ -329,17 +366,23 @@ Remove all the layers
 ### remove_layer(options)
 
 Remove a specific layer by its id
+
+**Arguments**
  - `options`:
     - `id`: String, id of the layer to be removed
 
 ### set_loader(enable)
 
 Show a loading animation
+
+**Arguments**
  - `enable`: Boolean, whether the loader should be displayed
 
 ### set_mode(mode)
 
 Set the UI mode of the viewer
+
+**Arguments**
  - `mode`: String, it should be one of the following options:
     - `"lite"`: minimal UI mode
     - `"full"`: full UI mode
