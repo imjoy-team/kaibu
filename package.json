@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -11,6 +11,7 @@
     "format": "prettier --write \"{src,tests}/**/**\""
   },
   "dependencies": {
+    "@hms-dbmi/vizarr": "^0.2.0",
     "@mdi/font": "^5.3.45",
     "@turf/turf": "^5.1.6",
     "buefy": "^0.8.0",

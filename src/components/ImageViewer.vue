@@ -524,10 +524,17 @@ export default {
           setMode: this.setMode
         });
       } else {
+        // this.addLayer({
+        //   type: "itk-vtk",
+        //   name: "example image",
+        //   data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+        // });
+
         this.addLayer({
-          type: "itk-vtk",
-          name: "example image",
-          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+          type: "vizarr",
+          name: "vizarr image",
+          data:
+            "https://storage.googleapis.com/vitessce-demo-data/test-data/spraggins_ome.zarr"
         });
 
         await this.addLayer({

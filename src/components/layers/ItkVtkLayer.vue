@@ -245,7 +245,7 @@ export default {
         containerStyle: containerStyle
       };
 
-      var itk_layer = new CanvasLayer();
+      const itk_layer = new CanvasLayer();
 
       let viewer, extent, is2D;
       if (
