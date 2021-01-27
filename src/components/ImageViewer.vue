@@ -540,7 +540,26 @@ export default {
         await this.addWidget({
           _rintf: true,
           name: "Form",
-          type: "form"
+          type: "form",
+          fields: [
+            {
+              label: "Country",
+              type: "select",
+              iconLeft: "globe-americas",
+              placeholder: "Select your option",
+              options: [
+                "Afghanistan",
+                "Åland Islands",
+                "Albania",
+                "Algeria",
+                "...",
+                "Western Sahara",
+                { text: "Yemen", value: "YE" },
+                { text: "Zambia", value: "ZB", selected: true },
+                "Zimbabwe"
+              ]
+            }
+          ]
         });
       }
     },

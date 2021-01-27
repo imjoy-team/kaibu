@@ -1,13 +1,25 @@
 <template>
   <div class="form-widget">
     <form-json
-      :btnReset="{ value: 'Reset' }"
-      :btnSubmit="{ value: 'Submit' }"
+      v-if="jsonFields && jsonFields.length > 0"
+      :btnReset="{ value: config.reset_text || 'Reset' }"
+      :btnSubmit="{ value: config.submit_text || 'Submit' }"
       :camelizePayloadKeys="true"
       :formFields="jsonFields"
-      formName="userProfil"
+      :formName="config.name || 'form'"
     >
     </form-json>
+    <div class="box" v-else>
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p>
+              The form is empty
+            </p>
+          </div>
+        </div>
+      </article>
+    </div>
   </div>
 </template>
 
@@ -15,29 +27,6 @@
 import "vue-form-json/dist/vue-form-json.css";
 import formJson from "vue-form-json";
 
-const jsonFields = [
-  [
-    {
-      label: "First Name",
-      value: "fir",
-      rules: {
-        min: 4,
-        max: 20
-      }
-    },
-    {
-      label: "Last Name",
-      placeholder: "Last Name placeholder",
-      rules: {
-        min: 3
-      }
-    }
-  ],
-  {
-    html:
-      "<div class='box'><article class='media'><div class='media-left'><figure class='image is-64x64'><img src='https://bulma.io/images/placeholders/64x64.png' alt='Image'></figure></div><div class='media-content'><div class='content'><p><strong class='has-text-info'>Info</strong><br>You can also pass html like this box</p></div>"
-  }
-];
 export default {
   name: "form-widget",
   type: "form",
@@ -51,15 +40,29 @@ export default {
     }
   },
   data() {
-    return {};
-  },
-  computed: {
-    jsonFields: () => jsonFields
+    return { jsonFields: [] };
   },
   mounted() {
-    this.$root.$on("formSubmitted", values => alert(JSON.stringify(values)));
+    this.jsonFields = this.config.fields;
+    this.config.form_submit_callback =
+      this.config.form_submit_callback ||
+      function(values) {
+        console.log("Form submitted", values);
+      };
+    this.$root.$on("formSubmitted", this.config.form_submit_callback);
     if (this.config._resolve) {
-      this.config._resolve({});
+      const me = this;
+      this.config._resolve({
+        _rintf: true,
+        clear_fields() {
+          me.jsonFields = [];
+          me.$forceUpdate();
+        },
+        set_fields(fields) {
+          me.jsonFields = fields;
+          me.$forceUpdate();
+        }
+      });
     }
   },
   methods: {}
