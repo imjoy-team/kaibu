@@ -57,10 +57,14 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
     return "ready";
   };
 
-  CanvasLayer.prototype.render = function render() {
+  CanvasLayer.prototype.render = function render(frameState) {
     if (this.sync_callback) {
-      this.sync_callback();
+      const center = frameState.viewState.center
+      const zoom = frameState.viewState.zoom
+      this.sync_callback(center, zoom);
     }
+
+
     this.viewerElement.style.opacity = this.getOpacity();
     return this.viewerElement; //return the viewer element
   };
@@ -138,19 +142,25 @@ export default {
 
     setupLayer() {
       return new Promise(resolve => {
-        const vizarr_layer = new CanvasLayer();
+        const vizarrLayer = new CanvasLayer();
         if (window.CreateVizarrViewer) {
-          window.CreateVizarrViewer(vizarr_layer.viewerElement).then(viewer => {
+          window.CreateVizarrViewer(vizarrLayer.viewerElement).then(viewer => {
             this.viewer = viewer;
-            resolve(vizarr_layer);
+            vizarrLayer.sync_callback = (center, zoom)=>{
+                viewer.setViewState({target: [center[0], center[1], 0], zoom})
+            }
+            resolve(vizarrLayer);
           });
         } else {
           window.document.addEventListener("vizarr-loaded", () => {
             window
-              .CreateVizarrViewer(vizarr_layer.viewerElement)
+              .CreateVizarrViewer(vizarrLayer.viewerElement)
               .then(viewer => {
                 this.viewer = viewer;
-                resolve(vizarr_layer);
+                // vizarrLayer.sync_callback = (center, zoom)=>{
+                //     viewer.setViewState({target: [center[0], center[1], 0], zoom: zoom-10})
+                // }
+                resolve(vizarrLayer);
               });
           });
         }

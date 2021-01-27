@@ -486,8 +486,8 @@ export default {
         new View({
           projection: projection,
           center: getCenter(config.extent),
-          zoom: 1,
-          minZoom: -10
+          zoom: 10,
+          minZoom: -20
         })
       );
     },

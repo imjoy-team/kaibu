@@ -2,7 +2,7 @@ import __SNOWPACK_ENV__ from './vizarr_module/__snowpack__/env.js';
 import.meta.env = __SNOWPACK_ENV__;
 
 import React from './vizarr_module/web_modules/react.js';
-import {useRecoilState, useSetRecoilState } from './vizarr_module/web_modules/recoil.js';
+import {useRecoilState, useSetRecoilState, useRecoilValue} from './vizarr_module/web_modules/recoil.js';
 import {createSourceData} from './vizarr_module/_dist_/io.js';
 
 import { layerIdsState, sourceInfoState, viewerViewState } from './vizarr_module/_dist_/state.js';
@@ -24,7 +24,7 @@ let resolveVizarr;
 export function CustomVizarr() {
   const setLayerIds = useSetRecoilState(layerIdsState);
   const setSourceInfo = useSetRecoilState(sourceInfoState);
-  const [setViewState] = useRecoilState(viewerViewState);
+  const [viewState, setViewState] = useRecoilState(viewerViewState);
 
 
   // Copied from './vizarr_modules/_dist_/vizarr.js
@@ -43,6 +43,32 @@ export function CustomVizarr() {
     // Update active Layer IDs
     setLayerIds((prevIds) => [...prevIds, id]);
   }
+
+
+
+  // Runs once on page Load
+  // useEffect(() => {
+  //   const url = 'https://storage.googleapis.com/vitessce-demo-data/test-data/spraggins_ome.zarr';
+  //   const config = {
+  //     source: url, // source could be a custom Zarr.js Store!
+  //   };
+  //   addImage(config);
+  // }, []);
+
+  const onClick = () => {
+    console.log('Resetting viewState');
+    // setViewState({ target: [ 0, 0, 0 ], zoom: 0 });
+    console.log('=====vizarr==>',viewState.target, viewState.zoom);
+    const map_veiw = window.map.getView();
+    const zoom = map_veiw.getZoom();
+    const center = map_veiw.getCenter();
+    console.log("=====openlayers==>", center, zoom)
+
+    console.log('====diff====>', viewState.target[0] - center[0], viewState.target[1]-center[1], viewState.zoom-zoom)
+    
+  };
+
+
 
   if(resolveVizarr){
     resolveVizarr({
