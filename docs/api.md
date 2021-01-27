@@ -211,13 +211,22 @@ Add a widget panel with buttons, file tree or graph.
 **Arguments**
  - `options`:
     - `name`: String, name of the widget panel
-    - `type`: String, type of the widget panel, the supported types are: `control`, `tree`, `vega`.
+    - `type`: String, type of the widget panel, the supported types are: `control`, `form` `tree`, `vega`.
     - other type-specific options
 
 **Returns**
 An object with the layer api functions, depending on the widget types, the api functions are different, see below.
 
-For `type="control"`, you can add buttons and dropdown with callback function attached, the supported elements types are `button`, `dropdown`. The returned layer api object consist of:
+
+#### Control Widget
+For `type="control"`, you can add buttons and dropdown with callback function attached, the supported elements types are `button`, `dropdown`. 
+**Arguments**
+ - `name`: String, name of the widget panel
+ - `type`: String, type of the widget panel, it must be `control` for control widget
+ - `elements`: Array, an array of control element with different types. For example, a button: `{"type": "button", "label": "Say Hello", "callback": say_hello}` and a dropdown menu: `{"type": "dropdown","label": "Mode","options": ["Mode A", "Mode B"], "callback": select_mode}`
+
+**Returns**
+The returned layer api object consist of:
  - `clear_elements`: Function, a function for clearing all the control elements
  - `set_elements`: Function, a function for setting the control elements, it takes one argument:
     - `elements`: Array, an array of control elements, each element can have `type` (`button`, `dropdown`), `label` and `callback`, see the example below.
@@ -263,11 +272,90 @@ class ImJoyPlugin():
 api.export(ImJoyPlugin())
 ```
 
-For `type="tree"`, you can pass a tree with nodes and set callback for the double click events. The returned layer api object consist of:
+#### Form Widget
+For `type="form"`, you can show a form with many fields for the user to fill. 
+
+**Arguments**
+ - `name`: String, the name of the form
+ - `type`: String, type of the widget panel, it must be `form` for form widget
+ - `fields`: Array, an array of fields, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
+
+**Returns**
+The returned layer api object consist of:
+ - `clear_fields`: Function, remove all the fields in the form
+ - `set_fields`: Function, set an array of fields, different field types are supported, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
+
+<!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["imageio", "numpy"]} -->
+```python
+from imjoy import api
+
+class ImJoyPlugin():
+    async def setup(self):
+        pass
+
+    async def run(self, ctx):
+        viewer = await api.createWindow(src="https://kaibu.org/#/app")
+
+        async def form_submit_callback(fields):
+            await api.alert("Selected mode: " + str(fields))
+
+        await viewer.add_widget(
+            {
+                "_rintf": True,
+                "name": "My Form",
+                "type": "form",
+                "form_submit_callback": form_submit_callback,
+                "fields": [
+                    {
+                        "label": "First Name",
+                        "value": "fir",
+                        "rules": {
+                            "min": 4,
+                            "max": 20
+                        }
+                    },
+                     {
+                        "label": "Country",
+                        "type": "select",
+                        "iconLeft": "globe-americas",
+                        "placeholder": "Select your option",
+                        "options": [
+                            "Afghanistan",
+                            "Åland Islands",
+                            "Albania",
+                            "Algeria",
+                            "...",
+                            "Western Sahara",
+                            {"text": "Yemen", "value": "YE"},
+                            {"text": "Zambia", "value": "ZB", "selected": true},
+                            "Zimbabwe"
+                        ]
+                    },
+                    {
+                        "html": "<div class='box'><article class='media'><div class='media-left'><figure class='image is-64x64'><img src='https://bulma.io/images/placeholders/64x64.png' alt='Image'></figure></div><div class='media-content'><div class='content'><p><strong class='has-text-info'>Info</strong><br>You can also pass html like this box</p></div>"
+                    },
+                ],
+            })
+
+api.export(ImJoyPlugin())
+```
+
+
+#### Tree Widget
+For `type="tree"`, you can pass a tree with nodes and set callback for the double click events.
+
+**Arguments**
+ - `name`: String, name of the tree
+ - `type`: String, type of the widget panel, it must be `tree` for tree widget
+ - `node_dbclick_callback`: Function, a callback function triggered when the user double click on a node, one argument with the node object will be passed to the function
+ - `nodes`: Array, an array of node objects. One node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes. 
+
+**Returns**
+The returned layer api object consist of:
  - `clear_nodes`: Function, a function for clearing all the nodes in the tree, it takes no argument
  - `set_nodes`: Function, a function for setting new nodes in the tree, it takes one argument:
-    - `nodes`: Array, an array of nodes
- - `get_nodes`: Function, a function for retrieving the nodes in the tree, it takes no argument. 
+    - `nodes`: Array, an array of nodes, and one node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes.
+ - `get_nodes`: Function, a function for retrieving the nodes in the tree, it takes no argument.
 
 
 See an example below:
@@ -320,7 +408,14 @@ nodes = [
 await tree.set_nodes(nodes)
 ```
 
+#### Vega Widget
 For `type="vega"`, you can pass any vega schema which enables supporting a large variety of chart types, see examples here: https://vega.github.io/vega/examples/. 
+**Arguments**
+ - `name`: String, name of the widget panel
+ - `type`: String, type of the widget panel, it must be `vega` for vega widget
+ - `spec`: Object or String, a vega spec object or URL
+
+**Returns**
 The returned layer api object consist of:
  - `append`: Function, a function for appending a data point to the chart, it takes two arguments:
     - `dataName`: the name of the dataset in the chart
