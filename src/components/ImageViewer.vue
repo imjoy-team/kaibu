@@ -536,31 +536,6 @@ export default {
           data:
             "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
-
-        await this.addWidget({
-          _rintf: true,
-          name: "Form",
-          type: "form",
-          fields: [
-            {
-              label: "Country",
-              type: "select",
-              iconLeft: "globe-americas",
-              placeholder: "Select your option",
-              options: [
-                "Afghanistan",
-                "Åland Islands",
-                "Albania",
-                "Algeria",
-                "...",
-                "Western Sahara",
-                { text: "Yemen", value: "YE" },
-                { text: "Zambia", value: "ZB", selected: true },
-                "Zimbabwe"
-              ]
-            }
-          ]
-        });
       }
     },
     setLoader(enable) {
