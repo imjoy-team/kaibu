@@ -517,6 +517,16 @@ class ImJoyPlugin {
 }
 api.export(new ImJoyPlugin())
 ```
+
+### update_slider(name, value)
+
+Update a slider value by its name
+
+**Arguments**
+ - `name`: String, the name of the slider
+ - `value`: Number or Arrary, the value for the slider, or an array with two elements
+
+(Also, see the example above)
 ### set_loader(enable)
 
 Show a loading animation
