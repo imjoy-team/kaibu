@@ -34,9 +34,6 @@
           </div>
 
           <div class="block" v-if="mode === 'full'">
-            <!-- <div class="field">
-              <b-switch v-model="showGallery">Gallery</b-switch>
-            </div> -->
             <div class="field">
               <b-dropdown aria-role="list">
                 <b-button
@@ -184,10 +181,7 @@
       >
         <img style="width: 30px;" src="static/img/kaibu-icon.svg" />
       </button>
-      <div v-show="showGallery">
-        <gallery :collections="collections"></gallery>
-      </div>
-      <div v-show="!showGallery" class="p-1">
+      <div class="p-1">
         <div id="map" :style="{ width: viewerWidth }"></div>
         <section
           v-if="activeSliders"
@@ -221,7 +215,6 @@ import "ol/ol.css";
 import { Map, View } from "ol";
 import { defaults } from "ol/interaction";
 import { randId } from "../utils";
-import Gallery from "@/components/Gallery";
 import * as layerComponents from "@/components/layers";
 import * as widgetComponents from "@/components/widgets";
 import { Projection } from "ol/proj";
@@ -241,8 +234,6 @@ for (let c in widgetComponents) {
   components[widgetComponents[c].name] = widgetComponents[c];
   widgetTypes[widgetComponents[c].type] = widgetComponents[c];
 }
-
-components["gallery"] = Gallery;
 
 // You have to install sortable.js to use it:
 // 'npm install sortablejs'
@@ -332,7 +323,6 @@ export default {
       mobile: "fullwidth",
       reduce: false,
       screenWidth: 1000,
-      showGallery: false,
       newLayerType: null,
       collections: null,
       layerTypes,
