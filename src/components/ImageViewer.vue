@@ -196,7 +196,7 @@
             <label class="label slider-label">{{ slider.name }}</label>
             <b-slider
               class="slider-body"
-              @input="slider.changed"
+              @input="slider.change_callback"
               v-model="slider.value"
               :min="slider.min || 0"
               :max="slider.max || 1"
@@ -328,7 +328,8 @@ export default {
       layerTypes,
       widgetTypes,
       widgets: {},
-      loading: false
+      loading: false,
+      activeSliders: []
     };
   },
   mounted() {
@@ -356,8 +357,7 @@ export default {
       layers: state => state.layers,
       layer_configs: state => state.layer_configs,
       currentLayer: state => state.currentLayer,
-      map: state => state.map,
-      activeSliders: state => state.activeSliders
+      map: state => state.map
     })
   },
   methods: {
@@ -511,7 +511,8 @@ export default {
           clearLayers: this.clearLayers,
           addWidget: this.addWidget,
           setLoader: this.setLoader,
-          setMode: this.setMode
+          setMode: this.setMode,
+          setSliders: this.setSliders
         });
       } else {
         this.addLayer({
@@ -527,6 +528,10 @@ export default {
             "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
       }
+    },
+    setSliders(sliders) {
+      this.activeSliders = sliders;
+      this.$forceUpdate();
     },
     setLoader(enable) {
       this.loading = enable;
@@ -614,6 +619,9 @@ export default {
 }
 .tab-item {
   max-height: 400px;
+}
+.slider-container > .field {
+  height: 20px;
 }
 .slider-container {
   padding-left: 10px;

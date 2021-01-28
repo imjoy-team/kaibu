@@ -170,18 +170,6 @@ export default {
   mounted() {
     this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity = 1.0;
-    // this.config.sliders = [
-    //   {
-    //     name: "T",
-    //     min: 0,
-    //     max: 100,
-    //     step: 1,
-    //     value: 3,
-    //     changed() {
-    //       console.log("t slider changed.");
-    //     }
-    //   }
-    // ];
     this.config.init = this.init;
   },
   beforeDestroy() {
