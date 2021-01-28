@@ -57,7 +57,8 @@ export async function setupImJoyAPI({
   clearLayers,
   addWidget,
   setLoader,
-  setMode
+  setMode,
+  selectWidgetTab
 }) {
   setMode("lite");
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
@@ -135,6 +136,9 @@ export async function setupImJoyAPI({
     },
     async set_mode(mode) {
       setMode(mode);
+    },
+    async select_widget_tab(tab) {
+      selectWidgetTab(tab);
     }
   };
 

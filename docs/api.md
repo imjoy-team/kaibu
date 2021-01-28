@@ -490,6 +490,8 @@ A simple wrapper to the `setTimeout` function in Javascript
 
 A simple wrapper to the `clearTimeout` function in Javascript
 
+### select_widget_tab(tab_index)
+Activate a specific widget tab
 ## Example: Interactive segmentation with Kaibu
 
 See the example project repository [here](https://github.com/imjoy-team/imjoy-interactive-segmentation).

@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,6 +15,7 @@
     "@turf/turf": "^5.1.6",
     "buefy": "^0.8.0",
     "core-js": "^3.6.5",
+    "itk-vtk-viewer": "^11.0.0",
     "json-stringify-safe": "^5.0.1",
     "mathjs": "^7.0.1",
     "ol": "^6.5.0",

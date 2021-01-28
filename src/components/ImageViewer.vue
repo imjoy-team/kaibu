@@ -100,6 +100,7 @@
           <b-tabs
             size="is-small"
             class="block"
+            v-model="selectedWidgetTab"
             v-if="Object.keys(widgets).length > 0"
           >
             <b-tab-item
@@ -338,7 +339,8 @@ export default {
       layerTypes,
       widgetTypes,
       widgets: {},
-      loading: false
+      loading: false,
+      selectedWidgetTab: undefined
     };
   },
   mounted() {
@@ -441,6 +443,9 @@ export default {
     layerSorted() {
       this.$store.commit("sortLayers");
     },
+    selectWidgetTab(tab) {
+      this.selectedWidgetTab = tab;
+    },
     removeLayer(layer) {
       this.$store.commit("removeLayer", layer);
       this.$forceUpdate();
@@ -521,7 +526,8 @@ export default {
           clearLayers: this.clearLayers,
           addWidget: this.addWidget,
           setLoader: this.setLoader,
-          setMode: this.setMode
+          setMode: this.setMode,
+          selectWidgetTab: this.selectWidgetTab
         });
       } else {
         this.addLayer({
@@ -801,5 +807,8 @@ svg {
   100% {
     transform: translate(24px, 0);
   }
+}
+.b-sidebar .sidebar-background {
+  display: none;
 }
 </style>
