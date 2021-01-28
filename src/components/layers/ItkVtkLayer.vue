@@ -464,12 +464,12 @@ export default {
       const viewPoint = camera.getPosition();
       camera.setFocalPoint(
         viewFocus[0] - diff_x,
-        this.extent[3] - (viewFocus[1] - diff_y),
+        viewFocus[1] - diff_y,
         viewFocus[2]
       );
       camera.setPosition(
         viewPoint[0] - diff_x,
-        this.extent[3] - (viewPoint[1] - diff_y),
+        viewPoint[1] - diff_y,
         viewPoint[2]
       );
       camera.computeDistance();
