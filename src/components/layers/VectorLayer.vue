@@ -4,7 +4,7 @@
       <div class="block">
         <b-tooltip label="Cursor" position="is-top">
           <button
-            :class="{ 'is-primary': !config.draw_enable && !select }"
+            :class="{ 'is-primary': !config.draw_enable && !selectIsActive }"
             @click="
               disableSelectInteraction();
               config.draw_enable = false;
@@ -18,7 +18,7 @@
         </b-tooltip>
         <b-tooltip label="Select" position="is-top">
           <button
-            :class="{ 'is-primary': !config.draw_enable && select }"
+            :class="{ 'is-primary': !config.draw_enable && selectIsActive }"
             @click="
               enableSelectInteraction();
               config.draw_enable = false;
@@ -318,6 +318,7 @@ export default {
     return {
       layer: null,
       select: null,
+      selectIsActive: false,
       vector_source: null,
       draw_history: [],
       draw_edge_color: null,
@@ -605,6 +606,10 @@ export default {
             this.draw_history.push({ remove: event.feature });
         }
       });
+      this.select = new Select({
+        wrapX: false
+      });
+      this.select.on("select", this.selectCallBack.bind(this));
       vector_layer.getLayerAPI = this.getLayerAPI;
       return vector_layer;
     },
@@ -663,6 +668,13 @@ export default {
         id: this.config.id,
         clear_features() {
           me.vector_source.clear(true);
+        },
+        update_config(new_config) {
+          for (let k in new_config) {
+            me.config[k] = new_config[k];
+          }
+          me.$forceUpdate();
+          me.updateDrawInteraction();
         },
         update_feature(id, geojsonFeature) {
           const feature = me.vector_source.getFeatureById(id);
@@ -765,9 +777,11 @@ export default {
     },
     enableSelectInteraction() {
       this.select.setActive(true);
+      this.selectIsActive = true;
     },
     disableSelectInteraction() {
       this.select.setActive(false);
+      this.selectIsActive = false;
     },
     updateDrawInteraction() {
       if (this.selected && this.visible && this.config.draw_enable) {
@@ -900,10 +914,6 @@ export default {
           geometryFunction: geometryFunction
         });
 
-        this.select = new Select({
-          wrapX: false
-        });
-        this.select.on("select", this.selectCallBack.bind(this));
         this.select.setActive(false);
         this.map.addInteraction(this.select);
 
