@@ -124,6 +124,8 @@ Add a vector layer with polygons
 An object with the layer api functions:
  - `name`: String, the name of the layer
  - `id`: String, the id of the layer
+ - `update_config`: Function, update the config layer config, it takes one argument:
+    - `config`: the new config, it can contain one or more options described in **Arguments**. For example, it can be used to update the markup tool setting.
  - `clear_features`: Function, a function that can be called for clear all the features in the layer, it takes no arguments
  - `update_feature`: Function, a function for updating the feature, it takes two arguments:
     - `id`: String, the id of an existing feature to be updated
