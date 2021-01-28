@@ -494,7 +494,7 @@ class ImJoyPlugin {
                 min: 0,
                 max: 1000,
                 step: 1,
-                value: [10, 300], // this makes it a range slider
+                value: [200, 400], // this makes it a range slider
                 change_callback() {
                     console.log("z slider changed.");
                 }
@@ -511,6 +511,8 @@ class ImJoyPlugin {
                 }
             }
         ])
+
+        await viewer.update_slider("T", 30)
     }
 }
 api.export(new ImJoyPlugin())

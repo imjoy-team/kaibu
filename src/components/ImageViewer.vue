@@ -512,7 +512,8 @@ export default {
           addWidget: this.addWidget,
           setLoader: this.setLoader,
           setMode: this.setMode,
-          setSliders: this.setSliders
+          setSliders: this.setSliders,
+          updateSlider: this.updateSlider
         });
       } else {
         this.addLayer({
@@ -527,6 +528,13 @@ export default {
           data:
             "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
+      }
+    },
+    updateSlider(name, value) {
+      const sliders = this.activeSliders.filter(slider => slider.name === name);
+      if (sliders.length <= 0) throw new Error(`Slider "${name}" not found`);
+      else {
+        sliders[0].value = value;
       }
     },
     setSliders(sliders) {
@@ -626,7 +634,7 @@ export default {
 .slider-container {
   padding-left: 10px;
   padding-right: 10px;
-  bottom: 0px;
+  bottom: 12px;
   position: absolute;
 }
 .slider-label {

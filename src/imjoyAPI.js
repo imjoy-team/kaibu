@@ -58,7 +58,8 @@ export async function setupImJoyAPI({
   addWidget,
   setLoader,
   setMode,
-  setSliders
+  setSliders,
+  updateSlider
 }) {
   setMode("lite");
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
@@ -139,6 +140,9 @@ export async function setupImJoyAPI({
     },
     async set_sliders(sliders) {
       setSliders(sliders);
+    },
+    async update_slider(name, value) {
+      updateSlider(name, value);
     }
   };
 
