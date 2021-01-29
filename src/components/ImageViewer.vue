@@ -34,9 +34,6 @@
           </div>
 
           <div class="block" v-if="mode === 'full'">
-            <!-- <div class="field">
-              <b-switch v-model="showGallery">Gallery</b-switch>
-            </div> -->
             <div class="field">
               <b-dropdown aria-role="list">
                 <b-button
@@ -184,10 +181,7 @@
       >
         <img style="width: 30px;" src="static/img/kaibu-icon.svg" />
       </button>
-      <div v-show="showGallery">
-        <gallery :collections="collections"></gallery>
-      </div>
-      <div v-show="!showGallery" class="p-1">
+      <div class="p-1">
         <div id="map" :style="{ width: viewerWidth }"></div>
         <section
           v-if="activeSliders"
@@ -202,7 +196,7 @@
             <label class="label slider-label">{{ slider.name }}</label>
             <b-slider
               class="slider-body"
-              @input="slider.changed"
+              @input="slider.change_callback"
               v-model="slider.value"
               :min="slider.min || 0"
               :max="slider.max || 1"
@@ -221,7 +215,6 @@ import "ol/ol.css";
 import { Map, View } from "ol";
 import { defaults } from "ol/interaction";
 import { randId } from "../utils";
-import Gallery from "@/components/Gallery";
 import * as layerComponents from "@/components/layers";
 import * as widgetComponents from "@/components/widgets";
 import { Projection } from "ol/proj";
@@ -241,8 +234,6 @@ for (let c in widgetComponents) {
   components[widgetComponents[c].name] = widgetComponents[c];
   widgetTypes[widgetComponents[c].type] = widgetComponents[c];
 }
-
-components["gallery"] = Gallery;
 
 // You have to install sortable.js to use it:
 // 'npm install sortablejs'
@@ -332,13 +323,13 @@ export default {
       mobile: "fullwidth",
       reduce: false,
       screenWidth: 1000,
-      showGallery: false,
       newLayerType: null,
       collections: null,
       layerTypes,
       widgetTypes,
       widgets: {},
-      loading: false
+      loading: false,
+      activeSliders: []
     };
   },
   mounted() {
@@ -366,8 +357,7 @@ export default {
       layers: state => state.layers,
       layer_configs: state => state.layer_configs,
       currentLayer: state => state.currentLayer,
-      map: state => state.map,
-      activeSliders: state => state.activeSliders
+      map: state => state.map
     })
   },
   methods: {
@@ -521,7 +511,9 @@ export default {
           clearLayers: this.clearLayers,
           addWidget: this.addWidget,
           setLoader: this.setLoader,
-          setMode: this.setMode
+          setMode: this.setMode,
+          setSliders: this.setSliders,
+          updateSlider: this.updateSlider
         });
       } else {
         this.addLayer({
@@ -537,6 +529,17 @@ export default {
             "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
         });
       }
+    },
+    updateSlider(name, value) {
+      const sliders = this.activeSliders.filter(slider => slider.name === name);
+      if (sliders.length <= 0) throw new Error(`Slider "${name}" not found`);
+      else {
+        sliders[0].value = value;
+      }
+    },
+    setSliders(sliders) {
+      this.activeSliders = sliders;
+      this.$forceUpdate();
     },
     setLoader(enable) {
       this.loading = enable;
@@ -625,10 +628,13 @@ export default {
 .tab-item {
   max-height: 400px;
 }
+.slider-container > .field {
+  height: 20px;
+}
 .slider-container {
   padding-left: 10px;
   padding-right: 10px;
-  bottom: 0px;
+  bottom: 12px;
   position: absolute;
 }
 .slider-label {
