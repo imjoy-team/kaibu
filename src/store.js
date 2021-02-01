@@ -6,7 +6,6 @@ export const store = new Vuex.Store({
   state: {
     layers: {},
     layer_configs: [],
-    activeSliders: null,
     currentLayer: null,
     map: null
   },
@@ -84,9 +83,6 @@ export const store = new Vuex.Store({
         state.currentLayer.selected = false;
       }
       state.currentLayer = layer;
-      if (layer.sliders) {
-        state.activeSliders = layer.sliders;
-      }
       layer.selected = true;
     },
     setMap(state, map) {

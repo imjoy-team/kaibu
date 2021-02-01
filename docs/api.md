@@ -124,6 +124,8 @@ Add a vector layer with polygons
 An object with the layer api functions:
  - `name`: String, the name of the layer
  - `id`: String, the id of the layer
+ - `update_config`: Function, update the config layer config, it takes one argument:
+    - `config`: the new config, it can contain one or more options described in **Arguments**. For example, it can be used to update the markup tool setting.
  - `clear_features`: Function, a function that can be called for clear all the features in the layer, it takes no arguments
  - `update_feature`: Function, a function for updating the feature, it takes two arguments:
     - `id`: String, the id of an existing feature to be updated
@@ -466,6 +468,67 @@ Remove a specific layer by its id
  - `options`:
     - `id`: String, id of the layer to be removed
 
+### set_sliders(sliders)
+
+Set an array of sliders shown in the bottom
+
+**Arguments**
+ - `sliders`: Array, an array of slider objects, one slider can contain the following fields:
+    - `name`: String, name of the slider, it should be short, ideally one letter
+    - `min`: Number, the minimum value of the slider
+    - `max`: Number, the maximum value of the slider
+    - `step`: Number, the sliding step
+    - `value`: Number or Array, the default value of the slider, if an array of two values is given, then it will become a range slider.
+    - `change_callback`: Function, the callback function called when the slider value changed
+
+Example in Javascript:
+<!-- ImJoyPlugin: {"type": "web-worker", "editor_height": "400px"} -->
+```js
+class ImJoyPlugin {
+    async setup() {}
+    async run(ctx) {
+        const viewer = await api.createWindow({src: "https://kaibu.org/#/app", name: "Kaibu"})
+        await viewer.view_image("https://images.proteinatlas.org/61448/1319_C10_2_blue_red_green.jpg")
+        await viewer.set_sliders([
+            {
+                _rintf: true,
+                name: "Z",
+                min: 0,
+                max: 1000,
+                step: 1,
+                value: [200, 400], // this makes it a range slider
+                change_callback() {
+                    console.log("z slider changed.");
+                }
+            },
+            {
+                _rintf: true,
+                name: "T",
+                min: 0,
+                max: 100,
+                step: 1,
+                value: 10,
+                change_callback() {
+                    console.log("t slider changed.");
+                }
+            }
+        ])
+
+        await viewer.update_slider("T", 30)
+    }
+}
+api.export(new ImJoyPlugin())
+```
+
+### update_slider(name, value)
+
+Update a slider value by its name
+
+**Arguments**
+ - `name`: String, the name of the slider
+ - `value`: Number or Arrary, the value for the slider, or an array with two elements
+
+(Also, see the example above)
 ### set_loader(enable)
 
 Show a loading animation
