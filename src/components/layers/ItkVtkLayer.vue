@@ -242,10 +242,6 @@ export default {
         overflow: "hidden",
         display: "block-inline"
       };
-      const viewerStyle = {
-        backgroundColor: [0, 0, 0, 0],
-        containerStyle: containerStyle
-      };
       const itk_layer = new CanvasLayer();
       let viewer, extent, is2D;
       const uiContainer = document.createElement("div");
@@ -258,13 +254,19 @@ export default {
         const size = multiScaleImage.pyramid[0].largestImage.size;
         is2D = multiScaleImage.imageType.dimension === 2;
         viewer = await itkVtkViewer.createViewer(itk_layer.viewerElement, {
-          viewerStyle: viewerStyle,
           image: multiScaleImage,
           pointSets: null,
           geometries: null,
           use2D: is2D,
           rotate: false,
-          uiContainer: uiContainer
+          uiContainer: uiContainer,
+          config: {
+            viewerConfigVersion: "0.2",
+            xyLowerLeft: true,
+            containerStyle,
+            uiCollapsed: false,
+            backgroundColor: [0, 0, 0, 0],
+          }
         });
         //TODO: udpate the extent when selecting different plane
         extent = [0, 0, size[0], size[1]];
@@ -379,7 +381,7 @@ export default {
         .removeEventListener("touchstart", this.interactor.handleTouchStart);
       itk_layer.sync_callback = this.synchronizeVtkCoordinate;
 
-      this.enableItkInteraction();
+      // this.enableItkInteraction();
       this.renderWindow.render();
     },
     disableSync(itk_layer) {
