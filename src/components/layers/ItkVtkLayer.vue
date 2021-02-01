@@ -265,7 +265,7 @@ export default {
             xyLowerLeft: true,
             containerStyle,
             uiCollapsed: false,
-            backgroundColor: [0, 0, 0, 0],
+            backgroundColor: [0, 0, 0, 0]
           }
         });
         //TODO: udpate the extent when selecting different plane
@@ -499,7 +499,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
-.itk-vtk-layer > section > div > div > div > canvas {
+.itk-vtk-layer > section > div > div > div > div > canvas {
   max-width: 100%;
   height: 140px;
 }
