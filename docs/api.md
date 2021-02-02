@@ -115,7 +115,7 @@ Add a vector layer with polygons
     - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
     - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
     - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
-    - `tag_suggestions`: Array, for tagging features in the layer, a set of tags will be displayed for the user to choose from
+    - `predefined_tags`: Array, for tagging features in the layer, a set of tags will be displayed for the user to choose from
     - `single_tag_mode`: Boolean, if set to true, only one tag is allowed for a feature
     - `user_name`: String, for making comment on each feature, the user name will be applied for the current user
     - `select_feature_callback`: Function, a function which will be called when a new feature is selected, the feature object will be passed as input argument

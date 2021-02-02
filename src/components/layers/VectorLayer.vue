@@ -178,8 +178,8 @@
             updateMetadata();
           "
           @remove="updateMetadata()"
-          :data="config.allowed_tags"
-          :open-on-focus="!!config.allowed_tags"
+          :data="config.predefined_tags"
+          :open-on-focus="!!config.predefined_tags"
           v-model="currentMetadata.tags"
           ellipsis
           type="is-info"
@@ -936,6 +936,10 @@ export default {
           this.currentMetadata.tags = [
             this.currentMetadata.tags[this.currentMetadata.tags.length - 1]
           ];
+      }
+      if(this.config.only_predefined_tags){
+        if (this.currentMetadata.tags.length > 1 && this.config.predefined_tags && this.config.predefined_tags.length>0)
+        this.currentMetadata.tags = this.currentMetadata.tags.filter(tag => this.config.predefined_tags.includes(tag))
       }
     },
     updateMetadata() {

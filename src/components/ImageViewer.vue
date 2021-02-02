@@ -83,6 +83,9 @@
                 <button class="button" slot="trigger">
                   <b-icon icon="dots-vertical" slot="trigger"></b-icon>
                 </button>
+                <b-dropdown-item @click="goto('https://github.com/imjoy-team/kaibu')" aria-role="listitem"
+                  ><b-icon icon="github"></b-icon> Github</b-dropdown-item
+                >
                 <b-dropdown-item @click="screenshot()" aria-role="listitem"
                   ><b-icon icon="camera"></b-icon> Screenshot</b-dropdown-item
                 >
@@ -539,7 +542,8 @@ export default {
           name: "shape vectors",
           data:
             "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json",
-          allowed_tags: ["nuclei", "cell"],
+          predefined_tags: ["nuclei", "cell"],
+          only_predefined_tags: true,
           single_tag_mode: false
         });
 
