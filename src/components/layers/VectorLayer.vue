@@ -91,22 +91,9 @@
         </b-tooltip>
       </div>
 
-      <b-field label="Edge Width">
-        <b-numberinput
-          v-model="config.draw_edge_width"
-          size="is-small"
-          controls-position="compact"
-        ></b-numberinput>
-      </b-field>
-      <b-field label="Point Size" v-if="config.draw_shape_type === 'Point'">
-        <b-numberinput
-          v-model="config.draw_size"
-          size="is-small"
-          controls-position="compact"
-        ></b-numberinput>
-      </b-field>
       <div class="block">
-        <b-tooltip label="Edge Color" position="is-top">
+        <label class="label" style="display: inline-block;">Color:&nbsp;</label>
+        <b-tooltip label="Edge Color" position="is-bottom">
           <v-swatches
             :disabled="!config.draw_enable"
             style="top: 10px;margin:1px;"
@@ -133,7 +120,7 @@
             popover-x="left"
           ></v-swatches>
         </b-tooltip>
-        <b-tooltip label="Face Color" position="is-top">
+        <b-tooltip label="Face Color" position="is-bottom">
           <v-swatches
             :disabled="!config.draw_enable"
             style="top: 10px;margin:1px;"
@@ -161,6 +148,78 @@
           ></v-swatches>
         </b-tooltip>
       </div>
+      <b-field>
+        <label class="label" style="display: inline-block;"
+          >Edge Width:&nbsp;</label
+        >
+        <b-numberinput
+          v-model="config.draw_edge_width"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
+      <b-field v-if="config.draw_shape_type === 'Point'">
+        <label class="label" style="display: inline-block;"
+          >Point Size:&nbsp;</label
+        >
+        <b-numberinput
+          v-model="config.draw_size"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
+    </section>
+    <br />
+    <section v-if="currentFeature">
+      <b-field label="Tags" v-if="currentMetadata">
+        <b-taginput
+          @add="
+            normalizeTags();
+            updateMetadata();
+          "
+          @remove="updateMetadata()"
+          :data="config.allowed_tags"
+          :open-on-focus="!!config.allowed_tags"
+          v-model="currentMetadata.tags"
+          ellipsis
+          type="is-info"
+          icon="label"
+          placeholder="Add a tag"
+          aria-close-label="Delete this tag"
+        >
+        </b-taginput>
+      </b-field>
+      <b-field
+        v-if="
+          currentMetadata.rating !== null && currentMetadata.rating != undefined
+        "
+      >
+        <b-rate
+          custom-text="Rating"
+          v-model="currentMetadata.rating"
+          @change="updateMetadata()"
+        ></b-rate>
+      </b-field>
+      <section v-for="comment in currentMetadata.comments" :key="comment.id">
+        <b-notification
+          aria-close-label="Close comment"
+          @close="removeComment(comment)"
+        >
+          {{ comment.user_name ? comment.user_name + ": " : ""
+          }}{{ comment.content }}
+        </b-notification>
+      </section>
+      <b-field>
+        <b-input
+          v-model="currentNewComment"
+          maxlength="1000"
+          type="textarea"
+          @keyup.enter.native="
+            addComment();
+            updateMetadata();
+          "
+        ></b-input>
+      </b-field>
     </section>
     <br />
     <section>
@@ -349,7 +408,10 @@ export default {
         Circle: "vector-circle-variant",
         Star: "octagram-outline",
         Point: "target"
-      }
+      },
+      currentFeature: null,
+      currentMetadata: null,
+      currentNewComment: null
     };
   },
   watch: {
@@ -627,6 +689,8 @@ export default {
         wrapX: false
       });
       this.select.on("select", this.selectCallBack.bind(this));
+      this.map.addInteraction(this.select);
+      this.disableSelectInteraction();
       vector_layer.getLayerAPI = this.getLayerAPI;
       return vector_layer;
     },
@@ -853,8 +917,49 @@ export default {
       });
       return color_style;
     },
+    addComment() {
+      this.currentMetadata.comments.push({
+        id: randId(),
+        user_name: this.config.user_name,
+        content: this.currentNewComment
+      });
+      this.currentNewComment = "";
+    },
+    removeComment(comment) {
+      this.currentMetadata.comments = this.currentMetadata.comments.filter(
+        c => c.id !== comment.id
+      );
+    },
+    normalizeTags() {
+      if (this.config.single_tag_mode) {
+        if (this.currentMetadata.tags.length > 1)
+          this.currentMetadata.tags = [
+            this.currentMetadata.tags[this.currentMetadata.tags.length - 1]
+          ];
+      }
+    },
+    updateMetadata() {
+      if (this.currentMetadata) {
+        this.currentFeature.set("metadata", this.currentMetadata);
+        if (this.config.change_feature_callback) {
+          this.config.change_feature_callback(this.currentMetadata);
+        }
+      }
+    },
     selectCallBack() {
       const features = this.select.getFeatures().getArray();
+      if (features.length == 1) {
+        this.currentFeature = features[0];
+        if (this.currentFeature)
+          this.currentMetadata = this.currentFeature.get("metadata") || {
+            tags: [],
+            comments: []
+          };
+        this.currentNewComment = "";
+      } else {
+        this.currentFeature = null;
+        this.currentMetadata = null;
+      }
       if (this.config.select_feature_callback) {
         const format = new GeoJSON();
         const fs = [];
@@ -863,6 +968,18 @@ export default {
         }
         this.config.select_feature_callback(fs.length > 1 ? fs : fs[0]);
       }
+    },
+    selectFeatures(newFeatures) {
+      const features = this.select.getFeatures();
+      features.forEach(feature => {
+        features.remove(feature);
+      });
+      newFeatures.forEach(feature => {
+        features.push(feature);
+      });
+      this.$nextTick(() => {
+        this.selectCallBack();
+      });
     },
     setupDrawInteraction() {
       if (!this.vector_source) return;
@@ -932,8 +1049,6 @@ export default {
         });
 
         this.select.setActive(false);
-        this.map.addInteraction(this.select);
-
         this.map.addInteraction(draw);
         draw.on("drawend", async evt => {
           const feature = evt.feature;
@@ -981,6 +1096,7 @@ export default {
                         );
                         this.vector_source.removeFeature(pfeature);
                         this.vector_source.addFeatures(cuttedFeatures);
+                        this.selectFeatures(cuttedFeatures);
                         added = added.concat(cuttedFeatures);
                         removed.push(pfeature);
                       }
@@ -999,6 +1115,8 @@ export default {
 
               this.vector_source.removeFeature(feature);
             }, 100);
+          } else {
+            this.selectFeatures([feature]);
           }
         });
         this.draw = draw;

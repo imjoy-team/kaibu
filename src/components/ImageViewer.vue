@@ -526,7 +526,9 @@ export default {
           type: "vector",
           name: "shape vectors",
           data:
-            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
+            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json",
+          allowed_tags: ["nuclei", "cell"],
+          single_tag_mode: false
         });
       }
     },
