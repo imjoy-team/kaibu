@@ -30,6 +30,7 @@
             <b-icon icon="cursor-default" size="is-medium"> </b-icon>
           </button>
         </b-tooltip>
+
         <b-tooltip label="Draw Mode" position="is-top">
           <button
             :class="{ 'is-primary': config.draw_enable }"
@@ -44,6 +45,7 @@
           </button>
         </b-tooltip>
         &nbsp;&nbsp; &nbsp;&nbsp;
+
         <b-tooltip label="Freehand Mode" position="is-top">
           <button
             :disabled="!config.draw_enable"
@@ -58,6 +60,52 @@
             <b-icon icon="gesture"> </b-icon>
           </button>
         </b-tooltip>
+        &nbsp;&nbsp; &nbsp;&nbsp;
+        <b-tooltip label="Undo (Ctrl/Command+Z)" position="is-top">
+          <button @click="undoDraw()" class="button">
+            <b-icon icon="undo"> </b-icon>
+          </button>
+        </b-tooltip>
+        &nbsp;&nbsp; &nbsp;&nbsp;
+        <b-tooltip label="Delete" position="is-top">
+          <button @click="deleteDraw()" class="button">
+            <b-icon icon="delete"> </b-icon>
+          </button>
+        </b-tooltip>
+      </div>
+      <div class="block">
+        <b-tooltip
+          v-for="(icon, type) in draw_types"
+          :key="type"
+          :label="type"
+          position="is-bottom"
+        >
+          <button
+            :disabled="!config.draw_enable"
+            :class="{ 'is-primary': config.draw_shape_type === type }"
+            @click="setDrawType(type)"
+            class="button"
+          >
+            <b-icon :icon="icon" size="is-medium"> </b-icon>
+          </button>
+        </b-tooltip>
+      </div>
+
+      <b-field label="Edge Width">
+        <b-numberinput
+          v-model="config.draw_edge_width"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
+      <b-field label="Point Size" v-if="config.draw_shape_type === 'Point'">
+        <b-numberinput
+          v-model="config.draw_size"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
+      <div class="block">
         <b-tooltip label="Edge Color" position="is-top">
           <v-swatches
             :disabled="!config.draw_enable"
@@ -113,37 +161,6 @@
           ></v-swatches>
         </b-tooltip>
       </div>
-      <div class="block">
-        <b-tooltip
-          v-for="(icon, type) in draw_types"
-          :key="type"
-          :label="type"
-          position="is-bottom"
-        >
-          <button
-            :disabled="!config.draw_enable"
-            :class="{ 'is-primary': config.draw_shape_type === type }"
-            @click="setDrawType(type)"
-            class="button"
-          >
-            <b-icon :icon="icon" size="is-medium"> </b-icon>
-          </button>
-        </b-tooltip>
-      </div>
-      <b-field label="Edge Width">
-        <b-numberinput
-          v-model="config.draw_edge_width"
-          size="is-small"
-          controls-position="compact"
-        ></b-numberinput>
-      </b-field>
-      <b-field label="Point Size" v-if="config.draw_shape_type === 'Point'">
-        <b-numberinput
-          v-model="config.draw_size"
-          size="is-small"
-          controls-position="compact"
-        ></b-numberinput>
-      </b-field>
     </section>
     <br />
     <section>
