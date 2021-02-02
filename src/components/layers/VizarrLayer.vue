@@ -147,7 +147,7 @@ export default {
           window.CreateVizarrViewer(vizarrLayer.viewerElement).then(viewer => {
             this.viewer = viewer;
             vizarrLayer.sync_callback = (center, zoom)=>{
-                viewer.setViewState({target: [center[0], center[1], 0], zoom})
+                // viewer.setViewState({ target: [ center[0], center[1], 0 ], zoom: zoom*Math.sqrt(46.85276874422804) });
             }
             resolve(vizarrLayer);
           });
@@ -157,9 +157,9 @@ export default {
               .CreateVizarrViewer(vizarrLayer.viewerElement)
               .then(viewer => {
                 this.viewer = viewer;
-                // vizarrLayer.sync_callback = (center, zoom)=>{
-                //     viewer.setViewState({target: [center[0], center[1], 0], zoom: zoom-10})
-                // }
+                vizarrLayer.sync_callback = (center, zoom)=>{
+                  //  viewer.setViewState({ target: [ center[0], center[1], 0 ], zoom: zoom*Math.sqrt(46.85276874422804) });
+                }
                 resolve(vizarrLayer);
               });
           });

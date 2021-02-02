@@ -63,6 +63,7 @@ export function CustomVizarr() {
     const zoom = map_veiw.getZoom();
     const center = map_veiw.getCenter();
     console.log("=====openlayers==>", center, zoom)
+    // setViewState({ target: [ center[0], center[1], 0 ], zoom: zoom*Math.sqrt(46.85276874422804) });
 
     console.log('====diff====>', viewState.target[0] - center[0], viewState.target[1]-center[1], viewState.zoom-zoom)
     
