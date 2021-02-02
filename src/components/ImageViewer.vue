@@ -546,7 +546,7 @@ export default {
         await this.addWidget({
           name: "Bar chart",
           type: "vega",
-          attach_to: "shape vectors",
+          // attach_to: "shape vectors",
           spec:
             "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json"
         });
