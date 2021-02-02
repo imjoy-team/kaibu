@@ -5,11 +5,17 @@ Vue.use(Vuex);
 export const store = new Vuex.Store({
   state: {
     layers: {},
+    widgets: {},
     layer_configs: [],
     currentLayer: null,
+    currentLayerWidget: null,
+    standaloneWidgets: {},
     map: null
   },
   actions: {
+    addWidget(context, config) {
+      context.commit("addWidget", config);
+    },
     addLayer(context, config) {
       context.commit("addLayer", config);
       Vue.nextTick(() => {
@@ -67,6 +73,15 @@ export const store = new Vuex.Store({
       if (config.visible === undefined) config.visible = true;
       state.layer_configs.push(config);
     },
+    addWidget(state, config) {
+      state.widgets[config.name] = config;
+      state.standaloneWidgets = {};
+      for (let k of Object.keys(state.widgets)) {
+        debugger;
+        if (!state.widgets[k].attach_to)
+          state.standaloneWidgets[k] = this.widgets[k];
+      }
+    },
     removeLayer(state, layer) {
       layer.selected = false;
       state.layer_configs = state.layer_configs.filter(l => l.id !== layer.id);
@@ -84,6 +99,16 @@ export const store = new Vuex.Store({
       }
       state.currentLayer = layer;
       layer.selected = true;
+      state.currentLayerWidget = null;
+      for (let k of Object.keys(state.widgets)) {
+        if (
+          state.currentLayer.name &&
+          state.widgets[k].attach_to == state.currentLayer.name
+        ) {
+          state.currentLayerWidget = state.widgets[k];
+          break;
+        }
+      }
     },
     setMap(state, map) {
       state.map = map;

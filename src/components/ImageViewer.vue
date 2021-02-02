@@ -97,10 +97,10 @@
           <b-tabs
             size="is-small"
             class="block"
-            v-if="Object.keys(widgets).length > 0"
+            v-if="Object.keys(standaloneWidgets).length > 0"
           >
             <b-tab-item
-              v-for="(widget, id) in widgets"
+              v-for="(widget, id) in standaloneWidgets"
               :key="id"
               :label="widget.name"
               :icon="widget.icon"
@@ -156,6 +156,17 @@
 
           <hr class="solid" />
           <div class="block" v-show="currentLayer" style="min-height: 150px;">
+            <b-menu-list
+              v-if="currentLayerWidget"
+              :label="currentLayerWidget.name"
+              :icon="currentLayerWidget.icon"
+            >
+              <component
+                :is="widgetTypes[currentLayerWidget.type]"
+                @loading="loading = $event"
+                :config="currentLayerWidget"
+              />
+            </b-menu-list>
             <b-menu-list label="Properties">
               <component
                 v-for="layer in layer_configs"
@@ -327,7 +338,6 @@ export default {
       collections: null,
       layerTypes,
       widgetTypes,
-      widgets: {},
       loading: false,
       activeSliders: []
     };
@@ -356,7 +366,9 @@ export default {
     ...mapState({
       layers: state => state.layers,
       layer_configs: state => state.layer_configs,
+      standaloneWidgets: state => state.standaloneWidgets,
       currentLayer: state => state.currentLayer,
+      currentLayerWidget: state => state.currentLayerWidget,
       map: state => state.map
     })
   },
@@ -530,6 +542,14 @@ export default {
           allowed_tags: ["nuclei", "cell"],
           single_tag_mode: false
         });
+
+        await this.addWidget({
+          name: "Bar chart",
+          type: "vega",
+          attach_to: "shape vectors",
+          spec:
+            "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json"
+        });
       }
     },
     updateSlider(name, value) {
@@ -556,7 +576,7 @@ export default {
         }
         config._resolve = resolve;
         config._reject = reject;
-        this.widgets[config.name] = config;
+        this.$store.dispatch("addWidget", config);
         this.$forceUpdate();
       });
     },
