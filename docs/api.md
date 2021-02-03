@@ -555,7 +555,52 @@ A simple wrapper to the `clearTimeout` function in Javascript
 
 ### select_widget_tab(tab_index)
 Activate a specific widget tab
-## Example: Interactive segmentation with Kaibu
+## Example 1: Skin image annotation
+
+The follow code block shows a simple example on annotating skin image with a form widget.
+<!-- ImJoyPlugin: {"type": "web-worker", "editor_height": "400px", "hide_code_block": true} -->
+```js
+class ImJoyPlugin {
+  async setup() {}
+  async run(ctx) {
+    const viewer = await api.createWindow({
+      src: "https://kaibu.org/#/app",
+      name: "Kaibu"
+    })
+    await viewer.view_image("https://raw.githubusercontent.com/dasoto/skincancer/master/images/test.png", {
+      name: "skin image"
+    })
+    await viewer.add_shapes([],{name: "ROI"})
+    await viewer.add_widget({
+      "_rintf": true,
+      "name": "Labels",
+      "type": "form",
+      "form_submit_callback": function (values) {
+        api.showMessage(JSON.stringify(values))
+      },
+      "fields": [{
+        "label": "Skin Cancer Type",
+        "type": "radio",
+        "items": [{
+            "text": "Normal",
+            "value": "Normal",
+            "checked": true
+          },
+          "Melanoma",
+          "Squamous cell carcinoma"
+        ]
+        },
+        {
+          "label": "Comment",
+          "placeholder": "",
+          "isRequired": false
+      }],
+    })
+  }
+}
+api.export(new ImJoyPlugin())
+```
+## Example 2: Interactive segmentation with Kaibu
 
 See the example project repository [here](https://github.com/imjoy-team/imjoy-interactive-segmentation).
 
