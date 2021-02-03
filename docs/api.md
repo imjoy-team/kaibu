@@ -335,7 +335,7 @@ class ImJoyPlugin():
                             "...",
                             "Western Sahara",
                             {"text": "Yemen", "value": "YE"},
-                            {"text": "Zambia", "value": "ZB", "selected": true},
+                            {"text": "Zambia", "value": "ZB", "selected": True},
                             "Zimbabwe"
                         ]
                     },
