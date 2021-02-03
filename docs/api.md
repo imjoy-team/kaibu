@@ -602,7 +602,7 @@ api.export(new ImJoyPlugin())
 ## Example 2: Annotate multi-frame CT images
 
 In the following code block we show how to use the sliders to annotate a 3D volume frame by frame and save the annotation as json file.
-You can also find a Jupyter notebook [here](https://github.com/imjoy-team/imjoy-interactive-segmentation/blob/master/notebooks/AnnotateCTImages-Kaibu.ipynb) which is recommended if you want to run it locally.
+You can also find a [Jupyter notebook here](https://github.com/imjoy-team/kaibu/blob/master/notebooks/AnnotateCTImages-Kaibu.ipynb) which is recommended if you want to run it locally.
 
 <!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["numpy", "pydicom"], "hide_code_block": true} -->
 ```python
