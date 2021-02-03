@@ -83,7 +83,9 @@
                 <button class="button" slot="trigger">
                   <b-icon icon="dots-vertical" slot="trigger"></b-icon>
                 </button>
-                <b-dropdown-item @click="goto('https://github.com/imjoy-team/kaibu')" aria-role="listitem"
+                <b-dropdown-item
+                  @click="goto('https://github.com/imjoy-team/kaibu')"
+                  aria-role="listitem"
                   ><b-icon icon="github"></b-icon> Github</b-dropdown-item
                 >
                 <b-dropdown-item @click="screenshot()" aria-role="listitem"

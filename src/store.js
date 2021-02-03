@@ -75,8 +75,7 @@ export const store = new Vuex.Store({
     },
     addWidget(state, config) {
       state.widgets[config.name] = config;
-      if (!config.attach_to)
-        state.standaloneWidgets[config.name] = config;
+      if (!config.attach_to) state.standaloneWidgets[config.name] = config;
     },
     removeLayer(state, layer) {
       layer.selected = false;
