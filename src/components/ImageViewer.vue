@@ -548,14 +548,6 @@ export default {
           only_predefined_tags: true,
           single_tag_mode: false
         });
-
-        await this.addWidget({
-          name: "Bar chart",
-          type: "vega",
-          // attach_to: "shape vectors",
-          spec:
-            "https://raw.githubusercontent.com/vega/vega/master/docs/examples/bar-chart.vg.json"
-        });
       }
     },
     updateSlider(name, value) {
