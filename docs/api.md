@@ -598,7 +598,117 @@ class ImJoyPlugin {
 }
 api.export(new ImJoyPlugin())
 ```
-## Example 2: Interactive segmentation with Kaibu
+
+## Example 2: Annotate multi-frame CT images
+
+In the following code block we show how to use the sliders to annotate a 3D volume frame by frame and save the annotation as json file.
+You can also find a Jupyter notebook [here](https://github.com/imjoy-team/imjoy-interactive-segmentation/blob/master/notebooks/AnnotateCTImages-Kaibu.ipynb) which is recommended if you want to run it locally.
+
+<!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["numpy", "pydicom"], "hide_code_block": true} -->
+```python
+import os
+import json
+from imjoy import api
+from pydicom import dcmread
+from pydicom.data import get_testdata_file
+
+
+path = get_testdata_file("eCT_Supplemental.dcm")
+ds = dcmread(path)
+ct_volume = ds.pixel_array # the example volume has only two frames
+MAX_FRAMES = 100
+annotations = {}
+ANNOTATION_DIR = './annotations'
+os.makedirs(ANNOTATION_DIR, exist_ok=True)
+
+def save_annotation(filename, annotation):
+    with open(os.path.join(ANNOTATION_DIR, filename), 'w') as outfile:
+        json.dump(annotation, outfile)
+
+class ImJoyPlugin():
+    async def setup(self):
+        self.image_layer = None
+        self.currrent_index = 0
+
+    async def run(self, ctx):
+        viewer = await api.createWindow(src="https://kaibu.org/#/app", fullscreen=True)
+        self.image_layer = await viewer.view_image(ct_volume[0, :, :])
+        self.annotation_layer = await viewer.add_shapes([], 
+                                                        name="annotation", 
+                                                        draw_enable=False, 
+                                                        draw_label="my roi",
+                                                        draw_shape_type="polygon",
+                                                        draw_edge_color="#0080ff")
+        
+        async def save_current_annotation():
+            # save the annootation before change to the next layer
+            # this will be a json object in geojson format
+            # you can save it as json file
+            # to convert geojson to mask image, 
+            # see here: https://github.com/imjoy-team/imjoy-interactive-segmentation/blob/4c920bd6b619407bfe2ddf321f4452a4517adbbd/imgseg/geojson_utils.py#L51
+            annotations[self.currrent_index] = await self.annotation_layer.get_features()
+            # save as json file on disk
+            save_annotation('annotation_frame'+str(self.currrent_index)+'.json', annotations[self.currrent_index])
+
+        async def goto_next():
+            await switch_frame(self.currrent_index + 1)
+            
+        async def switch_frame(index):
+            try:
+                # make sure we don't exceed the MAX_FRAMES
+                index = index % MAX_FRAMES
+
+                await viewer.set_loader(True)
+
+                await save_current_annotation()
+                
+                self.currrent_index = index
+                # The example data have only 2 frames, here we use `index % 2` to repeat the frames
+                await self.image_layer.set_image(ct_volume[index % ct_volume.shape[0], :, :])
+
+                # restore the annotation if available
+                if index in annotations:
+                    self.annotation_layer.set_features(annotations[index])
+                else:
+                    self.annotation_layer.clear_features()
+
+            finally:
+                await viewer.set_loader(False)
+
+        await viewer.set_sliders([
+        {
+            "_rintf": True,
+            "name": "Z",
+            "min": 0,
+            "max": MAX_FRAMES,
+            "step": 1,
+            "value": self.currrent_index,
+            "change_callback": switch_frame
+        }])
+        
+        
+        await viewer.add_widget(
+        {
+            "_rintf": True,
+            "name": "Control",
+            "type": "control",
+            "elements": [
+                {
+                    "type": "button",
+                    "label": "Save",
+                    "callback": save_current_annotation,
+                },
+                {
+                    "type": "button",
+                    "label": "Next",
+                    "callback": goto_next,
+                }
+            ],
+        })
+
+api.export(ImJoyPlugin())
+```
+## Example 3: Interactive segmentation with Kaibu
 
 See the example project repository [here](https://github.com/imjoy-team/imjoy-interactive-segmentation).
 
