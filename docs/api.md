@@ -115,6 +115,9 @@ Add a vector layer with polygons
     - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
     - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
     - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
+    - `predefined_tags`: Array, for tagging features in the layer, a set of tags will be displayed for the user to choose from
+    - `single_tag_mode`: Boolean, if set to true, only one tag is allowed for a feature
+    - `user_name`: String, for making comment on each feature, the user name will be applied for the current user
     - `select_feature_callback`: Function, a function which will be called when a new feature is selected, the feature object will be passed as input argument
     - `add_feature_callback`: Function, a function which will be called when a new feature is added to the layer, the feature object will be passed as input argument
     - `remove_feature_callback`: Function, a function which will be called when a new feature is removed from the layer, the feature object will be passed as input argument
@@ -214,6 +217,7 @@ Add a widget panel with buttons, file tree or graph.
  - `options`:
     - `name`: String, name of the widget panel
     - `type`: String, type of the widget panel, the supported types are: `control`, `form` `tree`, `vega`.
+    - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
     - other type-specific options
 
 **Returns**
@@ -225,6 +229,7 @@ For `type="control"`, you can add buttons and dropdown with callback function at
 **Arguments**
  - `name`: String, name of the widget panel
  - `type`: String, type of the widget panel, it must be `control` for control widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
  - `elements`: Array, an array of control element with different types. For example, a button: `{"type": "button", "label": "Say Hello", "callback": say_hello}` and a dropdown menu: `{"type": "dropdown","label": "Mode","options": ["Mode A", "Mode B"], "callback": select_mode}`
 
 **Returns**
@@ -280,6 +285,7 @@ For `type="form"`, you can show a form with many fields for the user to fill.
 **Arguments**
  - `name`: String, the name of the form
  - `type`: String, type of the widget panel, it must be `form` for form widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
  - `fields`: Array, an array of fields, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
 
 **Returns**
@@ -349,6 +355,7 @@ For `type="tree"`, you can pass a tree with nodes and set callback for the doubl
 **Arguments**
  - `name`: String, name of the tree
  - `type`: String, type of the widget panel, it must be `tree` for tree widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
  - `node_dbclick_callback`: Function, a callback function triggered when the user double click on a node, one argument with the node object will be passed to the function
  - `nodes`: Array, an array of node objects. One node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes. 
 
@@ -415,6 +422,7 @@ For `type="vega"`, you can pass any vega schema which enables supporting a large
 **Arguments**
  - `name`: String, name of the widget panel
  - `type`: String, type of the widget panel, it must be `vega` for vega widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
  - `spec`: Object or String, a vega spec object or URL
 
 **Returns**
