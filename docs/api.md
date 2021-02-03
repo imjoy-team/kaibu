@@ -647,9 +647,9 @@ class ImJoyPlugin():
                                                         draw_label="my roi",
                                                         draw_shape_type="polygon",
                                                         draw_edge_color="#0080ff")
-        
+
         async def save_current_annotation():
-            # save the annootation before change to the next layer
+            # save the annotation before change to the next layer
             # this will be a json object in geojson format
             # you can save it as json file
             # to convert geojson to mask image, 
@@ -659,17 +659,17 @@ class ImJoyPlugin():
             save_annotation('annotation_frame'+str(self.currrent_index)+'.json', annotations[self.currrent_index])
 
         async def goto_next():
-            await switch_frame(self.currrent_index + 1)
-            
+            index = (self.currrent_index + 1) % MAX_FRAMES
+            await viewer.update_slider("Z", index)
+            self.currrent_index = index
+            await switch_frame(index)
+
         async def switch_frame(index):
             try:
                 # make sure we don't exceed the MAX_FRAMES
                 index = index % MAX_FRAMES
-
                 await viewer.set_loader(True)
-
                 await save_current_annotation()
-                
                 self.currrent_index = index
                 # The example data have only 2 frames, here we use `index % 2` to repeat the frames
                 await self.image_layer.set_image(ct_volume[index % ct_volume.shape[0], :, :])
@@ -693,8 +693,8 @@ class ImJoyPlugin():
             "value": self.currrent_index,
             "change_callback": switch_frame
         }])
-        
-        
+
+
         await viewer.add_widget(
         {
             "_rintf": True,
