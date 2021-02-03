@@ -196,7 +196,7 @@
             <label class="label slider-label">{{ slider.name }}</label>
             <b-slider
               class="slider-body"
-              @input="slider.change_callback"
+              @change="slider.change_callback"
               v-model="slider.value"
               :min="slider.min || 0"
               :max="slider.max || 1"
