@@ -1106,7 +1106,6 @@ export default {
                         );
                         this.vector_source.removeFeature(pfeature);
                         this.vector_source.addFeatures(cuttedFeatures);
-                        this.selectFeatures(cuttedFeatures);
                         added = added.concat(cuttedFeatures);
                         removed.push(pfeature);
                       }
@@ -1122,11 +1121,8 @@ export default {
                   add: added
                 });
               }
-
               this.vector_source.removeFeature(feature);
             }, 100);
-          } else {
-            this.selectFeatures([feature]);
           }
         });
         this.draw = draw;
