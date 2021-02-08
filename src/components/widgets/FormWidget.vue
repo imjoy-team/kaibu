@@ -66,6 +66,9 @@ export default {
   data() {
     return { jsonFields: [] };
   },
+  beforeDestroy(){
+    this.$root.$off("formSubmitted", this.handleFormSubmitted);
+  },
   mounted() {
     this.jsonFields = this.config.fields;
     this.config.form_submit_callback =
@@ -73,7 +76,7 @@ export default {
       function(values) {
         console.log("Form submitted", values);
       };
-    this.$root.$on("formSubmitted", this.config.form_submit_callback);
+    this.$root.$on("formSubmitted", this.handleFormSubmitted);
     if (this.config._resolve) {
       const me = this;
       this.config._resolve({
@@ -90,6 +93,11 @@ export default {
     }
   },
   methods: {
+    handleFormSubmitted(result){
+      if (this.config.name && result.formName === this.config.name) {
+        this.config.form_submit_callback(result.values);
+      }
+    },
     trimEllip(str, length) {
       if (!str) return str;
       if (typeof str === "object") str = str.toString();
