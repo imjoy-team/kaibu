@@ -218,6 +218,7 @@ Add a widget panel with buttons, file tree or graph.
     - `name`: String, name of the widget panel
     - `type`: String, type of the widget panel, the supported types are: `control`, `form` `tree`, `vega`.
     - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+    - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
     - other type-specific options
 
 **Returns**
@@ -230,6 +231,7 @@ For `type="control"`, you can add buttons and dropdown with callback function at
  - `name`: String, name of the widget panel
  - `type`: String, type of the widget panel, it must be `control` for control widget
  - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `elements`: Array, an array of control element with different types. For example, a button: `{"type": "button", "label": "Say Hello", "callback": say_hello}` and a dropdown menu: `{"type": "dropdown","label": "Mode","options": ["Mode A", "Mode B"], "callback": select_mode}`
 
 **Returns**
@@ -286,8 +288,32 @@ For `type="form"`, you can show a form with many fields for the user to fill.
  - `name`: String, the name of the form
  - `type`: String, type of the widget panel, it must be `form` for form widget
  - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `fields`: Array, an array of fields, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
-
+    In addition to the standard fields supported by `vue-form-json`, we also provide custom fields via a different setting (i.e. `slots`):
+        - `tagInput`:
+        ```json
+        {
+            "slot": "tagInput",
+            "props": {
+                "label": "book tags", "options": ["drama", "sci-fi"]
+            }
+        }
+        ```
+        - `selectButton`:
+        ```js
+        {
+            "slot": "selectButton",
+            "props": {
+                "label": "select a file", "callback": ()=>{
+                    // do something here
+                    // you can return some value here
+                    // and it will be filled as part of the form
+                    return file
+                } 
+            }
+        }
+        ```
 **Returns**
 The returned layer api object consist of:
  - `clear_fields`: Function, remove all the fields in the form
@@ -356,6 +382,7 @@ For `type="tree"`, you can pass a tree with nodes and set callback for the doubl
  - `name`: String, name of the tree
  - `type`: String, type of the widget panel, it must be `tree` for tree widget
  - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `node_dbclick_callback`: Function, a callback function triggered when the user double click on a node, one argument with the node object will be passed to the function
  - `nodes`: Array, an array of node objects. One node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes. 
 
@@ -423,6 +450,7 @@ For `type="vega"`, you can pass any vega schema which enables supporting a large
  - `name`: String, name of the widget panel
  - `type`: String, type of the widget panel, it must be `vega` for vega widget
  - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `spec`: Object or String, a vega spec object or URL
 
 **Returns**

@@ -8,6 +8,30 @@
       :formFields="jsonFields"
       :formName="config.name || 'form'"
     >
+      <template slot="tagInput" slot-scope="slotProps">
+        <b-taginput
+          v-model="slotProps.tags"
+          :data="slotProps.options"
+          :open-on-focus="slotProps.options && slotProps.options.length > 0"
+          autocomplete
+          @input="slotProps.updateValue(slotProps.tags)"
+          icon="label"
+          placeholder="Add a tag"
+        >
+          <template #empty>
+            There are no tags
+          </template>
+        </b-taginput>
+      </template>
+      <template slot="selectButton" slot-scope="slotProps">
+        <b-button
+          @click="resolveCallback(slotProps)"
+          :icon-left="slotProps.icon"
+        >
+          {{ slotProps.label }}
+        </b-button>
+        <p>{{ trimEllip(slotProps.value, 20) }}</p>
+      </template>
     </form-json>
     <div class="box" v-else>
       <article class="media">
@@ -25,7 +49,7 @@
 
 <script>
 import "vue-form-json/dist/vue-form-json.css";
-import formJson from "vue-form-json";
+import formJson from "vue-form-json/dist/vue-form-json.common.js";
 
 export default {
   name: "form-widget",
@@ -65,7 +89,17 @@ export default {
       });
     }
   },
-  methods: {}
+  methods: {
+    trimEllip(str, length) {
+      if (!str) return str;
+      if (typeof str === "object") str = str.toString();
+      return str.length > length ? str.substring(0, length) + "..." : str;
+    },
+    async resolveCallback(slotProps) {
+      const value = await Promise.resolve(slotProps.callback());
+      slotProps.updateValue(value);
+    }
+  }
 };
 </script>
 

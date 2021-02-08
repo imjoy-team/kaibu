@@ -109,6 +109,11 @@
               :key="id"
               :label="widget.name"
               :icon="widget.icon"
+              :style="{
+                'max-height': widget.max_height
+                  ? widget.max_height + 'px'
+                  : '400px'
+              }"
             >
               <component
                 :is="widgetTypes[widget.type]"
@@ -642,11 +647,10 @@ export default {
 }
 .tab-content {
   background: white;
-  max-height: 400px;
   padding: 2px;
 }
 .tab-item {
-  max-height: 400px;
+  overflow: auto;
 }
 .slider-container > .field {
   height: 20px;
