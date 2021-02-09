@@ -66,7 +66,7 @@ export default {
   data() {
     return { jsonFields: [] };
   },
-  beforeDestroy(){
+  beforeDestroy() {
     this.$root.$off("formSubmitted", this.handleFormSubmitted);
   },
   mounted() {
@@ -93,7 +93,7 @@ export default {
     }
   },
   methods: {
-    handleFormSubmitted(result){
+    handleFormSubmitted(result) {
       if (this.config.name && result.formName === this.config.name) {
         this.config.form_submit_callback(result.values);
       }
