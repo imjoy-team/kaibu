@@ -292,29 +292,29 @@ For `type="form"`, you can show a form with many fields for the user to fill.
  - `form_submit_callback`: Function, a callback function which will be called when the user submit the form. It carries one argument which are the values of the form.
  - `fields`: Array, an array of fields, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
     In addition to the standard fields supported by `vue-form-json`, we also provide custom fields via a different setting (i.e. `slots`):
-        - `tagInput`:
-        ```json
-        {
-            "slot": "tagInput",
-            "props": {
-                "label": "book tags", "options": ["drama", "sci-fi"]
-            }
+    - `tagInput`:
+    ```json
+    {
+        "slot": "tagInput",
+        "props": {
+            "label": "book tags", "options": ["drama", "sci-fi"]
         }
-        ```
-        - `selectButton`:
-        ```js
-        {
-            "slot": "selectButton",
-            "props": {
-                "label": "select a file", "callback": ()=>{
-                    // do something here
-                    // you can return some value here
-                    // and it will be filled as part of the form
-                    return file
-                } 
-            }
+    }
+    ```
+    - `selectButton`:
+    ```js
+    {
+        "slot": "selectButton",
+        "props": {
+            "label": "select a file", "callback": ()=>{
+                // do something here
+                // you can return some value here
+                // and it will be filled as part of the form
+                return file
+            } 
         }
-        ```
+    }
+    ```
 **Returns**
 The returned layer api object consist of:
  - `clear_fields`: Function, remove all the fields in the form
