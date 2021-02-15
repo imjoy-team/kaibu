@@ -106,15 +106,21 @@ Add a vector layer with polygons
     - `edge_color`: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
     - `face_color`: String, color for filling the face, hex string format, same as `edge_color`
     - `size`: Number, size of the shape
-    - `label`: String, label fo the shape
+    - `label`: String, label of the shape
+    - `text_placement`: String, how should the label text be placed, possible values are `point` and `line`
     - `draw_enable`: Boolean, switch on the markup tool
     - `draw_label`: String, set the label for the markup tool
+    - `draw_max_label_count`: Number, the maximum number of feature for the current `draw_label`, if exceeded, some features will be automatically removed
     - `draw_freehand`: Boolean, switch on freehand mode for the markup tool
     - `draw_shape_type`: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
     - `draw_edge_width`: Integer, set the edge width of the markup tool
+    - `default_edge_width`: Integer, the default edge width of the markup tool
     - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
+    - `default_edge_color`: String, the default edge color for the markup tool
     - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
+    - `default_face_color`: String, the default face color for the markup tool
     - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
+    - `default_size`: Integer, the default value of the point size for the markup tool
     - `predefined_tags`: Array, for tagging features in the layer, a set of tags will be displayed for the user to choose from
     - `single_tag_mode`: Boolean, if set to true, only one tag is allowed for a feature
     - `user_name`: String, for making comment on each feature, the user name will be applied for the current user
