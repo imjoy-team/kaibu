@@ -168,6 +168,10 @@
           controls-position="compact"
         ></b-numberinput>
       </b-field>
+      <b-field>
+        <label class="label" style="display: inline-block;">Label:&nbsp;</label>
+        <b-input type="text" v-model="config.draw_label"></b-input>
+      </b-field>
     </section>
     <br />
     <section v-if="currentFeature">
@@ -417,9 +421,15 @@ export default {
   watch: {
     draw_edge_color: function(newVal) {
       this.config.draw_edge_color = newVal;
+      this.setupDrawInteraction();
     },
     draw_face_color: function(newVal) {
       this.config.draw_face_color = newVal;
+      this.setupDrawInteraction();
+    },
+    draw_edge_width: function(newVal) {
+      this.config.draw_edge_width = newVal;
+      this.setupDrawInteraction();
     },
     selected: function() {
       this.updateDrawInteraction();
@@ -450,10 +460,15 @@ export default {
       draw_freehand: true,
       draw_label: null,
       draw_size: 7,
+      default_size: 7,
       draw_shape_type: "Polygon",
       draw_face_color: "#FFFFFF0F",
+      default_face_color: "#FFFFFF0F",
       draw_edge_width: 2,
-      draw_edge_color: getRandomColor()
+      default_edge_width: 2,
+      draw_edge_color: "#0BF737",
+      default_edge_color: "#0BF737",
+      draw_max_label_count: 0
     };
     for (let k in this.default_config) {
       if (!this.config[k]) {
@@ -655,12 +670,36 @@ export default {
             format.writeFeatureObject(event.feature)
           );
         }
+        const remove = [];
+        const label = event.feature.get("label");
+        if (
+          label &&
+          label === this.config.draw_label &&
+          this.config.draw_max_label_count
+        ) {
+          const features = this.vector_source.getFeatures();
+          const previous = features.filter(
+            feature =>
+              feature.get("label") === label && feature !== event.feature
+          );
+          if (previous.length >= this.config.draw_max_label_count) {
+            for (
+              let i = 0;
+              i < previous.length - this.config.draw_max_label_count + 1;
+              i++
+            ) {
+              const toRemove = previous[i];
+              remove.push(toRemove);
+              this.vector_source.removeFeature(toRemove);
+            }
+          }
+        }
 
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
           if (!event.feature._skip_history)
-            this.draw_history.push({ add: event.feature });
+            this.draw_history.push({ add: event.feature, remove });
         }
       });
       this.vector_source.on("changefeature", event => {
@@ -877,14 +916,14 @@ export default {
       }
     },
     featureStyle(feature, resolution) {
-      const label = feature.get("label") || this.config.draw_label;
-      const size = feature.get("size") || this.config.draw_size;
+      const label = feature.get("label");
+      const size = feature.get("size") || this.config.default_size;
       const edge_color =
-        feature.get("edge_color") || this.config.draw_edge_color;
+        feature.get("edge_color") || this.config.default_edge_color;
       const edge_width =
-        feature.get("edge_width") || this.config.draw_edge_width;
+        feature.get("edge_width") || this.config.default_edge_width;
       const face_color =
-        feature.get("face_color") || this.config.draw_face_color;
+        feature.get("face_color") || this.config.default_face_color;
       const color_style = new Style({
         fill: new Fill({
           color: face_color
@@ -894,6 +933,7 @@ export default {
           width: edge_width
         }),
         text: new Text({
+          placement: this.config.text_placement || "line",
           text: label,
           font: "14px Calibri,sans-serif",
           fill: new Fill({
@@ -1046,6 +1086,7 @@ export default {
           source: this.vector_source,
           type: _draw_type,
           freehand: this.config.draw_freehand,
+          geometryFunction: geometryFunction,
           style: new Style({
             fill: new Fill({
               color: this.config.draw_face_color
@@ -1054,10 +1095,9 @@ export default {
               color: this.config.draw_edge_color,
               width: this.config.draw_edge_width
             })
-          }),
-          geometryFunction: geometryFunction
+          })
         });
-
+        this.draw = draw;
         this.select.setActive(false);
         this.map.addInteraction(draw);
         draw.on("drawend", async evt => {
@@ -1067,6 +1107,7 @@ export default {
           feature.set("edge_color", this.config.draw_edge_color);
           feature.set("edge_width", this.config.draw_edge_width);
           feature.set("face_color", this.config.draw_face_color);
+
           if (draw_type === "PolygonCutter") {
             feature._skip_history = true;
             setTimeout(() => {
@@ -1125,7 +1166,6 @@ export default {
             }, 100);
           }
         });
-        this.draw = draw;
       });
     }
   }
