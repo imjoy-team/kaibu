@@ -107,7 +107,7 @@ Add a vector layer with polygons
     - `face_color`: String, color for filling the face, hex string format, same as `edge_color`
     - `size`: Number, size of the shape
     - `label`: String, label of the shape
-    - `text_placement`: String, how should the label text be placed, possible values are `point` and `line`
+    - `text_placement`: String, how should the label text be placed, possible values are `null` (won't display), `point` and `line`
     - `draw_enable`: Boolean, switch on the markup tool
     - `draw_label`: String, set the label for the markup tool
     - `draw_max_label_count`: Number, the maximum number of feature for the current `draw_label`, if exceeded, some features will be automatically removed
