@@ -25,8 +25,10 @@
       </template>
       <template slot="selectButton" slot-scope="slotProps">
         <b-button
+          class="select-button"
           @click="resolveCallback(slotProps)"
           :icon-left="slotProps.icon"
+          :style="slotProps.style"
         >
           {{ slotProps.label }}
         </b-button>
@@ -112,4 +114,8 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style></style>
+<style>
+.select-button {
+  width: 100%;
+}
+</style>

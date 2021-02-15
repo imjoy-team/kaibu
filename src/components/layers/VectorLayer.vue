@@ -455,6 +455,7 @@ export default {
       blending: "additive",
       visible: true,
       size: 7,
+      text_placement: null,
       // custom fields
       draw_enable: false,
       draw_freehand: true,
@@ -934,14 +935,15 @@ export default {
         }),
         text: new Text({
           placement: this.config.text_placement || "line",
-          text: label,
+          offsetY: 10,
+          text: this.config.text_placement && label,
           font: "14px Calibri,sans-serif",
           fill: new Fill({
             color: "#000"
           }),
           stroke: new Stroke({
             color: edge_color,
-            width: 4
+            width: 3
           })
         }),
         image: new Circle({
