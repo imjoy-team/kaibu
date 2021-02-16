@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.30",
+  "version": "0.1.34",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -27,7 +27,7 @@
     "vega-lite": "^4.12.2",
     "vue": "^2.6.11",
     "vue-form-generator": "^2.3.4",
-    "vue-form-json": "^3.2.0",
+    "vue-form-json": "github:oeway/vue-form-json#slot-props",
     "vue-router": "^3.2.0",
     "vue-swatches": "^2.1.0",
     "vuex": "^3.4.0"

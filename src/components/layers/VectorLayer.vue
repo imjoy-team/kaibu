@@ -91,22 +91,9 @@
         </b-tooltip>
       </div>
 
-      <b-field label="Edge Width">
-        <b-numberinput
-          v-model="config.draw_edge_width"
-          size="is-small"
-          controls-position="compact"
-        ></b-numberinput>
-      </b-field>
-      <b-field label="Point Size" v-if="config.draw_shape_type === 'Point'">
-        <b-numberinput
-          v-model="config.draw_size"
-          size="is-small"
-          controls-position="compact"
-        ></b-numberinput>
-      </b-field>
       <div class="block">
-        <b-tooltip label="Edge Color" position="is-top">
+        <label class="label" style="display: inline-block;">Color:&nbsp;</label>
+        <b-tooltip label="Edge Color" position="is-bottom">
           <v-swatches
             :disabled="!config.draw_enable"
             style="top: 10px;margin:1px;"
@@ -133,7 +120,7 @@
             popover-x="left"
           ></v-swatches>
         </b-tooltip>
-        <b-tooltip label="Face Color" position="is-top">
+        <b-tooltip label="Face Color" position="is-bottom">
           <v-swatches
             :disabled="!config.draw_enable"
             style="top: 10px;margin:1px;"
@@ -161,6 +148,82 @@
           ></v-swatches>
         </b-tooltip>
       </div>
+      <b-field>
+        <label class="label" style="display: inline-block;"
+          >Edge Width:&nbsp;</label
+        >
+        <b-numberinput
+          v-model="config.draw_edge_width"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
+      <b-field v-if="config.draw_shape_type === 'Point'">
+        <label class="label" style="display: inline-block;"
+          >Point Size:&nbsp;</label
+        >
+        <b-numberinput
+          v-model="config.draw_size"
+          size="is-small"
+          controls-position="compact"
+        ></b-numberinput>
+      </b-field>
+      <b-field>
+        <label class="label" style="display: inline-block;">Label:&nbsp;</label>
+        <b-input type="text" v-model="config.draw_label"></b-input>
+      </b-field>
+    </section>
+    <br />
+    <section v-if="currentFeature">
+      <b-field label="Tags" v-if="currentMetadata">
+        <b-taginput
+          @add="
+            normalizeTags();
+            updateMetadata();
+          "
+          @remove="updateMetadata()"
+          :data="config.predefined_tags"
+          :open-on-focus="!!config.predefined_tags"
+          v-model="currentMetadata.tags"
+          ellipsis
+          type="is-info"
+          icon="label"
+          placeholder="Add a tag"
+          aria-close-label="Delete this tag"
+        >
+        </b-taginput>
+      </b-field>
+      <b-field
+        v-if="
+          currentMetadata.rating !== null && currentMetadata.rating != undefined
+        "
+      >
+        <b-rate
+          custom-text="Rating"
+          v-model="currentMetadata.rating"
+          @change="updateMetadata()"
+        ></b-rate>
+      </b-field>
+      <section v-for="comment in currentMetadata.comments" :key="comment.id">
+        <b-notification
+          aria-close-label="Close comment"
+          @close="removeComment(comment)"
+        >
+          {{ comment.user_name ? comment.user_name + ": " : ""
+          }}{{ comment.content }}
+        </b-notification>
+      </section>
+      <b-field>
+        <b-input
+          v-model="currentNewComment"
+          maxlength="1000"
+          type="textarea"
+          @keyup.enter.native="
+            addComment();
+            updateMetadata();
+          "
+        ></b-input>
+      </b-field>
     </section>
     <br />
     <section>
@@ -349,15 +412,24 @@ export default {
         Circle: "vector-circle-variant",
         Star: "octagram-outline",
         Point: "target"
-      }
+      },
+      currentFeature: null,
+      currentMetadata: null,
+      currentNewComment: null
     };
   },
   watch: {
     draw_edge_color: function(newVal) {
       this.config.draw_edge_color = newVal;
+      this.setupDrawInteraction();
     },
     draw_face_color: function(newVal) {
       this.config.draw_face_color = newVal;
+      this.setupDrawInteraction();
+    },
+    draw_edge_width: function(newVal) {
+      this.config.draw_edge_width = newVal;
+      this.setupDrawInteraction();
     },
     selected: function() {
       this.updateDrawInteraction();
@@ -383,15 +455,21 @@ export default {
       blending: "additive",
       visible: true,
       size: 7,
+      text_placement: null,
       // custom fields
       draw_enable: false,
       draw_freehand: true,
       draw_label: null,
       draw_size: 7,
+      default_size: 7,
       draw_shape_type: "Polygon",
       draw_face_color: "#FFFFFF0F",
+      default_face_color: "#FFFFFF0F",
       draw_edge_width: 2,
-      draw_edge_color: getRandomColor()
+      default_edge_width: 2,
+      draw_edge_color: "#0BF737",
+      default_edge_color: "#0BF737",
+      draw_max_label_count: 0
     };
     for (let k in this.default_config) {
       if (!this.config[k]) {
@@ -593,12 +671,36 @@ export default {
             format.writeFeatureObject(event.feature)
           );
         }
+        const remove = [];
+        const label = event.feature.get("label");
+        if (
+          label &&
+          label === this.config.draw_label &&
+          this.config.draw_max_label_count
+        ) {
+          const features = this.vector_source.getFeatures();
+          const previous = features.filter(
+            feature =>
+              feature.get("label") === label && feature !== event.feature
+          );
+          if (previous.length >= this.config.draw_max_label_count) {
+            for (
+              let i = 0;
+              i < previous.length - this.config.draw_max_label_count + 1;
+              i++
+            ) {
+              const toRemove = previous[i];
+              remove.push(toRemove);
+              this.vector_source.removeFeature(toRemove);
+            }
+          }
+        }
 
         if (event.feature._undoing) {
           delete event.feature._undoing;
         } else {
           if (!event.feature._skip_history)
-            this.draw_history.push({ add: event.feature });
+            this.draw_history.push({ add: event.feature, remove });
         }
       });
       this.vector_source.on("changefeature", event => {
@@ -627,6 +729,8 @@ export default {
         wrapX: false
       });
       this.select.on("select", this.selectCallBack.bind(this));
+      this.map.addInteraction(this.select);
+      this.disableSelectInteraction();
       vector_layer.getLayerAPI = this.getLayerAPI;
       return vector_layer;
     },
@@ -813,14 +917,14 @@ export default {
       }
     },
     featureStyle(feature, resolution) {
-      const label = feature.get("label") || this.config.draw_label;
-      const size = feature.get("size") || this.config.draw_size;
+      const label = feature.get("label");
+      const size = feature.get("size") || this.config.default_size;
       const edge_color =
-        feature.get("edge_color") || this.config.draw_edge_color;
+        feature.get("edge_color") || this.config.default_edge_color;
       const edge_width =
-        feature.get("edge_width") || this.config.draw_edge_width;
+        feature.get("edge_width") || this.config.default_edge_width;
       const face_color =
-        feature.get("face_color") || this.config.draw_face_color;
+        feature.get("face_color") || this.config.default_face_color;
       const color_style = new Style({
         fill: new Fill({
           color: face_color
@@ -830,14 +934,16 @@ export default {
           width: edge_width
         }),
         text: new Text({
-          text: label,
+          placement: this.config.text_placement || "line",
+          offsetY: 10,
+          text: this.config.text_placement && label,
           font: "14px Calibri,sans-serif",
           fill: new Fill({
             color: "#000"
           }),
           stroke: new Stroke({
             color: edge_color,
-            width: 4
+            width: 3
           })
         }),
         image: new Circle({
@@ -853,8 +959,59 @@ export default {
       });
       return color_style;
     },
+    addComment() {
+      this.currentMetadata.comments.push({
+        id: randId(),
+        user_name: this.config.user_name,
+        content: this.currentNewComment
+      });
+      this.currentNewComment = "";
+    },
+    removeComment(comment) {
+      this.currentMetadata.comments = this.currentMetadata.comments.filter(
+        c => c.id !== comment.id
+      );
+    },
+    normalizeTags() {
+      if (this.config.single_tag_mode) {
+        if (this.currentMetadata.tags.length > 1)
+          this.currentMetadata.tags = [
+            this.currentMetadata.tags[this.currentMetadata.tags.length - 1]
+          ];
+      }
+      if (this.config.only_predefined_tags) {
+        if (
+          this.currentMetadata.tags.length > 1 &&
+          this.config.predefined_tags &&
+          this.config.predefined_tags.length > 0
+        )
+          this.currentMetadata.tags = this.currentMetadata.tags.filter(tag =>
+            this.config.predefined_tags.includes(tag)
+          );
+      }
+    },
+    updateMetadata() {
+      if (this.currentMetadata) {
+        this.currentFeature.set("metadata", this.currentMetadata);
+        if (this.config.change_feature_callback) {
+          this.config.change_feature_callback(this.currentMetadata);
+        }
+      }
+    },
     selectCallBack() {
       const features = this.select.getFeatures().getArray();
+      if (features.length == 1) {
+        this.currentFeature = features[0];
+        if (this.currentFeature)
+          this.currentMetadata = this.currentFeature.get("metadata") || {
+            tags: [],
+            comments: []
+          };
+        this.currentNewComment = "";
+      } else {
+        this.currentFeature = null;
+        this.currentMetadata = null;
+      }
       if (this.config.select_feature_callback) {
         const format = new GeoJSON();
         const fs = [];
@@ -863,6 +1020,18 @@ export default {
         }
         this.config.select_feature_callback(fs.length > 1 ? fs : fs[0]);
       }
+    },
+    selectFeatures(newFeatures) {
+      const features = this.select.getFeatures();
+      features.forEach(feature => {
+        features.remove(feature);
+      });
+      newFeatures.forEach(feature => {
+        features.push(feature);
+      });
+      this.$nextTick(() => {
+        this.selectCallBack();
+      });
     },
     setupDrawInteraction() {
       if (!this.vector_source) return;
@@ -919,6 +1088,7 @@ export default {
           source: this.vector_source,
           type: _draw_type,
           freehand: this.config.draw_freehand,
+          geometryFunction: geometryFunction,
           style: new Style({
             fill: new Fill({
               color: this.config.draw_face_color
@@ -927,13 +1097,10 @@ export default {
               color: this.config.draw_edge_color,
               width: this.config.draw_edge_width
             })
-          }),
-          geometryFunction: geometryFunction
+          })
         });
-
+        this.draw = draw;
         this.select.setActive(false);
-        this.map.addInteraction(this.select);
-
         this.map.addInteraction(draw);
         draw.on("drawend", async evt => {
           const feature = evt.feature;
@@ -942,6 +1109,7 @@ export default {
           feature.set("edge_color", this.config.draw_edge_color);
           feature.set("edge_width", this.config.draw_edge_width);
           feature.set("face_color", this.config.draw_face_color);
+
           if (draw_type === "PolygonCutter") {
             feature._skip_history = true;
             setTimeout(() => {
@@ -996,12 +1164,10 @@ export default {
                   add: added
                 });
               }
-
               this.vector_source.removeFeature(feature);
             }, 100);
           }
         });
-        this.draw = draw;
       });
     }
   }
