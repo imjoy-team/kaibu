@@ -88,7 +88,7 @@ function convertImageUrl2Itk(url) {
       resolve({
         imageType: {
           dimension: 2,
-          pixelType: 1,
+          pixelType: 3,
           componentType: "uint8_t",
           components: 4
         },
