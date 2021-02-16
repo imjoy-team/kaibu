@@ -17,11 +17,6 @@ module.exports = {
         toType: "dir"
       },
       {
-        from: path.join(__dirname, "node_modules/itk-vtk-viewer/dist/itkVtkViewer.js"),
-        to: path.join(__dirname, "dist/itkVtkViewer.js"),
-        toType: "file"
-      },
-      {
         context: 'node_modules/itk-vtk-viewer/dist/',
         from: '**/*.png',
         to: path.join(__dirname, "dist"),

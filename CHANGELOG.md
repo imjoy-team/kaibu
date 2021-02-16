@@ -3,6 +3,7 @@
 **v0.1.40**
  * Upgrade ITK/VTK viewer with multiscale pyramid support
  * Allow instant stroke width change
+ * Import itk-vtk-viewer as a node module
 
 **v0.1.34**
  * Add `text_displacement`, and hide the labels by default

@@ -37,7 +37,7 @@
 import { Map } from "ol";
 import { Pointer } from "ol/interaction";
 import Layer from "ol/layer/Layer";
-const itkVtkViewer = window.itkVtkViewer;
+import * as itkVtkViewer from "itk-vtk-viewer";
 const CanvasLayer = /*@__PURE__*/ (function(Layer) {
   function CanvasLayer(options) {
     options = options || {};
@@ -88,7 +88,7 @@ function convertImageUrl2Itk(url) {
       resolve({
         imageType: {
           dimension: 2,
-          pixelType: 3,
+          pixelType: 14,
           componentType: "uint8_t",
           components: 4
         },
