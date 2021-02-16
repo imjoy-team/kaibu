@@ -92,7 +92,7 @@ function convertImageUrl2Itk(url) {
           componentType: "uint8_t",
           components: 4
         },
-        name: "test image",
+        name: null,
         origin: [0, 0],
         spacing: [1, 1],
         direction: { data: [1, 0, 0, 1] },
@@ -239,6 +239,7 @@ export default {
         !(this.config.data instanceof File)
       ) {
         const multiScaleImage = await this.normalizeImage(this.config.data);
+        multiScaleImage.name = this.config.name;
         const size = multiScaleImage.pyramid[0].largestImage.size;
         is2D = multiScaleImage.imageType.dimension === 2;
         viewer = await itkVtkViewer.createViewer(itk_layer.viewerElement, {
@@ -508,5 +509,10 @@ export default {
 .icon-select .box {
   left: unset !important;
   top: 24px !important;
+}
+
+label[class^="ItkVtkViewer-module-layerLabelCommon_"] {
+  font-size: 1rem !important;
+  line-height: 30px;
 }
 </style>

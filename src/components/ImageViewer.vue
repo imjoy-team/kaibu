@@ -350,7 +350,8 @@ export default {
       layerTypes,
       widgetTypes,
       loading: false,
-      selectedWidgetTab: undefined
+      selectedWidgetTab: undefined,
+      activeSliders: null
     };
   },
   mounted() {
