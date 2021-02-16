@@ -83,6 +83,11 @@
                 <button class="button" slot="trigger">
                   <b-icon icon="dots-vertical" slot="trigger"></b-icon>
                 </button>
+                <b-dropdown-item
+                  @click="goto('https://github.com/imjoy-team/kaibu')"
+                  aria-role="listitem"
+                  ><b-icon icon="github"></b-icon> Github</b-dropdown-item
+                >
                 <b-dropdown-item @click="screenshot()" aria-role="listitem"
                   ><b-icon icon="camera"></b-icon> Screenshot</b-dropdown-item
                 >
@@ -98,13 +103,18 @@
             size="is-small"
             class="block"
             v-model="selectedWidgetTab"
-            v-if="Object.keys(widgets).length > 0"
+            v-if="Object.keys(standaloneWidgets).length > 0"
           >
             <b-tab-item
-              v-for="(widget, id) in widgets"
+              v-for="(widget, id) in standaloneWidgets"
               :key="id"
               :label="widget.name"
               :icon="widget.icon"
+              :style="{
+                'max-height': widget.max_height
+                  ? widget.max_height + 'px'
+                  : '400px'
+              }"
             >
               <component
                 :is="widgetTypes[widget.type]"
@@ -157,6 +167,17 @@
 
           <hr class="solid" />
           <div class="block" v-show="currentLayer" style="min-height: 150px;">
+            <b-menu-list
+              v-if="currentLayerWidget"
+              :label="currentLayerWidget.name"
+              :icon="currentLayerWidget.icon"
+            >
+              <component
+                :is="widgetTypes[currentLayerWidget.type]"
+                @loading="loading = $event"
+                :config="currentLayerWidget"
+              />
+            </b-menu-list>
             <b-menu-list label="Properties">
               <component
                 v-for="layer in layer_configs"
@@ -197,7 +218,7 @@
             <label class="label slider-label">{{ slider.name }}</label>
             <b-slider
               class="slider-body"
-              @input="slider.change_callback"
+              @change="slider.change_callback"
               v-model="slider.value"
               :min="slider.min || 0"
               :max="slider.max || 1"
@@ -328,7 +349,6 @@ export default {
       collections: null,
       layerTypes,
       widgetTypes,
-      widgets: {},
       loading: false,
       selectedWidgetTab: undefined
     };
@@ -357,7 +377,9 @@ export default {
     ...mapState({
       layers: state => state.layers,
       layer_configs: state => state.layer_configs,
+      standaloneWidgets: state => state.standaloneWidgets,
       currentLayer: state => state.currentLayer,
+      currentLayerWidget: state => state.currentLayerWidget,
       map: state => state.map
     })
   },
@@ -529,7 +551,10 @@ export default {
           type: "vector",
           name: "shape vectors",
           data:
-            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json"
+            "https://gist.githubusercontent.com/oeway/7c62128939a7f9b1701e2bbd72b809dc/raw/example_shape_vectors.json",
+          predefined_tags: ["nuclei", "cell"],
+          only_predefined_tags: true,
+          single_tag_mode: false
         });
       }
     },
@@ -557,7 +582,7 @@ export default {
         }
         config._resolve = resolve;
         config._reject = reject;
-        this.widgets[config.name] = config;
+        this.$store.dispatch("addWidget", config);
         this.$forceUpdate();
       });
     },
@@ -625,11 +650,10 @@ export default {
 }
 .tab-content {
   background: white;
-  max-height: 400px;
   padding: 2px;
 }
 .tab-item {
-  max-height: 400px;
+  overflow: auto;
 }
 .slider-container > .field {
   height: 20px;

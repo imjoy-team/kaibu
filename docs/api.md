@@ -113,15 +113,24 @@ Add a vector layer with polygons
     - `edge_color`: String, color of the edge, should be an hex string format, for example: `#F7350B`, you can use https://htmlcolorcodes.com/color-picker/ to pick a color.
     - `face_color`: String, color for filling the face, hex string format, same as `edge_color`
     - `size`: Number, size of the shape
-    - `label`: String, label fo the shape
+    - `label`: String, label of the shape
+    - `text_placement`: String, how should the label text be placed, possible values are `null` (won't display), `point` and `line`
     - `draw_enable`: Boolean, switch on the markup tool
     - `draw_label`: String, set the label for the markup tool
+    - `draw_max_label_count`: Number, the maximum number of feature for the current `draw_label`, if exceeded, some features will be automatically removed
     - `draw_freehand`: Boolean, switch on freehand mode for the markup tool
     - `draw_shape_type`: String, choose a shape type for the markup tool, should be one of the following: "polygon", "path", "rectangle"
     - `draw_edge_width`: Integer, set the edge width of the markup tool
+    - `default_edge_width`: Integer, the default edge width of the markup tool
     - `draw_edge_color`: String, set the edge color for the markup tool, should be an hex string format, same as `edge_color`
+    - `default_edge_color`: String, the default edge color for the markup tool
     - `draw_face_color`: String, set the face color for the markup tool, should be an hex string format, same as `edge_color` 
+    - `default_face_color`: String, the default face color for the markup tool
     - `draw_size`: Integer, set the size for the point size for the markup tool, only used when draw_shape_type="point"
+    - `default_size`: Integer, the default value of the point size for the markup tool
+    - `predefined_tags`: Array, for tagging features in the layer, a set of tags will be displayed for the user to choose from
+    - `single_tag_mode`: Boolean, if set to true, only one tag is allowed for a feature
+    - `user_name`: String, for making comment on each feature, the user name will be applied for the current user
     - `select_feature_callback`: Function, a function which will be called when a new feature is selected, the feature object will be passed as input argument
     - `add_feature_callback`: Function, a function which will be called when a new feature is added to the layer, the feature object will be passed as input argument
     - `remove_feature_callback`: Function, a function which will be called when a new feature is removed from the layer, the feature object will be passed as input argument
@@ -221,6 +230,8 @@ Add a widget panel with buttons, file tree or graph.
  - `options`:
     - `name`: String, name of the widget panel
     - `type`: String, type of the widget panel, the supported types are: `control`, `form` `tree`, `vega`.
+    - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+    - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
     - other type-specific options
 
 **Returns**
@@ -232,6 +243,8 @@ For `type="control"`, you can add buttons and dropdown with callback function at
 **Arguments**
  - `name`: String, name of the widget panel
  - `type`: String, type of the widget panel, it must be `control` for control widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `elements`: Array, an array of control element with different types. For example, a button: `{"type": "button", "label": "Say Hello", "callback": say_hello}` and a dropdown menu: `{"type": "dropdown","label": "Mode","options": ["Mode A", "Mode B"], "callback": select_mode}`
 
 **Returns**
@@ -287,8 +300,34 @@ For `type="form"`, you can show a form with many fields for the user to fill.
 **Arguments**
  - `name`: String, the name of the form
  - `type`: String, type of the widget panel, it must be `form` for form widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
+ - `form_submit_callback`: Function, a callback function which will be called when the user submit the form. It carries one argument which are the values of the form.
  - `fields`: Array, an array of fields, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
-
+    In addition to the standard fields supported by `vue-form-json`, we also provide custom fields via a different setting (i.e. `slots`):
+    - `tagInput`:
+    ```json
+    {
+        "slot": "tagInput",
+        "props": {
+            "label": "book tags", "options": ["drama", "sci-fi"]
+        }
+    }
+    ```
+    - `selectButton`:
+    ```js
+    {
+        "slot": "selectButton",
+        "props": {
+            "label": "select a file", "callback": ()=>{
+                // do something here
+                // you can return some value here
+                // and it will be filled as part of the form
+                return file
+            } 
+        }
+    }
+    ```
 **Returns**
 The returned layer api object consist of:
  - `clear_fields`: Function, remove all the fields in the form
@@ -336,7 +375,7 @@ class ImJoyPlugin():
                             "...",
                             "Western Sahara",
                             {"text": "Yemen", "value": "YE"},
-                            {"text": "Zambia", "value": "ZB", "selected": true},
+                            {"text": "Zambia", "value": "ZB", "selected": True},
                             "Zimbabwe"
                         ]
                     },
@@ -356,6 +395,8 @@ For `type="tree"`, you can pass a tree with nodes and set callback for the doubl
 **Arguments**
  - `name`: String, name of the tree
  - `type`: String, type of the widget panel, it must be `tree` for tree widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `node_dbclick_callback`: Function, a callback function triggered when the user double click on a node, one argument with the node object will be passed to the function
  - `nodes`: Array, an array of node objects. One node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes. 
 
@@ -422,6 +463,8 @@ For `type="vega"`, you can pass any vega schema which enables supporting a large
 **Arguments**
  - `name`: String, name of the widget panel
  - `type`: String, type of the widget panel, it must be `vega` for vega widget
+ - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
+ - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `spec`: Object or String, a vega spec object or URL
 
 **Returns**
@@ -607,7 +650,117 @@ class ImJoyPlugin {
 }
 api.export(new ImJoyPlugin())
 ```
-## Example 2: Interactive segmentation with Kaibu
+
+## Example 2: Annotate multi-frame CT images
+
+In the following code block we show how to use the sliders to annotate a 3D volume frame by frame and save the annotation as json file.
+You can also find a [Jupyter notebook here](https://github.com/imjoy-team/kaibu/blob/master/notebooks/AnnotateCTImages-Kaibu.ipynb) which is recommended if you want to run it locally.
+
+<!-- ImJoyPlugin: {"type": "native-python", "editor_height": "400px", "requirements": ["numpy", "pydicom"], "hide_code_block": true} -->
+```python
+import os
+import json
+from imjoy import api
+from pydicom import dcmread
+from pydicom.data import get_testdata_file
+
+
+path = get_testdata_file("eCT_Supplemental.dcm")
+ds = dcmread(path)
+ct_volume = ds.pixel_array # the example volume has only two frames
+MAX_FRAMES = 100
+annotations = {}
+ANNOTATION_DIR = './annotations'
+os.makedirs(ANNOTATION_DIR, exist_ok=True)
+
+def save_annotation(filename, annotation):
+    with open(os.path.join(ANNOTATION_DIR, filename), 'w') as outfile:
+        json.dump(annotation, outfile)
+
+class ImJoyPlugin():
+    async def setup(self):
+        self.image_layer = None
+        self.currrent_index = 0
+
+    async def run(self, ctx):
+        viewer = await api.createWindow(src="https://kaibu.org/#/app", fullscreen=True)
+        self.image_layer = await viewer.view_image(ct_volume[0, :, :])
+        self.annotation_layer = await viewer.add_shapes([], 
+                                                        name="annotation", 
+                                                        draw_enable=False, 
+                                                        draw_label="my roi",
+                                                        draw_shape_type="polygon",
+                                                        draw_edge_color="#0080ff")
+
+        async def save_current_annotation():
+            # save the annotation before change to the next layer
+            # this will be a json object in geojson format
+            # you can save it as json file
+            # to convert geojson to mask image, 
+            # see here: https://github.com/imjoy-team/imjoy-interactive-segmentation/blob/4c920bd6b619407bfe2ddf321f4452a4517adbbd/imgseg/geojson_utils.py#L51
+            annotations[self.currrent_index] = await self.annotation_layer.get_features()
+            # save as json file on disk
+            save_annotation('annotation_frame'+str(self.currrent_index)+'.json', annotations[self.currrent_index])
+
+        async def goto_next():
+            index = (self.currrent_index + 1) % MAX_FRAMES
+            await viewer.update_slider("Z", index)
+            self.currrent_index = index
+            await switch_frame(index)
+
+        async def switch_frame(index):
+            try:
+                # make sure we don't exceed the MAX_FRAMES
+                index = index % MAX_FRAMES
+                await viewer.set_loader(True)
+                await save_current_annotation()
+                self.currrent_index = index
+                # The example data have only 2 frames, here we use `index % 2` to repeat the frames
+                await self.image_layer.set_image(ct_volume[index % ct_volume.shape[0], :, :])
+
+                # restore the annotation if available
+                if index in annotations:
+                    self.annotation_layer.set_features(annotations[index])
+                else:
+                    self.annotation_layer.clear_features()
+
+            finally:
+                await viewer.set_loader(False)
+
+        await viewer.set_sliders([
+        {
+            "_rintf": True,
+            "name": "Z",
+            "min": 0,
+            "max": MAX_FRAMES,
+            "step": 1,
+            "value": self.currrent_index,
+            "change_callback": switch_frame
+        }])
+
+
+        await viewer.add_widget(
+        {
+            "_rintf": True,
+            "name": "Control",
+            "type": "control",
+            "elements": [
+                {
+                    "type": "button",
+                    "label": "Save",
+                    "callback": save_current_annotation,
+                },
+                {
+                    "type": "button",
+                    "label": "Next",
+                    "callback": goto_next,
+                }
+            ],
+        })
+
+api.export(ImJoyPlugin())
+```
+## Example 3: Interactive segmentation with Kaibu
 
 See the example project repository [here](https://github.com/imjoy-team/imjoy-interactive-segmentation).
 
