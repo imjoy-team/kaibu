@@ -37,7 +37,7 @@
 import { Map } from "ol";
 import { Pointer } from "ol/interaction";
 import Layer from "ol/layer/Layer";
-import * as itkVtkViewer from "itk-vtk-viewer";
+import * as itkVtkViewer from "itk-vtk-viewer/dist/itkVtkViewerCDN";
 const CanvasLayer = /*@__PURE__*/ (function(Layer) {
   function CanvasLayer(options) {
     options = options || {};
