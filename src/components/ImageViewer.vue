@@ -11,7 +11,7 @@
         :position="position"
         :fullheight="true"
         :fullwidth="false"
-        :overlay="screenWidth <= 800"
+        :overlay="false"
         :open.sync="open"
         :mobile="mobile"
         :can-cancel="true"
