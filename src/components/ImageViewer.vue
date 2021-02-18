@@ -200,7 +200,10 @@
         v-show="!open"
         @click="openSidebar()"
       >
-        <img style="width: 30px;" src="static/img/kaibu-icon.svg" />
+        <img
+          style="width: 30px; border-radius: 6px;"
+          src="static/img/kaibu-icon.svg"
+        />
       </button>
       <div class="p-1">
         <div id="map" :style="{ width: viewerWidth }"></div>
