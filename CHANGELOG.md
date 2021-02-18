@@ -3,6 +3,7 @@
 **v0.1.34**
  * Add `text_displacement`, and hide the labels by default
  * Support customizing the style of the `selectButton`
+ * Don't show sidebar as an overlay
 
 **v0.1.33**
  * Support widget `max_height`
