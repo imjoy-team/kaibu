@@ -1,7 +1,5 @@
 import { reshape } from "mathjs";
 
-const itkVtkViewer = window.itkVtkViewer;
-
 const dtypeToTypedArray = {
   int8: "Int8Array",
   int16: "Int16Array",
@@ -58,8 +56,7 @@ export async function setupImJoyAPI({
   addWidget,
   setLoader,
   setMode,
-  setSliders,
-  updateSlider
+  selectWidgetTab
 }) {
   setMode("lite");
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
@@ -74,10 +71,12 @@ export async function setupImJoyAPI({
     type: "rpc-window"
   });
 
-  api.registerCodec({
-    name: "itkimage",
-    decoder: itkVtkViewer.utils.convertToItkImage
-  });
+  // TODO: improve the support for itkImage
+  // api.registerCodec({
+  //   name: "itkimage",
+  //   decoder: itkVtkViewer.utils.ndarrayToItkImage
+  // });
+
   const service_api = {
     setup() {
       api.log("Kaibu loaded successfully.");
@@ -138,11 +137,8 @@ export async function setupImJoyAPI({
     async set_mode(mode) {
       setMode(mode);
     },
-    async set_sliders(sliders) {
-      setSliders(sliders);
-    },
-    async update_slider(name, value) {
-      updateSlider(name, value);
+    async select_widget_tab(tab) {
+      selectWidgetTab(tab);
     }
   };
 

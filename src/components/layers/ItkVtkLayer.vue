@@ -26,6 +26,13 @@
         :step="0.1"
       ></b-slider>
     </b-field>
+    <b-field v-if="layer" label="Blending">
+      <b-select placeholder="Select a mode" v-model="blending">
+        <option v-for="b in blendingOptions" :value="b" :key="b">
+          {{ b }}
+        </option>
+      </b-select>
+    </b-field>
     <section
       :id="'itk-vtk-control_' + config.id"
       style="position: relative;"
@@ -37,18 +44,18 @@
 import { Map } from "ol";
 import { Pointer } from "ol/interaction";
 import Layer from "ol/layer/Layer";
-
-const itkVtkViewer = window.itkVtkViewer;
-
+import * as itkVtkViewer from "itk-vtk-viewer/dist/itkVtkViewerCDN";
 const CanvasLayer = /*@__PURE__*/ (function(Layer) {
   function CanvasLayer(options) {
     options = options || {};
     Layer.call(this, options);
+    this.rootContainer = document.createElement("div");
+    this.rootContainer.classList.add("ol-layer");
+    this.rootContainer.style.position = "absolute";
+    this.rootContainer.style.width = "100%";
+    this.rootContainer.style.height = "100%";
     this.viewerElement = document.createElement("div");
-    this.viewerElement.classList.add("ol-layer");
-    this.viewerElement.style.position = "absolute";
-    this.viewerElement.style.width = "100%";
-    this.viewerElement.style.height = "100%";
+    this.rootContainer.appendChild(this.viewerElement);
     this.sync_callback = options.sync_callback;
   }
 
@@ -64,8 +71,8 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
     if (this.sync_callback) {
       this.sync_callback();
     }
-    this.viewerElement.style.opacity = this.getOpacity();
-    return this.viewerElement; //return the viewer element
+    this.rootContainer.style.opacity = this.getOpacity();
+    return this.rootContainer; //return the viewer element
   };
 
   return CanvasLayer;
@@ -88,11 +95,11 @@ function convertImageUrl2Itk(url) {
       resolve({
         imageType: {
           dimension: 2,
-          pixelType: 1,
+          pixelType: 3,
           componentType: "uint8_t",
           components: 4
         },
-        name: "test image",
+        name: null,
         origin: [0, 0],
         spacing: [1, 1],
         direction: { data: [1, 0, 0, 1] },
@@ -105,30 +112,8 @@ function convertImageUrl2Itk(url) {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
-function generateData3D() {
-  const size = [100, 100, 100];
-  const imgArray = new Uint16Array(new ArrayBuffer(100 * 100 * 100 * 2));
-  for (let i = 0; i < 100 * 100 * 100; i++) {
-    imgArray[i] = Math.floor(Math.random() * Math.floor(65535));
-  }
-  const imageData = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage({
-    imageType: {
-      dimension: 3,
-      pixelType: 1,
-      componentType: "uint16_t",
-      components: 1
-    },
-    name: "test image",
-    origin: [0, 0, 0],
-    spacing: [1, 1, 1],
-    direction: { data: [1, 0, 0, 0, 1, 0, 0, 0, 1] },
-    size: size,
-    data: imgArray
-  });
-  return imageData;
-}
-
+const camelToSnakeCase = str =>
+  str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 export default {
   name: "itk-vtk-layer",
   type: "itk-vtk",
@@ -158,19 +143,45 @@ export default {
       layer: null,
       mode: "2D",
       resolveFiles: null,
-      showLoadButton: false
+      showLoadButton: false,
+      blending: null,
+      blendingOptions: [
+        "normal",
+        "multiply",
+        "screen",
+        "overlay",
+        "darken",
+        "lighten",
+        "color-dodge",
+        "color-burn",
+        "hard-light",
+        "soft-light",
+        "difference",
+        "exclusion",
+        "hue",
+        "saturation",
+        "color",
+        "luminosity"
+      ]
     };
   },
   watch: {
     visible: function(newVal) {
       this.layer.setVisible(newVal);
       this.$forceUpdate();
+    },
+    blending: function(newVal) {
+      this.config.blending = newVal;
+      if (this.layer)
+        this.layer.rootContainer.style["mix-blend-mode"] = this.config.blending;
     }
   },
   mounted() {
     this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity = 1.0;
     this.config.init = this.init;
+    this.config.blending = this.config.blending || "normal";
+    this.blending = this.config.blending;
   },
   beforeDestroy() {
     if (this.layer) {
@@ -195,24 +206,14 @@ export default {
         imageData = data;
         if (imageData._rtype && imageData._rtype === "ndarray") {
           imageData = itkVtkViewer.utils.ndarrayToItkImage(imageData);
-          // TODO: fix direction to be inline with Fiji
-          // if (imageData.imageType.dimension === 2) {
-          //   imageData.direction.data = [1, 0, 0, -1];
-          // } else if (imageData.imageType.dimension === 3) {
-          //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
-          // }
         }
-      } else if (typeof data === "string")
+      } else if (typeof data === "string") {
         imageData = await convertImageUrl2Itk(data);
-
-      // this.config.name = this.config.type;
-      // this.config.data =
-      //   "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
-      // imageData = await convertImageUrl2Itk(this.config.data);
-      const vtkImage = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage(
+      }
+      const multiScaleImage = itkVtkViewer.utils.toMultiscaleChunkedImage(
         imageData
       );
-      return vtkImage;
+      return multiScaleImage;
     },
     async setupLayer() {
       const containerStyle = {
@@ -228,38 +229,48 @@ export default {
         overflow: "hidden",
         display: "block-inline"
       };
-      const viewerStyle = {
-        backgroundColor: [0, 0, 0, 0],
-        containerStyle: containerStyle
-      };
-
-      var itk_layer = new CanvasLayer();
-
+      const itk_layer = new CanvasLayer();
       let viewer, extent, is2D;
+      const uiContainer = document.createElement("div");
+      if (typeof this.config.data === "string") {
+        const res = await fetch(this.config.data);
+        const blob = await res.blob();
+        const filename = this.config.data
+          .split("/")
+          .pop()
+          .split("#")[0]
+          .split("?")[0];
+        this.config.data = new File([blob], filename, {
+          type: blob.type,
+          lastModified: Date.now()
+        });
+      }
       if (
         this.config.data &&
         !(this.config.data instanceof FileList) &&
         !(this.config.data instanceof File)
       ) {
-        const vtkImage = await this.normalizeImage(this.config.data);
-
-        const extent_3d = vtkImage.getExtent();
-
-        const dims = vtkImage.getDimensions();
-        is2D = dims.length === 2 || (dims.length === 3 && dims[2] === 1);
-        viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, {
-          viewerStyle: viewerStyle,
-          image: vtkImage,
+        const multiScaleImage = await this.normalizeImage(this.config.data);
+        multiScaleImage.name = this.config.name;
+        const size = multiScaleImage.pyramid[0].largestImage.size;
+        is2D = multiScaleImage.imageType.dimension === 2;
+        viewer = await itkVtkViewer.createViewer(itk_layer.viewerElement, {
+          image: multiScaleImage,
           pointSets: null,
           geometries: null,
           use2D: is2D,
           rotate: false,
-          uiContainer: document.getElementById(
-            "itk-vtk-control_" + this.config.id
-          )
+          uiContainer: uiContainer,
+          config: {
+            viewerConfigVersion: "0.2",
+            xyLowerLeft: true,
+            containerStyle,
+            uiCollapsed: false,
+            backgroundColor: [0, 0, 0, 0]
+          }
         });
         //TODO: udpate the extent when selecting different plane
-        extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
+        extent = [0, 0, size[0], size[1]];
       } else {
         let files;
         if (this.config.data instanceof File) {
@@ -271,27 +282,32 @@ export default {
         try {
           this.$emit("loading", true);
           const cfg = await itkVtkViewer.utils.readFiles({ files: files });
-          cfg.uiContainer = document.getElementById("toolbar");
           is2D = cfg.use2D;
-          cfg.uiContainer = document.getElementById(
-            "itk-vtk-control_" + this.config.id
-          );
-          viewer = itkVtkViewer.createViewer(itk_layer.viewerElement, cfg);
-          const vs = viewer
-            .getViewProxy()
-            .getRenderer()
-            .getVolumes();
-          if (vs.length > 0) {
-            const extent_3d = vs[0].getBounds();
-            extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
-          } else {
-            console.warn("Extent is not set.");
-            extent = [0, 0, 100, 100];
+          cfg.image.spacing = [1, 1];
+          viewer = await itkVtkViewer.createViewer(itk_layer.viewerElement, {
+            image: cfg.image,
+            pointSets: cfg.pointSets,
+            geometries: cfg.geometries,
+            use2D: cfg.use2D,
+            rotate: false,
+            uiContainer: uiContainer,
+            config: {
+              viewerConfigVersion: "0.2",
+              xyLowerLeft: true,
+              containerStyle,
+              uiCollapsed: false,
+              backgroundColor: [0, 0, 0, 0]
+            }
+          });
+          extent = [0, 0, cfg.image.size[0], cfg.image.size[1]];
+          if (!this.config.name || this.config.name === "itk-vtk") {
+            this.config.name = viewer.getLayerNames()[0];
           }
         } finally {
           this.$emit("loading", false);
         }
       }
+      this.extent = extent;
       if (!viewer) throw "Failed to load itk-vtk-viewer";
       this.config.name = this.config.name || this.config.type;
       const viewProxy = viewer.getViewProxy();
@@ -304,9 +320,9 @@ export default {
       this.interactor = this.renderWindow.getInteractor();
       if (is2D) this.enableSync(itk_layer);
       this.renderer = this.viewProxy.getRenderer();
-      viewer.setUserInterfaceCollapsed(true);
+      viewer.setUICollapsed(true);
       setTimeout(() => {
-        viewer.setUserInterfaceCollapsed(false);
+        viewer.setUICollapsed(false);
       }, 10);
       this.viewer = viewer;
       this.$emit("update-extent", { id: this.config.id, extent: extent });
@@ -326,23 +342,54 @@ export default {
         this.layer.setOpacity(this.config.opacity);
       };
 
+      if (this.config.blending) {
+        itk_layer.rootContainer.style["mix-blend-mode"] = this.config.blending;
+      }
+
+      // viewer.setImageColorMap('BkRd', 0)
+      // viewer.setImageColorMap('BkGn', 1)
+      // viewer.setImageColorMap('BkBu', 2)
+
+      uiContainer.style.position = "relative";
+      document
+        .getElementById("itk-vtk-control_" + this.config.id)
+        .appendChild(uiContainer);
+
       return itk_layer;
     },
     getLayerAPI() {
       const me = this;
-      return {
+      const api = {
         _rintf: true,
         name: this.config.name,
         id: this.config.id,
+        set_blending(mode) {
+          me.blending = mode;
+          me.$forceUpdate();
+        },
+        set_opacity(val) {
+          me.config.opacity = val;
+          me.updateOpacity();
+          me.$forceUpdate();
+        },
         async set_image(image) {
-          const vtkImage = await me.normalizeImage(image);
-          me.viewer.setImage(vtkImage);
+          const multiScaleImage = await me.normalizeImage(image);
+          me.viewer.setImage(multiScaleImage);
         }
       };
+      for (let k of Object.keys(me.viewer)) {
+        if (!api[k] && (k.startsWith("set") || k.startsWith("get"))) {
+          api[camelToSnakeCase(k.replace("UI", "Ui"))] = me.viewer[k].bind(
+            me.viewer
+          );
+        }
+      }
+      return api;
     },
     getFiles() {
       return new Promise(resolve => {
         this.showLoadButton = true;
+        this.$refs.file_input.click();
         this.resolveFiles = event => {
           resolve(event.target.files);
           this.resolveFiles = null;
@@ -365,7 +412,7 @@ export default {
         .removeEventListener("touchstart", this.interactor.handleTouchStart);
       itk_layer.sync_callback = this.synchronizeVtkCoordinate;
 
-      this.enableItkInteraction();
+      // this.enableItkInteraction();
       this.renderWindow.render();
     },
     disableSync(itk_layer) {
@@ -483,14 +530,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
-.itk-vtk-layer > section > div > div > div > canvas {
+.itk-vtk-layer > section > div > div > div > div > canvas {
   max-width: 100%;
   height: 140px;
 }
 .itk-vtk-layer > section > div {
   background: #dedddf;
+  font-size: 19.2px;
 }
-.itk-vtk-layer > section > div:first-child {
+
+.itk-vtk-layer > section > div > div:first-child {
   display: none;
 }
 .selected-box {
@@ -502,5 +551,10 @@ export default {
 .icon-select .box {
   left: unset !important;
   top: 24px !important;
+}
+
+label[class^="ItkVtkViewer-module-layerLabelCommon_"] {
+  font-size: 1rem !important;
+  line-height: 30px;
 }
 </style>

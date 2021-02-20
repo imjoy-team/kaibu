@@ -102,6 +102,7 @@
           <b-tabs
             size="is-small"
             class="block"
+            v-model="selectedWidgetTab"
             v-if="Object.keys(standaloneWidgets).length > 0"
           >
             <b-tab-item
@@ -142,8 +143,8 @@
                   </button>
                   {{
                     (layer.name &&
-                      layer.name.slice(0, 30) +
-                        (layer.name.length > 30 ? "..." : "")) ||
+                      layer.name.slice(0, 24) +
+                        (layer.name.length > 24 ? "..." : "")) ||
                       "Unnamed Layer"
                   }}
                   <b-dropdown
@@ -352,7 +353,8 @@ export default {
       layerTypes,
       widgetTypes,
       loading: false,
-      activeSliders: []
+      selectedWidgetTab: undefined,
+      activeSliders: null
     };
   },
   mounted() {
@@ -456,6 +458,9 @@ export default {
     layerSorted() {
       this.$store.commit("sortLayers");
     },
+    selectWidgetTab(tab) {
+      this.selectedWidgetTab = tab;
+    },
     removeLayer(layer) {
       this.$store.commit("removeLayer", layer);
       this.$forceUpdate();
@@ -479,7 +484,7 @@ export default {
     newLayer(type) {
       this.addLayer({
         type: type,
-        name: type + "-" + randId()
+        name: type
       });
     },
     addLayer(config) {
@@ -537,14 +542,14 @@ export default {
           addWidget: this.addWidget,
           setLoader: this.setLoader,
           setMode: this.setMode,
-          setSliders: this.setSliders,
-          updateSlider: this.updateSlider
+          selectWidgetTab: this.selectWidgetTab
         });
       } else {
         this.addLayer({
           type: "itk-vtk",
           name: "example image",
-          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg",
+          blending: "screen"
         });
 
         await this.addLayer({
@@ -834,5 +839,8 @@ svg {
   100% {
     transform: translate(24px, 0);
   }
+}
+.b-sidebar .sidebar-background {
+  display: none;
 }
 </style>

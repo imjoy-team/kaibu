@@ -153,7 +153,7 @@
           >Edge Width:&nbsp;</label
         >
         <b-numberinput
-          v-model="config.draw_edge_width"
+          v-model="draw_edge_width"
           size="is-small"
           controls-position="compact"
         ></b-numberinput>
@@ -403,6 +403,7 @@ export default {
       draw_history: [],
       draw_edge_color: null,
       draw_face_color: null,
+      draw_edge_width: null,
       draw_types: {
         Polygon: "vector-polygon",
         LineString: "vector-polyline",
@@ -452,7 +453,7 @@ export default {
       scale: 1,
       translate: 0,
       opacity: 1.0,
-      blending: "additive",
+      blending: "normal",
       visible: true,
       size: 7,
       text_placement: null,
@@ -504,6 +505,7 @@ export default {
     }
     this.draw_edge_color = this.config.draw_edge_color;
     this.draw_face_color = this.config.draw_face_color;
+    this.draw_edge_width = this.config.draw_edge_width;
 
     document.addEventListener("keydown", this.keyHandler);
   },

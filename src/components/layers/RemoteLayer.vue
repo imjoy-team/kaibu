@@ -178,9 +178,7 @@ export default {
 .itk-vtk-layer > section > div {
   background: #dedddf;
 }
-.itk-vtk-layer > section > div:first-child {
-  display: none;
-}
+
 .selected-box {
   width: 100% !important;
 }

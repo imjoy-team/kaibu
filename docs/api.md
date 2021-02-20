@@ -66,10 +66,20 @@ api.export(ImJoyPlugin())
 
 Add an image layer
 
+**Arguments**
+ 
 - `image`: an image URL, base64 encoded image or a numpy array in Python
 - options:
     - `type`: String, image layer type, currently supports `2d-image`(OpenLayers 2D image layer), `itk-vtk` (ITK/VTK Viewer 2D/3D layer) or `vector`(OpenLayers vector feature layer).
     - `name`: String, name of the image layer
+**Returns**
+ A layer object with the following fields:
+ - `id`: String, the id of the layer
+ - `name`: String, the name of the layer
+ - `set_image`: Function, a function used to update the image in the layer
+ - `set_blending`: Function, a function used to update the blending model of the layer
+ - `set_opacity`: Function, a function used to update the opacity of the layer
+ - Other ITK/VTK Viewer functions defined at https://kitware.github.io/itk-vtk-viewer/api/ (Note: the function names should be converted from camel case to snake case, e.g. `setUnits` will become `set_units`)
 
 Example in Python:
 
@@ -596,6 +606,8 @@ A simple wrapper to the `setTimeout` function in Javascript
 
 A simple wrapper to the `clearTimeout` function in Javascript
 
+### select_widget_tab(tab_index)
+Activate a specific widget tab
 ## Example 1: Skin image annotation
 
 The follow code block shows a simple example on annotating skin image with a form widget.
