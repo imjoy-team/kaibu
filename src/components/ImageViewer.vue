@@ -143,8 +143,8 @@
                   </button>
                   {{
                     (layer.name &&
-                      layer.name.slice(0, 30) +
-                        (layer.name.length > 30 ? "..." : "")) ||
+                      layer.name.slice(0, 24) +
+                        (layer.name.length > 24 ? "..." : "")) ||
                       "Unnamed Layer"
                   }}
                   <b-dropdown
@@ -481,7 +481,7 @@ export default {
     newLayer(type) {
       this.addLayer({
         type: type,
-        name: type + "-" + randId()
+        name: type
       });
     },
     addLayer(config) {
@@ -545,7 +545,8 @@ export default {
         this.addLayer({
           type: "itk-vtk",
           name: "example image",
-          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg"
+          data: "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg",
+          blending: "screen"
         });
 
         await this.addLayer({

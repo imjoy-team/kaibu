@@ -26,6 +26,13 @@
         :step="0.1"
       ></b-slider>
     </b-field>
+    <b-field v-if="layer" label="Blending">
+      <b-select placeholder="Select a mode" v-model="blending">
+        <option v-for="b in blendingOptions" :value="b" :key="b">
+          {{ b }}
+        </option>
+      </b-select>
+    </b-field>
     <section
       :id="'itk-vtk-control_' + config.id"
       style="position: relative;"
@@ -85,18 +92,6 @@ function convertImageUrl2Itk(url) {
       ctx.scale(1, -1);
       ctx.drawImage(image, 0, 0, image.width, image.height);
       const imageData = ctx.getImageData(0, 0, image.width, image.height);
-      // const rgbaData = imageData.data; // ArrayBuffer
-      // convert RGBA to RGB
-      // const rgbData = new Uint8Array(new ArrayBuffer(image.height * image.width * 3))
-      // for (let i = 0; i < image.height; i++) {
-      //     for (let j = 0; j < image.width; j++) {
-      //         const pos = i * image.width + j;
-      //         rgbData[pos * 3] = rgbaData[pos * 4]
-      //         rgbData[pos * 3 + 1] = rgbaData[pos * 4 + 1]
-      //         rgbData[pos * 3 + 2] = rgbaData[pos * 4 + 2]
-      //     }
-      // }
-
       resolve({
         imageType: {
           dimension: 2,
@@ -117,32 +112,8 @@ function convertImageUrl2Itk(url) {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
-function generateData3D() {
-  const size = [100, 100, 100];
-  const imgArray = new Uint16Array(new ArrayBuffer(100 * 100 * 100 * 2));
-  for (let i = 0; i < 100 * 100 * 100; i++) {
-    imgArray[i] = Math.floor(Math.random() * Math.floor(65535));
-  }
-  const imageData = itkVtkViewer.utils.vtkITKHelper.convertItkTomultiScaleImage(
-    {
-      imageType: {
-        dimension: 3,
-        pixelType: 1,
-        componentType: "uint16_t",
-        components: 1
-      },
-      name: "test image",
-      origin: [0, 0, 0],
-      spacing: [1, 1, 1],
-      direction: { data: [1, 0, 0, 0, 1, 0, 0, 0, 1] },
-      size: size,
-      data: imgArray
-    }
-  );
-  return imageData;
-}
-
+const camelToSnakeCase = str =>
+  str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 export default {
   name: "itk-vtk-layer",
   type: "itk-vtk",
@@ -172,19 +143,45 @@ export default {
       layer: null,
       mode: "2D",
       resolveFiles: null,
-      showLoadButton: false
+      showLoadButton: false,
+      blending: null,
+      blendingOptions: [
+        "normal",
+        "multiply",
+        "screen",
+        "overlay",
+        "darken",
+        "lighten",
+        "color-dodge",
+        "color-burn",
+        "hard-light",
+        "soft-light",
+        "difference",
+        "exclusion",
+        "hue",
+        "saturation",
+        "color",
+        "luminosity"
+      ]
     };
   },
   watch: {
     visible: function(newVal) {
       this.layer.setVisible(newVal);
       this.$forceUpdate();
+    },
+    blending: function(newVal) {
+      this.config.blending = newVal;
+      if (this.layer)
+        this.layer.rootContainer.style["mix-blend-mode"] = this.config.blending;
     }
   },
   mounted() {
     this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity = 1.0;
     this.config.init = this.init;
+    this.config.blending = this.config.blending || "normal";
+    this.blending = this.config.blending;
   },
   beforeDestroy() {
     if (this.layer) {
@@ -209,20 +206,10 @@ export default {
         imageData = data;
         if (imageData._rtype && imageData._rtype === "ndarray") {
           imageData = itkVtkViewer.utils.ndarrayToItkImage(imageData);
-          // TODO: fix direction to be inline with Fiji
-          // if (imageData.imageType.dimension === 2) {
-          //   imageData.direction.data = [1, 0, 0, -1];
-          // } else if (imageData.imageType.dimension === 3) {
-          //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
-          // }
         }
-      } else if (typeof data === "string")
+      } else if (typeof data === "string") {
         imageData = await convertImageUrl2Itk(data);
-
-      // this.config.name = this.config.type;
-      // this.config.data =
-      //   "https://images.proteinatlas.org/19661/221_G2_1_red_green.jpg";
-      // imageData = await convertImageUrl2Itk(this.config.data);
+      }
       const multiScaleImage = itkVtkViewer.utils.toMultiscaleChunkedImage(
         imageData
       );
@@ -245,6 +232,19 @@ export default {
       const itk_layer = new CanvasLayer();
       let viewer, extent, is2D;
       const uiContainer = document.createElement("div");
+      if (typeof this.config.data === "string") {
+        const res = await fetch(this.config.data);
+        const blob = await res.blob();
+        const filename = this.config.data
+          .split("/")
+          .pop()
+          .split("#")[0]
+          .split("?")[0];
+        this.config.data = new File([blob], filename, {
+          type: blob.type,
+          lastModified: Date.now()
+        });
+      }
       if (
         this.config.data &&
         !(this.config.data instanceof FileList) &&
@@ -283,21 +283,25 @@ export default {
           this.$emit("loading", true);
           const cfg = await itkVtkViewer.utils.readFiles({ files: files });
           is2D = cfg.use2D;
-          cfg.uiContainer = uiContainer;
-          viewer = await itkVtkViewer.createViewer(
-            itk_layer.viewerElement,
-            cfg
-          );
-          const vs = viewer
-            .getViewProxy()
-            .getRenderer()
-            .getVolumes();
-          if (vs.length > 0) {
-            const extent_3d = vs[0].getBounds();
-            extent = [extent_3d[0], extent_3d[2], extent_3d[1], extent_3d[3]];
-          } else {
-            console.warn("Extent is not set.");
-            extent = [0, 0, 100, 100];
+          cfg.image.spacing = [1, 1];
+          viewer = await itkVtkViewer.createViewer(itk_layer.viewerElement, {
+            image: cfg.image,
+            pointSets: cfg.pointSets,
+            geometries: cfg.geometries,
+            use2D: cfg.use2D,
+            rotate: false,
+            uiContainer: uiContainer,
+            config: {
+              viewerConfigVersion: "0.2",
+              xyLowerLeft: true,
+              containerStyle,
+              uiCollapsed: false,
+              backgroundColor: [0, 0, 0, 0]
+            }
+          });
+          extent = [0, 0, cfg.image.size[0], cfg.image.size[1]];
+          if (!this.config.name || this.config.name === "itk-vtk") {
+            this.config.name = viewer.getLayerNames()[0];
           }
         } finally {
           this.$emit("loading", false);
@@ -338,6 +342,10 @@ export default {
         this.layer.setOpacity(this.config.opacity);
       };
 
+      if (this.config.blending) {
+        itk_layer.rootContainer.style["mix-blend-mode"] = this.config.blending;
+      }
+
       // viewer.setImageColorMap('BkRd', 0)
       // viewer.setImageColorMap('BkGn', 1)
       // viewer.setImageColorMap('BkBu', 2)
@@ -351,19 +359,37 @@ export default {
     },
     getLayerAPI() {
       const me = this;
-      return {
+      const api = {
         _rintf: true,
         name: this.config.name,
         id: this.config.id,
+        set_blending(mode) {
+          me.blending = mode;
+          me.$forceUpdate();
+        },
+        set_opacity(val) {
+          me.config.opacity = val;
+          me.updateOpacity();
+          me.$forceUpdate();
+        },
         async set_image(image) {
           const multiScaleImage = await me.normalizeImage(image);
           me.viewer.setImage(multiScaleImage);
         }
       };
+      for (let k of Object.keys(me.viewer)) {
+        if (!api[k] && (k.startsWith("set") || k.startsWith("get"))) {
+          api[camelToSnakeCase(k.replace("UI", "Ui"))] = me.viewer[k].bind(
+            me.viewer
+          );
+        }
+      }
+      return api;
     },
     getFiles() {
       return new Promise(resolve => {
         this.showLoadButton = true;
+        this.$refs.file_input.click();
         this.resolveFiles = event => {
           resolve(event.target.files);
           this.resolveFiles = null;

@@ -1,7 +1,5 @@
 import { reshape } from "mathjs";
 
-const itkVtkViewer = window.itkVtkViewer;
-
 const dtypeToTypedArray = {
   int8: "Int8Array",
   int16: "Int16Array",
@@ -73,10 +71,12 @@ export async function setupImJoyAPI({
     type: "rpc-window"
   });
 
-  api.registerCodec({
-    name: "itkimage",
-    decoder: itkVtkViewer.utils.convertToItkImage
-  });
+  // TODO: improve the support for itkImage
+  // api.registerCodec({
+  //   name: "itkimage",
+  //   decoder: itkVtkViewer.utils.ndarrayToItkImage
+  // });
+
   const service_api = {
     setup() {
       api.log("Kaibu loaded successfully.");

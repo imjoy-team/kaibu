@@ -453,7 +453,7 @@ export default {
       scale: 1,
       translate: 0,
       opacity: 1.0,
-      blending: "additive",
+      blending: "normal",
       visible: true,
       size: 7,
       text_placement: null,
