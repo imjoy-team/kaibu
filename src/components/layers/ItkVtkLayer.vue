@@ -85,10 +85,22 @@ function convertImageUrl2Itk(url) {
       ctx.scale(1, -1);
       ctx.drawImage(image, 0, 0, image.width, image.height);
       const imageData = ctx.getImageData(0, 0, image.width, image.height);
+      // const rgbaData = imageData.data; // ArrayBuffer
+      // convert RGBA to RGB
+      // const rgbData = new Uint8Array(new ArrayBuffer(image.height * image.width * 3))
+      // for (let i = 0; i < image.height; i++) {
+      //     for (let j = 0; j < image.width; j++) {
+      //         const pos = i * image.width + j;
+      //         rgbData[pos * 3] = rgbaData[pos * 4]
+      //         rgbData[pos * 3 + 1] = rgbaData[pos * 4 + 1]
+      //         rgbData[pos * 3 + 2] = rgbaData[pos * 4 + 2]
+      //     }
+      // }
+
       resolve({
         imageType: {
           dimension: 2,
-          pixelType: 14,
+          pixelType: 3,
           componentType: "uint8_t",
           components: 4
         },
@@ -325,6 +337,10 @@ export default {
         }
         this.layer.setOpacity(this.config.opacity);
       };
+
+      // viewer.setImageColorMap('BkRd', 0)
+      // viewer.setImageColorMap('BkGn', 1)
+      // viewer.setImageColorMap('BkBu', 2)
 
       uiContainer.style.position = "relative";
       document
