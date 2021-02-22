@@ -408,16 +408,6 @@ export default {
       if (this.config.blending) {
         itk_layer.viewerElement.style["mix-blend-mode"] = this.config.blending;
       }
-
-      // viewer.setImageColorMap('BkRd', 0)
-      // viewer.setImageColorMap('BkGn', 1)
-      // viewer.setImageColorMap('BkBu', 2)
-
-      // uiContainer.style.position = "relative";
-      // document
-      //   .getElementById("itk-vtk-control_" + this.config.id)
-      //   .appendChild(uiContainer);
-
       return itk_layer;
     },
     getLayerAPI() {
