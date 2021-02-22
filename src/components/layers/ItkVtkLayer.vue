@@ -26,6 +26,13 @@
         :step="0.1"
       ></b-slider>
     </b-field>
+    <b-field v-if="layer" label="Blending">
+      <b-select placeholder="Select a mode" v-model="blending">
+        <option v-for="b in blendingOptions" :value="b" :key="b">
+          {{ b }}
+        </option>
+      </b-select>
+    </b-field>
     <section
       :id="'itk-vtk-control_' + config.id"
       style="position: relative;"
@@ -37,7 +44,7 @@
 import { Map } from "ol";
 import { Pointer } from "ol/interaction";
 import Layer from "ol/layer/Layer";
-
+import UPNG from "upng-js/UPNG";
 const itkVtkViewer = window.itkVtkViewer;
 
 const CanvasLayer = /*@__PURE__*/ (function(Layer) {
@@ -92,7 +99,7 @@ function convertImageUrl2Itk(url) {
           componentType: "uint8_t",
           components: 4
         },
-        name: "test image",
+        name: null,
         origin: [0, 0],
         spacing: [1, 1],
         direction: { data: [1, 0, 0, 1] },
@@ -105,30 +112,8 @@ function convertImageUrl2Itk(url) {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
-function generateData3D() {
-  const size = [100, 100, 100];
-  const imgArray = new Uint16Array(new ArrayBuffer(100 * 100 * 100 * 2));
-  for (let i = 0; i < 100 * 100 * 100; i++) {
-    imgArray[i] = Math.floor(Math.random() * Math.floor(65535));
-  }
-  const imageData = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage({
-    imageType: {
-      dimension: 3,
-      pixelType: 1,
-      componentType: "uint16_t",
-      components: 1
-    },
-    name: "test image",
-    origin: [0, 0, 0],
-    spacing: [1, 1, 1],
-    direction: { data: [1, 0, 0, 0, 1, 0, 0, 0, 1] },
-    size: size,
-    data: imgArray
-  });
-  return imageData;
-}
-
+const camelToSnakeCase = str =>
+  str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 export default {
   name: "itk-vtk-layer",
   type: "itk-vtk",
@@ -158,19 +143,45 @@ export default {
       layer: null,
       mode: "2D",
       resolveFiles: null,
-      showLoadButton: false
+      showLoadButton: false,
+      blending: null,
+      blendingOptions: [
+        "normal",
+        "multiply",
+        "screen",
+        "overlay",
+        "darken",
+        "lighten",
+        "color-dodge",
+        "color-burn",
+        "hard-light",
+        "soft-light",
+        "difference",
+        "exclusion",
+        "hue",
+        "saturation",
+        "color",
+        "luminosity"
+      ]
     };
   },
   watch: {
     visible: function(newVal) {
       this.layer.setVisible(newVal);
       this.$forceUpdate();
+    },
+    blending: function(newVal) {
+      this.config.blending = newVal;
+      if (this.layer)
+        this.layer.viewerElement.style["mix-blend-mode"] = this.config.blending;
     }
   },
   mounted() {
     this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity = 1.0;
     this.config.init = this.init;
+    this.config.blending = this.config.blending || "normal";
+    this.blending = this.config.blending;
   },
   beforeDestroy() {
     if (this.layer) {
@@ -202,8 +213,75 @@ export default {
           //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
           // }
         }
-      } else if (typeof data === "string")
-        imageData = await convertImageUrl2Itk(data);
+      } else if (typeof data === "string") {
+        const filename = data
+          .split("/")
+          .pop()
+          .split("#")[0]
+          .split("?")[0];
+        if (filename.toLowerCase().endsWith(".png")) {
+          const res = await fetch(data);
+          const buffer = await res.arrayBuffer();
+          const image = UPNG.decode(buffer);
+          // ctype==3) {	// palette
+          // ctype==4) {	// gray + alpha
+          // ctype==0) {	// gray
+          // ctype==2) {	// RGB
+          // ctype==6) {  // RGB + alpha
+          let components = 4;
+          let componentType = "uint8_t";
+          const area = image.width * image.height;
+          // we need to flip the image upside down
+          if (image.ctype == 0) {
+            components = 1;
+            if (image.depth === 16) {
+              imageData = new Uint16Array(area);
+              for (let i = 0; i < image.height; i++) {
+                for (let j = 0; j < image.width; j++) {
+                  const idx = i * image.width + j;
+                  imageData[(image.height - i) * image.width + j] =
+                    (image.data[idx * 2] << 8) | image.data[idx * 2 + 1];
+                }
+              }
+              componentType = "uint16_t";
+            } else {
+              imageData = new Uint8Array(area);
+              for (let i = 0; i < image.height; i++) {
+                for (let j = 0; j < image.width; j++) {
+                  const idx = i * image.width + j;
+                  imageData[(image.height - i) * image.width + j] =
+                    image.data[idx];
+                }
+              }
+            }
+          } else {
+            imageData = new Uint8Array(area * 4);
+            const rgba = new Uint8Array(UPNG.toRGBA8(image)[0]);
+            const w = image.width * 4;
+            for (let i = 0; i < image.height; i++) {
+              for (let j = 0; j < w; j++) {
+                imageData[(image.height - i) * w + j] = rgba[i * w + j];
+              }
+            }
+          }
+          imageData = {
+            imageType: {
+              dimension: 2,
+              pixelType: 1,
+              componentType: componentType,
+              components: components
+            },
+            name: null,
+            origin: [0, 0],
+            spacing: [1, 1],
+            direction: { data: [1, 0, 0, 1] },
+            size: [image.width, image.height],
+            data: imageData
+          };
+        } else {
+          imageData = await convertImageUrl2Itk(data);
+        }
+      }
 
       // this.config.name = this.config.type;
       // this.config.data =
@@ -236,6 +314,7 @@ export default {
       var itk_layer = new CanvasLayer();
 
       let viewer, extent, is2D;
+
       if (
         this.config.data &&
         !(this.config.data instanceof FileList) &&
@@ -326,23 +405,44 @@ export default {
         this.layer.setOpacity(this.config.opacity);
       };
 
+      if (this.config.blending) {
+        itk_layer.viewerElement.style["mix-blend-mode"] = this.config.blending;
+      }
       return itk_layer;
     },
     getLayerAPI() {
       const me = this;
-      return {
+      const api = {
         _rintf: true,
         name: this.config.name,
         id: this.config.id,
+        set_blending(mode) {
+          me.blending = mode;
+          me.$forceUpdate();
+        },
+        set_opacity(val) {
+          me.config.opacity = val;
+          me.updateOpacity();
+          me.$forceUpdate();
+        },
         async set_image(image) {
           const vtkImage = await me.normalizeImage(image);
           me.viewer.setImage(vtkImage);
         }
       };
+      for (let k of Object.keys(me.viewer)) {
+        if (!api[k] && (k.startsWith("set") || k.startsWith("get"))) {
+          api[camelToSnakeCase(k.replace("UI", "Ui"))] = me.viewer[k].bind(
+            me.viewer
+          );
+        }
+      }
+      return api;
     },
     getFiles() {
       return new Promise(resolve => {
         this.showLoadButton = true;
+        this.$refs.file_input.click();
         this.resolveFiles = event => {
           resolve(event.target.files);
           this.resolveFiles = null;
