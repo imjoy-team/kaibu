@@ -44,7 +44,7 @@
 import { Map } from "ol";
 import { Pointer } from "ol/interaction";
 import Layer from "ol/layer/Layer";
-
+import UPNG from "upng-js/UPNG";
 const itkVtkViewer = window.itkVtkViewer;
 
 const CanvasLayer = /*@__PURE__*/ (function(Layer) {
@@ -213,8 +213,75 @@ export default {
           //   imageData.direction.data = [1, 0, 0, 0, -1, 0, 0, 0, 1];
           // }
         }
-      } else if (typeof data === "string")
-        imageData = await convertImageUrl2Itk(data);
+      } else if (typeof data === "string") {
+        const filename = data
+          .split("/")
+          .pop()
+          .split("#")[0]
+          .split("?")[0];
+        if (filename.toLowerCase().endsWith(".png")) {
+          const res = await fetch(data);
+          const buffer = await res.arrayBuffer();
+          const image = UPNG.decode(buffer);
+          // ctype==3) {	// palette
+          // ctype==4) {	// gray + alpha
+          // ctype==0) {	// gray
+          // ctype==2) {	// RGB
+          // ctype==6) {  // RGB + alpha
+          let components = 4;
+          let componentType = "uint8_t";
+          const area = image.width * image.height;
+          // we need to flip the image upside down
+          if (image.ctype == 0) {
+            components = 1;
+            if (image.depth === 16) {
+              imageData = new Uint16Array(area);
+              for (let i = 0; i < image.height; i++) {
+                for (let j = 0; j < image.width; j++) {
+                  const idx = i * image.width + j;
+                  imageData[(image.height - i) * image.width + j] =
+                    (image.data[idx * 2] << 8) | image.data[idx * 2 + 1];
+                }
+              }
+              componentType = "uint16_t";
+            } else {
+              imageData = new Uint8Array(area);
+              for (let i = 0; i < image.height; i++) {
+                for (let j = 0; j < image.width; j++) {
+                  const idx = i * image.width + j;
+                  imageData[(image.height - i) * image.width + j] =
+                    image.data[idx];
+                }
+              }
+            }
+          } else {
+            imageData = new Uint8Array(area * 4);
+            const rgba = new Uint8Array(UPNG.toRGBA8(image)[0]);
+            const w = image.width * 4;
+            for (let i = 0; i < image.height; i++) {
+              for (let j = 0; j < w; j++) {
+                imageData[(image.height - i) * w + j] = rgba[i * w + j];
+              }
+            }
+          }
+          imageData = {
+            imageType: {
+              dimension: 2,
+              pixelType: 1,
+              componentType: componentType,
+              components: components
+            },
+            name: null,
+            origin: [0, 0],
+            spacing: [1, 1],
+            direction: { data: [1, 0, 0, 1] },
+            size: [image.width, image.height],
+            data: imageData
+          };
+        } else {
+          imageData = await convertImageUrl2Itk(data);
+        }
+      }
 
       // this.config.name = this.config.type;
       // this.config.data =
@@ -247,19 +314,7 @@ export default {
       var itk_layer = new CanvasLayer();
 
       let viewer, extent, is2D;
-      if (typeof this.config.data === "string") {
-        const res = await fetch(this.config.data);
-        const blob = await res.blob();
-        const filename = this.config.data
-          .split("/")
-          .pop()
-          .split("#")[0]
-          .split("?")[0];
-        this.config.data = new File([blob], filename, {
-          type: blob.type,
-          lastModified: Date.now()
-        });
-      }
+
       if (
         this.config.data &&
         !(this.config.data instanceof FileList) &&
