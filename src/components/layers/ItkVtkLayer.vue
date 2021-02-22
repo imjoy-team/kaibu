@@ -26,6 +26,13 @@
         :step="0.1"
       ></b-slider>
     </b-field>
+    <b-field v-if="layer" label="Blending">
+      <b-select placeholder="Select a mode" v-model="blending">
+        <option v-for="b in blendingOptions" :value="b" :key="b">
+          {{ b }}
+        </option>
+      </b-select>
+    </b-field>
     <section
       :id="'itk-vtk-control_' + config.id"
       style="position: relative;"
@@ -92,7 +99,7 @@ function convertImageUrl2Itk(url) {
           componentType: "uint8_t",
           components: 4
         },
-        name: "test image",
+        name: null,
         origin: [0, 0],
         spacing: [1, 1],
         direction: { data: [1, 0, 0, 1] },
@@ -105,30 +112,8 @@ function convertImageUrl2Itk(url) {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
-function generateData3D() {
-  const size = [100, 100, 100];
-  const imgArray = new Uint16Array(new ArrayBuffer(100 * 100 * 100 * 2));
-  for (let i = 0; i < 100 * 100 * 100; i++) {
-    imgArray[i] = Math.floor(Math.random() * Math.floor(65535));
-  }
-  const imageData = itkVtkViewer.utils.vtkITKHelper.convertItkToVtkImage({
-    imageType: {
-      dimension: 3,
-      pixelType: 1,
-      componentType: "uint16_t",
-      components: 1
-    },
-    name: "test image",
-    origin: [0, 0, 0],
-    spacing: [1, 1, 1],
-    direction: { data: [1, 0, 0, 0, 1, 0, 0, 0, 1] },
-    size: size,
-    data: imgArray
-  });
-  return imageData;
-}
-
+const camelToSnakeCase = str =>
+  str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 export default {
   name: "itk-vtk-layer",
   type: "itk-vtk",
@@ -158,19 +143,45 @@ export default {
       layer: null,
       mode: "2D",
       resolveFiles: null,
-      showLoadButton: false
+      showLoadButton: false,
+      blending: null,
+      blendingOptions: [
+        "normal",
+        "multiply",
+        "screen",
+        "overlay",
+        "darken",
+        "lighten",
+        "color-dodge",
+        "color-burn",
+        "hard-light",
+        "soft-light",
+        "difference",
+        "exclusion",
+        "hue",
+        "saturation",
+        "color",
+        "luminosity"
+      ]
     };
   },
   watch: {
     visible: function(newVal) {
       this.layer.setVisible(newVal);
       this.$forceUpdate();
+    },
+    blending: function(newVal) {
+      this.config.blending = newVal;
+      if (this.layer)
+        this.layer.viewerElement.style["mix-blend-mode"] = this.config.blending;
     }
   },
   mounted() {
     this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity = 1.0;
     this.config.init = this.init;
+    this.config.blending = this.config.blending || "normal";
+    this.blending = this.config.blending;
   },
   beforeDestroy() {
     if (this.layer) {
@@ -236,6 +247,19 @@ export default {
       var itk_layer = new CanvasLayer();
 
       let viewer, extent, is2D;
+      if (typeof this.config.data === "string") {
+        const res = await fetch(this.config.data);
+        const blob = await res.blob();
+        const filename = this.config.data
+          .split("/")
+          .pop()
+          .split("#")[0]
+          .split("?")[0];
+        this.config.data = new File([blob], filename, {
+          type: blob.type,
+          lastModified: Date.now()
+        });
+      }
       if (
         this.config.data &&
         !(this.config.data instanceof FileList) &&
@@ -326,23 +350,54 @@ export default {
         this.layer.setOpacity(this.config.opacity);
       };
 
+      if (this.config.blending) {
+        itk_layer.viewerElement.style["mix-blend-mode"] = this.config.blending;
+      }
+
+      // viewer.setImageColorMap('BkRd', 0)
+      // viewer.setImageColorMap('BkGn', 1)
+      // viewer.setImageColorMap('BkBu', 2)
+
+      // uiContainer.style.position = "relative";
+      // document
+      //   .getElementById("itk-vtk-control_" + this.config.id)
+      //   .appendChild(uiContainer);
+
       return itk_layer;
     },
     getLayerAPI() {
       const me = this;
-      return {
+      const api = {
         _rintf: true,
         name: this.config.name,
         id: this.config.id,
+        set_blending(mode) {
+          me.blending = mode;
+          me.$forceUpdate();
+        },
+        set_opacity(val) {
+          me.config.opacity = val;
+          me.updateOpacity();
+          me.$forceUpdate();
+        },
         async set_image(image) {
           const vtkImage = await me.normalizeImage(image);
           me.viewer.setImage(vtkImage);
         }
       };
+      for (let k of Object.keys(me.viewer)) {
+        if (!api[k] && (k.startsWith("set") || k.startsWith("get"))) {
+          api[camelToSnakeCase(k.replace("UI", "Ui"))] = me.viewer[k].bind(
+            me.viewer
+          );
+        }
+      }
+      return api;
     },
     getFiles() {
       return new Promise(resolve => {
         this.showLoadButton = true;
+        this.$refs.file_input.click();
         this.resolveFiles = event => {
           resolve(event.target.files);
           this.resolveFiles = null;
