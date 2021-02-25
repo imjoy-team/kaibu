@@ -556,6 +556,23 @@ export default {
           only_predefined_tags: true,
           single_tag_mode: false
         });
+
+        await this.addWidget({
+          _rintf: true,
+          name: "My Form",
+          type: "form",
+          form_submit_callback: values => {
+            console.log(values);
+          },
+          fields: [
+            {
+              slot: "dropFiles",
+              props: {
+                label: "my-files"
+              }
+            }
+          ]
+        });
       }
     },
     updateSlider(name, value) {
