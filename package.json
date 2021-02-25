@@ -1,7 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.35",
-  "private": true,
+  "version": "0.1.36",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -49,8 +48,7 @@
     "prettier": "^1.19.1",
     "vue-cli-plugin-buefy": "~0.3.7",
     "vue-template-compiler": "^2.6.11",
-    "copy-webpack-plugin": "^4.6.0",
-    "yarn": "^1.22.10"
+    "copy-webpack-plugin": "^4.6.0"
   },
   "eslintConfig": {
     "root": true,

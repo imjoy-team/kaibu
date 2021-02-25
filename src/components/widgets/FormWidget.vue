@@ -4,7 +4,7 @@
       v-if="jsonFields && jsonFields.length > 0"
       :btnReset="{ value: config.reset_text || 'Reset' }"
       :btnSubmit="{ value: config.submit_text || 'Submit' }"
-      :camelizePayloadKeys="true"
+      :camelizePayloadKeys="config.camelize_payload_keys"
       :formFields="jsonFields"
       :formName="config.name || 'form'"
     >
@@ -22,6 +22,51 @@
             There are no tags
           </template>
         </b-taginput>
+      </template>
+      <template slot="dropFiles" slot-scope="slotProps">
+        <section>
+          <b-field>
+            <b-upload
+              v-model="slotProps.files"
+              @input="updateFiles(slotProps)"
+              multiple
+              drag-drop
+            >
+              <section class="section">
+                <div class="content has-text-centered">
+                  <p v-if="!dropFileFields[slotProps.label]">
+                    <b-icon icon="upload" size="is-large"></b-icon>
+                  </p>
+                  <p v-if="!dropFileFields[slotProps.label]">
+                    Drop your files here or click to upload
+                  </p>
+
+                  <span
+                    v-for="(file, index) in dropFileFields[slotProps.label]"
+                    :key="index"
+                    class="tag is-primary"
+                  >
+                    {{
+                      file.name.slice(0, 20) +
+                        (file.name.length > 20 ? "..." : "")
+                    }}
+                    <button
+                      class="delete is-small"
+                      type="button"
+                      @click.prevent="removeFile(slotProps.label, index)"
+                    ></button>
+                  </span>
+                  <b-button
+                    v-if="dropFileFields[slotProps.label]"
+                    class="is-small"
+                    @click.prevent="clearFiles(slotProps)"
+                    >Clear files</b-button
+                  >
+                </div>
+              </section>
+            </b-upload>
+          </b-field>
+        </section>
       </template>
       <template slot="selectButton" slot-scope="slotProps">
         <b-button
@@ -66,7 +111,7 @@ export default {
     }
   },
   data() {
-    return { jsonFields: [] };
+    return { jsonFields: [], dropFileFields: {} };
   },
   beforeDestroy() {
     this.$root.$off("formSubmitted", this.handleFormSubmitted);
@@ -95,6 +140,25 @@ export default {
     }
   },
   methods: {
+    removeFile(label, index) {
+      const files = this.dropFileFields[label];
+      files.splice(index, 1);
+      this.$forceUpdate();
+      if (files.length <= 0) {
+        delete this.dropFileFields[label];
+      }
+    },
+    clearFiles(slotProps) {
+      delete this.dropFileFields[slotProps.label];
+      slotProps.updateValue(null);
+      this.$forceUpdate();
+    },
+    updateFiles(slotProps) {
+      slotProps.updateValue(slotProps.files);
+      // we need this because otherwise we cannot update the list on the interface
+      this.dropFileFields[slotProps.label] = slotProps.files;
+      this.$forceUpdate();
+    },
     handleFormSubmitted(result) {
       if (this.config.name && result.formName === this.config.name) {
         this.config.form_submit_callback(result.values);

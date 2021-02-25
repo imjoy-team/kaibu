@@ -295,6 +295,7 @@ For `type="form"`, you can show a form with many fields for the user to fill.
  - `type`: String, type of the widget panel, it must be `form` for form widget
  - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
  - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
+ - `camelize_payload_keys`: Boolean, whether the keys (derived from the `label` property of the field) should be converted too camel style
  - `form_submit_callback`: Function, a callback function which will be called when the user submit the form. It carries one argument which are the values of the form.
  - `fields`: Array, an array of fields, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
     In addition to the standard fields supported by `vue-form-json`, we also provide custom fields via a different setting (i.e. `slots`):
@@ -318,6 +319,15 @@ For `type="form"`, you can show a form with many fields for the user to fill.
                 // and it will be filled as part of the form
                 return file
             } 
+        }
+    }
+    ```
+    - `dropFiles`:
+    ```js
+    {
+        slot: "dropFiles",
+        props: {
+            label: "my-files"
         }
     }
     ```
