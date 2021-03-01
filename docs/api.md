@@ -401,6 +401,8 @@ For `type="tree"`, you can pass a tree with nodes and set callback for the doubl
  - `attach_to`: String or null, if set, it means this widget will be attached to a layer (match by its name) and will be shown with the layer properties
  - `max_height`: Number, the maximum pixel height of the widget, the default value is 400.
  - `node_dbclick_callback`: Function, a callback function triggered when the user double click on a node, one argument with the node object will be passed to the function
+ - `node_drop_callback`: Function, a callback function triggered when the user drag and drop a node, two arguments will be passed `nodes` (the ones that are being moved) and `position` (the reference node).
+ - `node_toggle_callback`: Function, a callback function triggered when the user toggle a node.
  - `nodes`: Array, an array of node objects. One node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes. 
 
 **Returns**
