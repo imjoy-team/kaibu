@@ -66,10 +66,20 @@ api.export(ImJoyPlugin())
 
 Add an image layer
 
+**Arguments**
+ 
 - `image`: an image URL, base64 encoded image or a numpy array in Python
 - options:
     - `type`: String, image layer type, currently supports `2d-image`(OpenLayers 2D image layer), `itk-vtk` (ITK/VTK Viewer 2D/3D layer) or `vector`(OpenLayers vector feature layer).
     - `name`: String, name of the image layer
+**Returns**
+ A layer object with the following fields:
+ - `id`: String, the id of the layer
+ - `name`: String, the name of the layer
+ - `set_image`: Function, a function used to update the image in the layer
+ - `set_blending`: Function, a function used to update the blending model of the layer
+ - `set_opacity`: Function, a function used to update the opacity of the layer
+ - Other ITK/VTK Viewer functions defined at https://kitware.github.io/itk-vtk-viewer/api/ (Note: the function names should be converted from camel case to snake case, e.g. `setUnits` will become `set_units`)
 
 Example in Python:
 
@@ -409,7 +419,7 @@ For `type="tree"`, you can pass a tree with nodes and set callback for the doubl
 The returned layer api object consist of:
  - `clear_nodes`: Function, a function for clearing all the nodes in the tree, it takes no argument
  - `set_nodes`: Function, a function for setting new nodes in the tree, it takes one argument:
-    - `nodes`: Array, an array of nodes, and one node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes.
+    - `nodes`: Array, an array of nodes, and one node is an object with some fixed fields, for example: `{"title": 'Item1', "isLeaf": True, "isExpanded": True}`, a node can also contain `children` which is an inner array of nodes. Each node can also contain any custom data via the `data` key.
  - `get_nodes`: Function, a function for retrieving the nodes in the tree, it takes no argument.
 
 
@@ -436,7 +446,7 @@ class ImJoyPlugin():
                 "name": "Samples",
                 "node_dbclick_callback": node_dbclick_callback,
                 "nodes": [
-                    {"title": 'Item1', "isLeaf": True},
+                    {"title": 'Item1', "isLeaf": True, "data": {"my-custom-data": 123}},
                     {"title": 'Item2', "isLeaf": True},
                     {"title": 'Folder1'},
                     {"title": 'Folder2', "isExpanded": True,
@@ -607,6 +617,9 @@ A simple wrapper to the `setTimeout` function in Javascript
 ### clear_timeout(callback, time)
 
 A simple wrapper to the `clearTimeout` function in Javascript
+
+### select_widget_tab(tab_index)
+Activate a specific widget tab
 
 ## Example 1: Skin image annotation
 
