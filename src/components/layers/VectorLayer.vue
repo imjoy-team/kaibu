@@ -154,6 +154,7 @@
         >
         <b-numberinput
           v-model="config.draw_edge_width"
+          @input="setDrawType(config.draw_shape_type)"
           size="is-small"
           controls-position="compact"
         ></b-numberinput>
