@@ -178,7 +178,7 @@ export default {
   },
   mounted() {
     this.config.name = this.config.name || "itk-vtk image";
-    this.config.opacity = 1.0;
+    this.config.opacity = typeof this.config.opacity !== 'number' || 1.0;
     this.config.init = this.init;
     this.config.blending = this.config.blending || "normal";
     this.blending = this.config.blending;
@@ -193,6 +193,7 @@ export default {
     async init() {
       this.layer = await this.setupLayer();
       this.map.addLayer(this.layer);
+      this.updateOpacity();
       this.$forceUpdate();
       return this.layer;
     },
