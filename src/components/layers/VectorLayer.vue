@@ -803,9 +803,10 @@ export default {
             point: "MultiPoint",
             "multi-point": "MultiPoint"
           };
-          if(me.config.draw_shape_type){
-            if(type_mapping[me.config.draw_shape_type]){
-              me.config.draw_shape_type = type_mapping[me.config.draw_shape_type]
+          if (me.config.draw_shape_type) {
+            if (type_mapping[me.config.draw_shape_type]) {
+              me.config.draw_shape_type =
+                type_mapping[me.config.draw_shape_type];
             }
           }
           me.$forceUpdate();
