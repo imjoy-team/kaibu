@@ -180,6 +180,7 @@ export default {
     this.config.name = this.config.name || "itk-vtk image";
     this.config.opacity =
       typeof this.config.opacity === "number" ? this.config.opacity : 1.0;
+    this._lastOpacity = this.config.opacity;
     this.config.init = this.init;
     this.config.blending = this.config.blending || "normal";
     this.blending = this.config.blending;
