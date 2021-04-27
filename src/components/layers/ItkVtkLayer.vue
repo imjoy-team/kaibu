@@ -434,6 +434,7 @@ export default {
         }
       };
       for (let k of Object.keys(me.viewer)) {
+        if(k==='setImage') continue;
         if (!api[k] && (k.startsWith("set") || k.startsWith("get"))) {
           api[camelToSnakeCase(k.replace("UI", "Ui"))] = me.viewer[k].bind(
             me.viewer

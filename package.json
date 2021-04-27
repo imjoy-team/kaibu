@@ -14,6 +14,7 @@
     "@turf/turf": "^5.1.6",
     "buefy": "^0.8.0",
     "core-js": "^3.6.5",
+    "itk-vtk-viewer": "^11.4.0",
     "json-stringify-safe": "^5.0.1",
     "mathjs": "^7.0.1",
     "ol": "^6.5.0",
