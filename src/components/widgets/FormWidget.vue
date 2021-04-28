@@ -7,78 +7,8 @@
       :camelizePayloadKeys="config.camelize_payload_keys"
       :formFields="jsonFields"
       :formName="config.name || 'form'"
+      :components="components"
     >
-      <template slot="tagInput" slot-scope="slotProps">
-        <b-taginput
-          v-model="slotProps.tags"
-          :data="slotProps.options"
-          :open-on-focus="slotProps.options && slotProps.options.length > 0"
-          autocomplete
-          @input="slotProps.updateValue(slotProps.tags)"
-          icon="label"
-          placeholder="Add a tag"
-        >
-          <template #empty>
-            There are no tags
-          </template>
-        </b-taginput>
-      </template>
-      <template slot="dropFiles" slot-scope="slotProps">
-        <section>
-          <b-field>
-            <b-upload
-              v-model="slotProps.files"
-              @input="updateFiles(slotProps)"
-              multiple
-              drag-drop
-            >
-              <section class="section">
-                <div class="content has-text-centered">
-                  <p v-if="!dropFileFields[slotProps.label]">
-                    <b-icon icon="upload" size="is-large"></b-icon>
-                  </p>
-                  <p v-if="!dropFileFields[slotProps.label]">
-                    Drop your files here or click to upload
-                  </p>
-
-                  <span
-                    v-for="(file, index) in dropFileFields[slotProps.label]"
-                    :key="index"
-                    class="tag is-primary"
-                  >
-                    {{
-                      file.name.slice(0, 20) +
-                        (file.name.length > 20 ? "..." : "")
-                    }}
-                    <button
-                      class="delete is-small"
-                      type="button"
-                      @click.prevent="removeFile(slotProps.label, index)"
-                    ></button>
-                  </span>
-                  <b-button
-                    v-if="dropFileFields[slotProps.label]"
-                    class="is-small"
-                    @click.prevent="clearFiles(slotProps)"
-                    >Clear files</b-button
-                  >
-                </div>
-              </section>
-            </b-upload>
-          </b-field>
-        </section>
-      </template>
-      <template slot="selectButton" slot-scope="slotProps">
-        <b-button
-          class="select-button"
-          @click="resolveCallback(slotProps)"
-          :icon-left="slotProps.icon"
-          :style="slotProps.style"
-        >
-          {{ slotProps.label }}
-        </b-button>
-        <p>{{ trimEllip(slotProps.value, 20) }}</p>
-      </template>
     </form-json>
     <div class="box" v-else>
       <article class="media">
@@ -97,11 +27,23 @@
 <script>
 import "vue-form-json/dist/vue-form-json.css";
 import formJson from "vue-form-json/dist/vue-form-json.common.js";
+import TagInputField from "./tagInputField.vue";
+import DropFilesField from "./dropFilesField.vue";
+import SelectButtonField from "./selectButtonField.vue";
 
 export default {
   name: "form-widget",
   type: "form",
-  components: { "form-json": formJson },
+
+  components: {
+    "form-json": formJson,
+    // eslint-disable-next-line vue/no-unused-components
+    TagInputField,
+    // eslint-disable-next-line vue/no-unused-components
+    SelectButtonField,
+    // eslint-disable-next-line vue/no-unused-components
+    DropFilesField
+  },
   props: {
     config: {
       type: Object,
@@ -110,6 +52,9 @@ export default {
       }
     }
   },
+  computed: {
+    components: () => ({ TagInputField, SelectButtonField, DropFilesField })
+  },
   data() {
     return { jsonFields: [], dropFileFields: {} };
   },
@@ -117,7 +62,7 @@ export default {
     this.$root.$off("formSubmitted", this.handleFormSubmitted);
   },
   mounted() {
-    this.jsonFields = this.config.fields;
+    this.jsonFields = this.transformFields(this.config.fields);
     this.config.form_submit_callback =
       this.config.form_submit_callback ||
       function(values) {
@@ -140,38 +85,42 @@ export default {
     }
   },
   methods: {
-    removeFile(label, index) {
-      const files = this.dropFileFields[label];
-      files.splice(index, 1);
-      this.$forceUpdate();
-      if (files.length <= 0) {
-        delete this.dropFileFields[label];
+    transformFields(fields) {
+      const typeMapping = {};
+      for (let k in this.components) {
+        typeMapping[this.components[k].name] = k;
       }
-    },
-    clearFiles(slotProps) {
-      delete this.dropFileFields[slotProps.label];
-      slotProps.updateValue(null);
-      this.$forceUpdate();
-    },
-    updateFiles(slotProps) {
-      slotProps.updateValue(slotProps.files);
-      // we need this because otherwise we cannot update the list on the interface
-      this.dropFileFields[slotProps.label] = slotProps.files;
-      this.$forceUpdate();
+      // mapping type to component name
+      for (let field of fields) {
+        // convert legacy slots
+        if (field.slot === "tagInput") {
+          for (let k in field.props) {
+            field[k] = field.props[k];
+          }
+          field.type = "tags";
+          delete field.slot;
+          delete field.props;
+        }
+        // convert legacy slots
+        if (field.slot === "selectButton") {
+          for (let k in field.props) {
+            field[k] = field.props[k];
+          }
+          field.type = "button";
+          delete field.slot;
+          delete field.props;
+        }
+        if (typeMapping[field.type]) {
+          field.is = typeMapping[field.type];
+          delete field.type;
+        }
+      }
+      return fields;
     },
     handleFormSubmitted(result) {
       if (this.config.name && result.formName === this.config.name) {
         this.config.form_submit_callback(result.values);
       }
-    },
-    trimEllip(str, length) {
-      if (!str) return str;
-      if (typeof str === "object") str = str.toString();
-      return str.length > length ? str.substring(0, length) + "..." : str;
-    },
-    async resolveCallback(slotProps) {
-      const value = await Promise.resolve(slotProps.callback());
-      slotProps.updateValue(value);
     }
   }
 };
