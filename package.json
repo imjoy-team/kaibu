@@ -1,6 +1,6 @@
 {
   "name": "kaibu",
-  "version": "0.1.40",
+  "version": "0.1.41",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

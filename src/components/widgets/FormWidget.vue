@@ -78,7 +78,7 @@ export default {
           me.$forceUpdate();
         },
         set_fields(fields) {
-          me.jsonFields = fields;
+          me.jsonFields = me.transformFields(fields);
           me.$forceUpdate();
         }
       });

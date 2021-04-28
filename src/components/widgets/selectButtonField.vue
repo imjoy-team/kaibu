@@ -2,7 +2,11 @@
   <div>
     <label :for="item.label" class="label">
       {{ item.label }}
-      <sup class="has-text-grey-light is-size-7">*</sup>
+      <sup
+        class="has-text-grey-light is-size-7"
+        v-if="item.isRequired !== false"
+        >*</sup
+      >
     </label>
     <div class="control">
       <b-button
