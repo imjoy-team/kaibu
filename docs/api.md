@@ -308,37 +308,36 @@ For `type="form"`, you can show a form with many fields for the user to fill.
  - `camelize_payload_keys`: Boolean, whether the keys (derived from the `label` property of the field) should be converted too camel style
  - `form_submit_callback`: Function, a callback function which will be called when the user submit the form. It carries one argument which are the values of the form.
  - `fields`: Array, an array of fields, see [here](https://github.com/14nrv/vue-form-json/blob/master/src/components/Form/fields.json) for an example array with the supported fields.
-    In addition to the standard fields supported by `vue-form-json`, we also provide custom fields via a different setting (i.e. `slots`):
-    - `tagInput`:
+    In addition to the standard fields supported by `vue-form-json`, we also provide custom fields types:
+    - `tags`:
     ```json
     {
-        "slot": "tagInput",
-        "props": {
-            "label": "book tags", "options": ["drama", "sci-fi"]
-        }
+        "type": "tags",
+        "label": "book tags",
+        "options": ["drama", "sci-fi"],
+        "placeholder": "Add a tag",
+        "icon": "label",
+        "value": ["drama"]
     }
     ```
-    - `selectButton`:
+    - `button`:
     ```js
     {
-        "slot": "selectButton",
-        "props": {
-            "label": "select a file", "callback": ()=>{
-                // do something here
-                // you can return some value here
-                // and it will be filled as part of the form
-                return file
-            } 
+        "type": "button",
+        "label": "select a file", "callback": ()=>{
+            // do something here
+            // you can return some value here
+            // and it will be filled as part of the form
+            return file
         }
+    
     }
     ```
-    - `dropFiles`:
+    - `files`:
     ```js
     {
-        slot: "dropFiles",
-        props: {
-            label: "my-files"
-        }
+        type: "files",
+        label: "my-files"
     }
     ```
 **Returns**
