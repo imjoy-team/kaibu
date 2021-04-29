@@ -56,6 +56,7 @@ export async function setupImJoyAPI({
   removeLayer,
   clearLayers,
   addWidget,
+  removeWidget,
   setLoader,
   setMode,
   setSliders,
@@ -125,6 +126,9 @@ export async function setupImJoyAPI({
     },
     async add_widget(config) {
       return await addWidget(config);
+    },
+    async remove_widget(config) {
+      return await removeWidget(config);
     },
     async set_loader(enable) {
       setLoader(enable);

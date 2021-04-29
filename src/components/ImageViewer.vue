@@ -535,6 +535,7 @@ export default {
           removeLayer: this.removeLayer,
           clearLayers: this.clearLayers,
           addWidget: this.addWidget,
+          removeWidget: this.removeWidget,
           setLoader: this.setLoader,
           setMode: this.setMode,
           setSliders: this.setSliders,
@@ -585,6 +586,10 @@ export default {
         this.$store.dispatch("addWidget", config);
         this.$forceUpdate();
       });
+    },
+    removeWidget(config) {
+      this.$store.dispatch("removeWidget", config);
+      this.$forceUpdate();
     },
     screenshot() {
       // TODO: fix rendering for itk-vtk layer

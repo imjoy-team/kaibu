@@ -81,6 +81,9 @@ export const store = new Vuex.Store({
       state.widgets[config.name] = config;
       if (!config.attach_to) state.standaloneWidgets[config.name] = config;
     },
+    removeWidget(state, config) {
+      delete state.widgets[config.name];
+    },
     removeLayer(state, layer) {
       layer.selected = false;
       state.layer_configs = state.layer_configs.filter(l => l.id !== layer.id);
