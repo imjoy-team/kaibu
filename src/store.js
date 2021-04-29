@@ -95,6 +95,7 @@ export const store = new Vuex.Store({
       layer.visible = !layer.visible;
     },
     setCurrentLayer(state, layer) {
+      layer = state.layer_configs.filter(l => l.id === layer.id)[0]
       if (state.currentLayer === layer) return;
       if (state.currentLayer) {
         state.currentLayer.selected = false;

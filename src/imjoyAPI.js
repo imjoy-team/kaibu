@@ -53,6 +53,7 @@ function toArray(data) {
 
 export async function setupImJoyAPI({
   addLayer,
+  selectLayer,
   removeLayer,
   clearLayers,
   addWidget,
@@ -94,6 +95,7 @@ export async function setupImJoyAPI({
       }
     },
     add_layer: addLayer,
+    select_layer: selectLayer,
     remove_layer: removeLayer,
     clear_layers: clearLayers,
     async view_image(image_array, config) {

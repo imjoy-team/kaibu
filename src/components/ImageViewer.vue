@@ -532,6 +532,7 @@ export default {
       if (window.self !== window.top) {
         setupImJoyAPI({
           addLayer: this.addLayer,
+          selectLayer: this.selectLayer,
           removeLayer: this.removeLayer,
           clearLayers: this.clearLayers,
           addWidget: this.addWidget,
