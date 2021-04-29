@@ -71,7 +71,11 @@ export const store = new Vuex.Store({
     },
     addLayer(state, config) {
       if (config.visible === undefined) config.visible = true;
-      state.layer_configs.push(config);
+      if (typeof config.index === "number") {
+        const index = config.index;
+        state.layer_configs.splice(index, 0, config);
+        delete config.index;
+      } else state.layer_configs.push(config);
     },
     addWidget(state, config) {
       state.widgets[config.name] = config;
