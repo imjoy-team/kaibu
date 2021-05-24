@@ -795,20 +795,6 @@ export default {
           for (let k in new_config) {
             me.config[k] = new_config[k];
           }
-          const type_mapping = {
-            line: "LineString",
-            path: "LineString",
-            polygon: "Polygon",
-            rectangle: "Polygon",
-            point: "MultiPoint",
-            "multi-point": "MultiPoint"
-          };
-          if (me.config.draw_shape_type) {
-            if (type_mapping[me.config.draw_shape_type]) {
-              me.config.draw_shape_type =
-                type_mapping[me.config.draw_shape_type];
-            }
-          }
           me.$forceUpdate();
           me.updateDrawInteraction();
         },
