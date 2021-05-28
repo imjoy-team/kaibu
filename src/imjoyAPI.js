@@ -85,6 +85,9 @@ export async function setupImJoyAPI({
       api.log("Kaibu loaded successfully.");
     },
     async run(ctx) {
+      if(ctx.config && ctx.config.mode){
+        setMode(ctx.config.mode);
+      }
       if (ctx.data && ctx.data.layers) {
         const layer_apis = [];
         for (let config of ctx.data.layers) {
