@@ -60,6 +60,18 @@ api.export(ImJoyPlugin())
 ```
 <!-- tabs:end -->
 
+By default, if Kaibu is accessed as an ImJoy plugin, the so called `minimal` UI mode will be applied. If you want a full UI options such as allow user to add new layer, you can pass `mode: 'full'` as a config option. For example:
+
+<!-- ImJoyPlugin: {"type": "web-worker", "editor_height": "400px"} -->
+```js
+class ImJoyPlugin {
+    async setup() {}
+    async run(ctx) {
+        const viewer = await api.createWindow({src: "https://kaibu.org/#/app", name: "Kaibu", config: {mode: 'full'}})
+    }
+}
+api.export(new ImJoyPlugin())
+```
 ## Kaibu API
 
 ### view_image(image, options)
@@ -607,7 +619,7 @@ Set the UI mode of the viewer
 **Arguments**
  - `mode`: String, it should be one of the following options:
     - `"lite"`: minimal UI mode
-    - `"full"`: full UI mode
+    - `"full"`: full UI mode, with additional options such as open local files and add new layer etc.
 
 ### set_timeout(callback, time)
 
