@@ -23,7 +23,7 @@
                 <b-icon icon="upload" size="is-large"></b-icon>
 
                 Drop your files here or click to upload
-
+                <br />
                 <span
                   v-for="(file, index) in value"
                   :key="index"
@@ -39,6 +39,7 @@
                     @click.prevent="removeFile(item.label, index)"
                   ></button>
                 </span>
+                <br />
                 <b-button
                   v-if="value && value.length > 0"
                   class="is-small"

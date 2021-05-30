@@ -329,7 +329,8 @@ For `type="form"`, you can show a form with many fields for the user to fill.
         "options": ["drama", "sci-fi"],
         "placeholder": "Add a tag",
         "icon": "label",
-        "value": ["drama"]
+        "value": ["drama"],
+        "allow_new": true,
     }
     ```
     - `button`:

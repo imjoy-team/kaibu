@@ -15,6 +15,7 @@
         :data="item.options"
         :open-on-focus="item.options && item.options.length > 0"
         autocomplete
+        :allow-new="item.allow_new || !item.options"
         @input="$emit('input', value)"
         :icon="item.icon || 'label'"
         :placeholder="item.placeholder"
