@@ -61,7 +61,8 @@ export async function setupImJoyAPI({
   setLoader,
   setMode,
   setSliders,
-  updateSlider
+  updateSlider,
+  openSidebar
 }) {
   setMode("lite");
   const imjoyRPC = await window.imjoyLoader.loadImJoyRPC({
@@ -88,6 +89,9 @@ export async function setupImJoyAPI({
       if (ctx.config && ctx.config.mode) {
         setMode(ctx.config.mode);
       }
+      if (ctx.config && ctx.config.open_sidebar !== undefined) {
+        openSidebar(ctx.config.open_sidebar);
+      }
       if (ctx.data && ctx.data.layers) {
         const layer_apis = [];
         for (let config of ctx.data.layers) {
@@ -101,6 +105,7 @@ export async function setupImJoyAPI({
     select_layer: selectLayer,
     remove_layer: removeLayer,
     clear_layers: clearLayers,
+    open_sidebar: openSidebar,
     async view_image(image_array, config) {
       config = config || {};
       config.type = config.type || "itk-vtk";
