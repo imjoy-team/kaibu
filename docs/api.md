@@ -72,6 +72,8 @@ class ImJoyPlugin {
 }
 api.export(new ImJoyPlugin())
 ```
+
+Similarly, you can also control the sidebar by passing `open_sidebar: true` or `open_sidebar: false` to `config`.
 ## Kaibu API
 
 ### view_image(image, options)
@@ -621,6 +623,13 @@ Set the UI mode of the viewer
  - `mode`: String, it should be one of the following options:
     - `"lite"`: minimal UI mode
     - `"full"`: full UI mode, with additional options such as open local files and add new layer etc.
+
+### open_sidebar(open)
+
+Open or hide the side bar
+
+**Arguments**
+ - `open`: Boolean, true for open, false for hide
 
 ### set_timeout(callback, time)
 
