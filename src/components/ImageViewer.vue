@@ -27,7 +27,7 @@
             />
             <button
               class="button floating-close-btn is-small"
-              @click="closeSidebar"
+              @click="openSidebar(false)"
             >
               <b-icon icon="chevron-left"></b-icon>
             </button>
@@ -198,7 +198,7 @@
       <button
         class="button floating-menu-btn"
         v-show="!open"
-        @click="openSidebar()"
+        @click="openSidebar(true)"
       >
         <img
           style="width: 30px; border-radius: 6px;"
@@ -360,7 +360,7 @@ export default {
     this.sortableOptions.layer_configs = this.layer_configs;
     window.addEventListener("resize", this.updateSize);
     window.dispatchEvent(new Event("resize"));
-    this.openSidebar();
+    this.openSidebar(true);
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.updateSize);
@@ -424,15 +424,9 @@ export default {
     goto(url) {
       window.open(url, "_blank");
     },
-    closeSidebar() {
-      this.open = false;
+    openSidebar(open) {
       setTimeout(() => {
-        window.dispatchEvent(new Event("resize"));
-      }, 300);
-    },
-    openSidebar() {
-      setTimeout(() => {
-        this.open = true;
+        this.open = open;
         window.dispatchEvent(new Event("resize"));
       }, 300);
     },
@@ -540,7 +534,8 @@ export default {
           setLoader: this.setLoader,
           setMode: this.setMode,
           setSliders: this.setSliders,
-          updateSlider: this.updateSlider
+          updateSlider: this.updateSlider,
+          openSidebar: this.openSidebar
         });
       } else {
         this.addLayer({
