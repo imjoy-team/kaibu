@@ -4,4 +4,8 @@
   </div>
 </template>
 
-<style></style>
+<style>
+html {
+  overflow: auto !important;
+}
+</style>
