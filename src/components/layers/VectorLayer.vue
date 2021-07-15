@@ -274,8 +274,14 @@ function polygonCut(polygon, line, properties) {
       }
     }
 
+    properties['id'] = new Date().getTime()
     cutPolyGeoms.forEach(function(geometry) {
-      cutFeatures.push(turf.polygon(geometry, properties));
+      if (Object.keys(properties).includes('id')){
+        properties['id'] = properties['id'] + 1
+        console.log(JSON.stringify(properties['id']))
+      }
+      const propertiesCut= JSON.parse(JSON.stringify(properties));
+      cutFeatures.push(turf.polygon(geometry, propertiesCut));
     });
   }
 
