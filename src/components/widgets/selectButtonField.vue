@@ -54,6 +54,7 @@ export default {
     async resolveCallback(item) {
       this.item.value = await Promise.resolve(item.callback());
       this.$emit("input", this.item.value);
+      this.$forceUpdate();
     }
   }
 };
