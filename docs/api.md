@@ -535,6 +535,10 @@ For displaying a line chart for example, you can take the spec from https://vega
 
 In Python, you can also use [altair](https://altair-viz.github.io/) to obtain the spec.
 
+
+### select_widget(widget_name)
+Activate a specific widget tab
+
 ### clear_layers()
 
 Remove all the layers
@@ -638,9 +642,6 @@ A simple wrapper to the `setTimeout` function in Javascript
 ### clear_timeout(callback, time)
 
 A simple wrapper to the `clearTimeout` function in Javascript
-
-### select_widget_tab(tab_index)
-Activate a specific widget tab
 
 ## Example 1: Skin image annotation
 
