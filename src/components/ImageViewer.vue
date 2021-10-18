@@ -103,6 +103,7 @@
             size="is-small"
             class="block"
             v-if="Object.keys(standaloneWidgets).length > 0"
+            v-model="selectedWidgetTab"
           >
             <b-tab-item
               v-for="(widget, id) in standaloneWidgets"
@@ -352,7 +353,8 @@ export default {
       layerTypes,
       widgetTypes,
       loading: false,
-      activeSliders: []
+      activeSliders: [],
+      selectedWidgetTab: 0
     };
   },
   mounted() {
@@ -531,6 +533,7 @@ export default {
           clearLayers: this.clearLayers,
           addWidget: this.addWidget,
           removeWidget: this.removeWidget,
+          selectWidget: this.selectWidget,
           setLoader: this.setLoader,
           setMode: this.setMode,
           setSliders: this.setSliders,
@@ -554,6 +557,21 @@ export default {
           single_tag_mode: false
         });
       }
+    },
+    selectWidget(name) {
+      let index = 0;
+      if (typeof name !== "string") {
+        name = name.name;
+      }
+      for (let k of Object.keys(this.standaloneWidgets)) {
+        const widget = this.standaloneWidgets[k];
+        if (widget.name == name) {
+          this.selectedWidgetTab = index;
+          break;
+        }
+        index++;
+      }
+      this.$forceUpdate();
     },
     updateSlider(name, value) {
       const sliders = this.activeSliders.filter(slider => slider.name === name);
