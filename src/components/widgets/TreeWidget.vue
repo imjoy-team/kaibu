@@ -1,7 +1,17 @@
 <template>
   <div class="list-widget">
-    <!-- <p>{{ lastEvent }}</p> -->
+    <b-button
+      style="position: absolute; bottom: 0px; z-index: 1;"
+      v-if="
+        config.node_remove_callback && selectedNodes && selectedNodes.length > 0
+      "
+      @click="deleteNode()"
+      size="is-small"
+      icon-left="delete"
+      >Delete</b-button
+    >
     <sl-vue-tree
+      style="margin-bottom: 10px;"
       v-model="config.nodes"
       ref="slVueTree"
       :allow-multiselect="allowMultiselect"
@@ -59,9 +69,9 @@ export default {
   },
   data() {
     return {
-      lastEvent: "No last event",
       selectedNodesTitle: "",
-      allowMultiselect: false
+      allowMultiselect: false,
+      selectedNodes: null
     };
   },
   created() {
@@ -92,14 +102,19 @@ export default {
       event.stopPropagation();
       const visible = !node.data || node.data.visible !== false;
       slVueTree.updateNode(node.path, { data: { visible: !visible } });
-      this.lastEvent = `Node ${node.title} is ${
-        visible ? "visible" : "invisible"
-      } now`;
     },
-
+    async deleteNode() {
+      if (!this.config.node_remove_callback) return;
+      if (await this.config.node_remove_callback(this.selectedNodes)) {
+        const paths = this.selectedNodes.map(node => node.path);
+        const slVueTree = this.$refs.slVueTree;
+        slVueTree.remove(paths);
+        this.selectedNodes = null;
+      }
+    },
     async nodeSelected(nodes) {
+      this.selectedNodes = nodes;
       this.selectedNodesTitle = nodes.map(node => node.title).join(", ");
-      this.lastEvent = `Select nodes: ${this.selectedNodesTitle}`;
       if (this.config.node_select_callback) {
         try {
           this.$emit("loading", true);
@@ -111,9 +126,6 @@ export default {
     },
 
     async nodeToggled(node) {
-      this.lastEvent = `Node ${node.title} is ${
-        node.isExpanded ? "expanded" : "collapsed"
-      }`;
       if (this.config.node_toggle_callback) {
         try {
           this.$emit("loading", true);
@@ -136,9 +148,6 @@ export default {
     },
 
     async nodeDropped(nodes, position) {
-      this.lastEvent = `Nodes: ${nodes
-        .map(node => node.title)
-        .join(", ")} are dropped ${position.placement} ${position.node.title}`;
       if (this.config.node_drop_callback) {
         try {
           this.$emit("loading", true);
