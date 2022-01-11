@@ -269,6 +269,7 @@ import Polygon from "ol/geom/Polygon";
 import { intersects } from "ol/extent";
 import { createRegularPolygon, createBox } from "ol/interaction/Draw";
 import * as turf from "@turf/turf";
+import { randId } from '../../utils';
 
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
@@ -361,7 +362,11 @@ function polygonCut(polygon, line, properties) {
     }
 
     cutPolyGeoms.forEach(function(geometry) {
-      cutFeatures.push(turf.polygon(geometry, properties));
+      const propertiesCut= JSON.parse(JSON.stringify(properties));
+      if (Object.keys(propertiesCut).includes('id')){
+        propertiesCut['id'] = randId()
+      }
+      cutFeatures.push(turf.polygon(geometry, propertiesCut));
     });
   }
 
