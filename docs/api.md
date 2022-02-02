@@ -153,6 +153,7 @@ Add a vector layer with polygons
     - `add_feature_callback`: Function, a function which will be called when a new feature is added to the layer, the feature object will be passed as input argument
     - `remove_feature_callback`: Function, a function which will be called when a new feature is removed from the layer, the feature object will be passed as input argument
     - `change_feature_callback`: Function, a function which will be called when a new feature is updated, the feature object will be passed as input argument
+    - `key_press_callback`: Function, a function which will be called when a key is pressed, an object with `code`, `meta_key`, `ctrl_key`, `alt_key`, `shift_key` will be passed to the callback. By default the default key binding (e.g. Ctrl-Z) will keep working, to prevent propagate to the default key bindings, the callback should return `true`.
 
 **Returns**
 An object with the layer api functions:

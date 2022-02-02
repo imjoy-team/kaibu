@@ -532,8 +532,20 @@ export default {
       this.$forceUpdate();
       this.updateDrawInteraction();
     },
-    keyHandler(event) {
+    async keyHandler(event) {
       if (!this.selected || !this.visible) return;
+      if (this.config.key_press_callback) {
+        const stopPropagation = await this.config.key_press_callback({
+          code: event.code,
+          meta_key: event.metaKey,
+          ctrl_key: event.ctrlKey,
+          shift_key: event.shiftKey,
+          alt_key: event.altKey,
+        });
+        if(stopPropagation){
+          return;
+        }
+      }
       if (event.code === "Backspace" || event.code === "Delete") {
         this.deleteDraw();
       } else if (event.code === "KeyZ" && (event.metaKey || event.ctrlKey)) {
