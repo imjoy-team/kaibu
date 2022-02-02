@@ -133,6 +133,7 @@ Add a vector layer with polygons
     - `label`: String, label of the shape
     - `text_placement`: String, how should the label text be placed, possible values are `null` (won't display), `point` and `line`
     - `draw_enable`: Boolean, switch on the markup tool
+    - `select_enable`: Boolean, switch on the selection tool (draw_enable must be set to false)
     - `draw_label`: String, set the label for the markup tool
     - `draw_max_label_count`: Number, the maximum number of feature for the current `draw_label`, if exceeded, some features will be automatically removed
     - `draw_freehand`: Boolean, switch on freehand mode for the markup tool
