@@ -540,9 +540,9 @@ export default {
           meta_key: event.metaKey,
           ctrl_key: event.ctrlKey,
           shift_key: event.shiftKey,
-          alt_key: event.altKey,
+          alt_key: event.altKey
         });
-        if(stopPropagation){
+        if (stopPropagation) {
           return;
         }
       }
