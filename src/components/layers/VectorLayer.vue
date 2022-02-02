@@ -520,6 +520,9 @@ export default {
     async init() {
       this.layer = await this.setupLayer();
       this.map.addLayer(this.layer);
+      if(this.config.select_enable && !this.config.draw_enable){
+        this.enableSelectInteraction();
+      }
       this.updateDrawInteraction();
       this.$forceUpdate();
       return this.layer;
