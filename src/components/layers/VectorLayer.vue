@@ -269,6 +269,7 @@ import Polygon from "ol/geom/Polygon";
 import { intersects } from "ol/extent";
 import { createRegularPolygon, createBox } from "ol/interaction/Draw";
 import * as turf from "@turf/turf";
+import { v4 as uuidv4 } from "uuid";
 
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
@@ -277,11 +278,6 @@ function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
-}
-
-function randId() {
-  const randLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  return randLetter + Date.now();
 }
 
 function saveFile(blob, filename) {
@@ -647,7 +643,7 @@ export default {
       });
       this.vector_source.on("addfeature", event => {
         if (!event.feature.get("id")) {
-          const id = randId();
+          const id = uuidv4();
           event.feature.setId(id);
           event.feature.set("id", id);
         } else {
@@ -969,7 +965,7 @@ export default {
     },
     addComment() {
       this.currentMetadata.comments.push({
-        id: randId(),
+        id: uuidv4(),
         user_name: this.config.user_name,
         content: this.currentNewComment
       });
