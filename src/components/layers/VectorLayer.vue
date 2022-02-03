@@ -641,37 +641,10 @@ export default {
     },
     async setupLayer() {
       const data = this.config.data;
-      if (typeof data === "string") {
-        this.vector_source = new Vector({
-          renderMode: "image",
-          renderBuffer: 10,
-          url: data,
-          format: new GeoJSON()
-        });
-      } else if (data instanceof File) {
-        this.vector_source = new Vector({
-          renderMode: "image",
-          renderBuffer: 10
-        });
-        await this.loadFeatures(data);
-      } else if (data) {
-        this.vector_source = new Vector({
-          renderMode: "image",
-          renderBuffer: 10
-        });
-        const features = this.getFeaturesFromConfig();
-        this.vector_source.addFeatures(features);
-      } else {
-        this.vector_source = new Vector({
-          renderMode: "image",
-          renderBuffer: 10
-        });
-      }
-      const vector_layer = new VectorLayer({
-        source: this.vector_source
+      this.vector_source = new Vector({
+        renderMode: "image",
+        renderBuffer: 10
       });
-      vector_layer.setStyle(this.featureStyle);
-
       this.vector_source.on("addfeature", event => {
         if (!event.feature.get("id")) {
           const id = randId();
@@ -719,6 +692,7 @@ export default {
             this.draw_history.push({ add: event.feature, remove });
         }
       });
+
       this.vector_source.on("changefeature", event => {
         if (this.config.change_feature_callback) {
           const format = new GeoJSON();
@@ -741,6 +715,24 @@ export default {
             this.draw_history.push({ remove: event.feature });
         }
       });
+
+      if (typeof data === "string") {
+        const res = await fetch(data);
+        const geojson_data = await res.json();
+        const format = new GeoJSON();
+        const geojsonFeatures = format.readFeatures(geojson_data);
+        this.vector_source.addFeatures(geojsonFeatures);
+      } else if (data instanceof File) {
+        await this.loadFeatures(data);
+      } else if (data) {
+        const features = this.getFeaturesFromConfig();
+        this.vector_source.addFeatures(features);
+      }
+      const vector_layer = new VectorLayer({
+        source: this.vector_source
+      });
+      vector_layer.setStyle(this.featureStyle);
+
       this.select = new Select({
         wrapX: false
       });
