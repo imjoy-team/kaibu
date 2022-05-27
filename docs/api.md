@@ -82,7 +82,7 @@ Add an image layer
 
 **Arguments**
  
-- `image`: an image URL, base64 encoded image or a numpy array in Python
+- `image`: an image URL, base64 encoded image or a numpy array in Python.
 - options:
     - `type`: String, image layer type, currently supports `2d-image`(OpenLayers 2D image layer), `itk-vtk` (ITK/VTK Viewer 2D/3D layer) or `vector`(OpenLayers vector feature layer).
     - `name`: String, name of the image layer
@@ -94,6 +94,9 @@ Add an image layer
  - `set_blending`: Function, a function used to update the blending model of the layer
  - `set_opacity`: Function, a function used to update the opacity of the layer
  - Other ITK/VTK Viewer functions defined at https://kitware.github.io/itk-vtk-viewer/api/ (Note: the function names should be converted from camel case to snake case, e.g. `setUnits` will become `set_units`)
+
+
+By default, the ITK/VTK Viewer will be used to display the image, it supports 4-dimensional images. In Python, you can pass an numpy array as a 3D color image to the viewer. The ordering of the dimensions are `[Z, Y, X, C]`.
 
 Example in Python:
 
@@ -114,6 +117,10 @@ class ImJoyPlugin():
 
         # view image
         await viewer.view_image(image, type="itk-vtk", name="Chelsea")
+        
+        # you can also display an 3D color image (with arbitrary number of channels)
+        # image = np.random.randint(0, 155, size=[80, 100, 100, 5]).astype('uint8')
+        # await viewer.view_image(image, type="itk-vtk", name="3d-color-image")
 
 api.export(ImJoyPlugin())
 ```
