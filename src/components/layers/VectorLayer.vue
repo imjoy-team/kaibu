@@ -935,7 +935,7 @@ export default {
         }),
         stroke: new Stroke({
           color: edge_color,
-          width: edge_width
+          width: edge_width / resolution
         }),
         text: new Text({
           placement: this.config.text_placement || "line",
@@ -951,7 +951,7 @@ export default {
           })
         }),
         image: new Circle({
-          radius: size / Math.pow(resolution, 1 / 3),
+          radius: size / resolution,
           stroke: new Stroke({
             color: edge_color,
             width: edge_width
@@ -1093,15 +1093,17 @@ export default {
           type: _draw_type,
           freehand: this.config.draw_freehand,
           geometryFunction: geometryFunction,
-          style: new Style({
-            fill: new Fill({
-              color: this.config.draw_face_color
-            }),
-            stroke: new Stroke({
-              color: this.config.draw_edge_color,
-              width: this.config.draw_edge_width
-            })
-          })
+          style: (feature, resolution) => {
+            return new Style({
+              fill: new Fill({
+                color: this.config.draw_face_color
+              }),
+              stroke: new Stroke({
+                color: this.config.draw_edge_color,
+                width: this.config.draw_edge_width / resolution
+              })
+            });
+          }
         });
         this.draw = draw;
         this.select.setActive(false);
