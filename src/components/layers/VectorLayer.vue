@@ -844,6 +844,19 @@ export default {
           const geojsonFeatures = format.readFeatures(geojson_data);
           me.vector_source.addFeatures(geojsonFeatures);
         },
+        remove_feature(id) {
+          const feature = me.vector_source.getFeatureById(id);
+          if (feature) me.vector_source.removeFeature(feature);
+        },
+        remove_features(ids) {
+          if (!Array.isArray(ids)) {
+            throw new Error("Please pass an id array");
+          }
+          for (let id of ids) {
+            const feature = me.vector_source.getFeatureById(id);
+            if (feature) me.vector_source.removeFeature(feature);
+          }
+        },
         get_features(config) {
           config = config || {};
           if (config.decimals === undefined) config.decimals = 2;
