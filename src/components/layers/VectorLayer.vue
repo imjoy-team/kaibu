@@ -866,7 +866,18 @@ export default {
             decimals: config.decimals
           });
           return routeFeatures;
-        }
+        },
+
+        get_selected_features(config) {
+          config = config || {};
+          if (config.decimals === undefined) config.decimals = 2;
+          const selectedFeatures = me.select.getFeatures().array_;
+          const format = new GeoJSON();
+          const routeFeatures = format.writeFeaturesObject(selectedFeatures, {
+            decimals: config.decimals
+          });
+          return routeFeatures;
+        },
       };
     },
     clearFeatures() {
