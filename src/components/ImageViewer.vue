@@ -485,6 +485,18 @@ export default {
         config._add_layer_promise = { resolve, reject };
       });
     },
+    getLayer(key) {
+      for (let config of this.$store.state.layer_configs) {
+        // name or id
+        if (config.name === key || config.id === key) {
+          const layer = this.$store.state.layers[config.id];
+          return layer.getLayerAPI();
+        }
+      }
+    },
+    getLayerIds() {
+      return this.$store.state.layer_configs.map(config => config.id);
+    },
     updateExtent(config) {
       //TODO: calculate the extent for all layers
       const projection = new Projection({
@@ -528,6 +540,8 @@ export default {
       if (window.self !== window.top) {
         setupImJoyAPI({
           addLayer: this.addLayer,
+          getLayer: this.getLayer,
+          getLayerIds: this.getLayerIds,
           selectLayer: this.selectLayer,
           removeLayer: this.removeLayer,
           clearLayers: this.clearLayers,

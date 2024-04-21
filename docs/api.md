@@ -252,6 +252,24 @@ class ImJoyPlugin():
 api.export(ImJoyPlugin())
 ```
 
+### get_layer_ids()
+
+Get all the layer ids.
+
+**Returns**
+An array of layer ids.
+
+### get_layer(key)
+
+Get a layer by its id or name.
+
+**Arguments**
+ - `key`: String, the id or name of the layer
+
+**Returns**
+The layer object corresponding to the id or name.
+If the layer is not found, it will return `null`.
+
 ### add_widget(options)
 
 Add a widget panel with buttons, file tree or graph.

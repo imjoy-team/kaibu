@@ -867,7 +867,6 @@ export default {
           });
           return routeFeatures;
         },
-
         get_selected_features(config) {
           config = config || {};
           if (config.decimals === undefined) config.decimals = 2;
