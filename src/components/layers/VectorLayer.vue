@@ -877,7 +877,7 @@ export default {
             decimals: config.decimals
           });
           return routeFeatures;
-        },
+        }
       };
     },
     clearFeatures() {
