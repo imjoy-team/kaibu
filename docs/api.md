@@ -182,6 +182,10 @@ An object with the layer api functions:
     - `new_feature`: Object, the new feature object
  - `add_features`: Function, add an array of new features, it takes one argument:
     - `new_features`: Array, an array of features
+ - `remove_feature`: Function, remove a feature, it takes one argument:
+    - `id`: String, the id of an existing feature to be removed
+ - `remove_features`: Function, remove an array of features, it takes one argument:
+    - `ids`: Array, an array of features ids
  - `get_features`: Function, get all the features of the layer, it takes no argument
 
 Example in Python:
