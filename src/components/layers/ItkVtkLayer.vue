@@ -79,7 +79,7 @@ const CanvasLayer = /*@__PURE__*/ (function(Layer) {
 })(Layer);
 
 function convertImageUrl2Itk(url) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const canvas = document.createElement("canvas");
 
     const image = new Image();
@@ -106,6 +106,9 @@ function convertImageUrl2Itk(url) {
         size: [image.width, image.height],
         data: new Uint8Array(imageData.data.buffer)
       });
+    };
+    image.onerror = function() {
+      reject(new Error(`Failed to load image from URL: ${url}`));
     };
     image.crossOrigin = "Anonymous";
     image.src = url;
