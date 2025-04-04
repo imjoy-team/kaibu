@@ -53,6 +53,8 @@ function toArray(data) {
 
 export async function setupImJoyAPI({
   addLayer,
+  getLayer,
+  getLayerIds,
   selectLayer,
   removeLayer,
   clearLayers,
@@ -103,6 +105,8 @@ export async function setupImJoyAPI({
       }
     },
     add_layer: addLayer,
+    get_layer: getLayer,
+    get_layer_ids: getLayerIds,
     select_layer: selectLayer,
     remove_layer: removeLayer,
     clear_layers: clearLayers,
